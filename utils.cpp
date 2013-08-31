@@ -12,10 +12,11 @@
 	#define TEST(name, code)
 #endif
 
-#define FAIL // TODO
-#define TRY(n) do { error_t _error = n; if (_error != OK) return _error; } while (false)
+// TODO better.
+#define FAIL(test,error) do { if (!(test)) return (error); } while (false)
+#define TRY(n) do { error_t _error = (n); if (_error != OK) return _error; } while (false)
 //#define NEXT(i,c,e) do { if (NextChar(i, c) != OK) return e; } while (false)
-#define NEXT(i,c,e) do { SkipWhitespace(i); if (*i++ != c) return e; SkipWhitespace(i); } while (false)
+#define NEXT(i,c,e) do { SkipWhitespace(i); if (*i++ != c) return (e); SkipWhitespace(i); } while (false)
 
 typedef
 	error_t (*ReadFunction_t)(char const * &, cell &);

@@ -52,20 +52,33 @@ public:
 		return OK;
 	};
 	
-	virtual ReadValue()
+	virtual error_t
+		ReadValue(char const * & input, cell & result)
 	{
-	}
+		return (*m_read)(input, result);
+	};
+	
+	error_t
+		Run(char const * & input, Memory * memory, Delimiters * delimiters)
+	{
+		Utils::SkipWhitespace(input);
+		TRY(ReadValue(input, dest));
+		Utils::SkipWhitespace(input);
+		return delimiters->Skip();
+	};
 	
 	int
 		GetMemoryUsage() { return 1; };
 	
 private:
+	ReadFunction_t
+		m_read;
+	
 	cell
 		m_default;
 };
 
-class Specifier_b   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadBinary (input, result); };
-class Specifier_c   : public SimpleSpecifier
+class Specifier_c : public SimpleSpecifier
 {
 public:
 	// cons
@@ -76,7 +89,8 @@ public:
 		
 	};
 	
-	error_t ReadValue(char const * & input, cell & result)
+	error_t
+		ReadValue(char const * & input, cell & result)
 	{
 		// Detect enclosing quotes.
 		bool
@@ -97,18 +111,6 @@ public:
 		return OK;
 	};
 };
-/*
-class Specifier_d_i : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadDecimal(input, result); };
-class Specifier_f   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadFloat  (input, result); };
-class Specifier_g   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadIEEE754(input, result); };
-class Specifier_h_x : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadHex    (input, result); };
-class Specifier_l   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadLogical(input, result); };
-class Specifier_n   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadNumber (input, result); };
-class Specifier_o   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadOctal  (input, result); };
-*/
-// class Specifier_q   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadOctal  (input, result); };
-// class Specifier_r   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadOctal  (input, result); };
-// class Specifier_u   : public SimpleSpecifier { error_t ReadValue(char const * & input, cell & result) return Utils::ReadOctal  (input, result); };
 
 SimpleSpecifier
 	gSpecifierD('b', &Utils::ReadBinary ),
@@ -121,8 +123,6 @@ SimpleSpecifier
 	gSpecifierN('n', &Utils::ReadNumber ),
 	gSpecifierO('o', &Utils::ReadOctal  ),
 	gSpecifierX('x', &Utils::ReadHex    );
-
-
 
 class NumericSpecifier : public Specifier
 {
@@ -201,13 +201,13 @@ protected:
 class EnumSpecifier : public SpecifierGroup
 {
 	error_t
-		Run(char const * & input, Memory * memory)
+		Run(char const * & input, Memory * memory, Delimiters * delimiters)
 	{
 		EnumMemory
 			mem(memory->GetNextPointer());
 		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, mem));
+			TRY((*i)->Run(input, mem, delimiters));
 		}
 		return OK;
 	}
@@ -221,21 +221,21 @@ public:
 		GetMemoryUsage() { return 0; };
 	
 	error_t
-		Run(char const * & input, Memory * memory)
+		Run(char const * & input, Memory * memory, Delimiters * delimiters)
 	{
 		// Just takes all writes and null-routes them, but still serves reads.
 		QuietMemory
 			quiet(memory);
 		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, quiet));
+			TRY((*i)->Run(input, quiet, delimiters));
 		}
 		return OK;
 	};
 };
 
 // This is just a set of specifiers, to be run one after the other - simple as!
-class Sequential : public SpecifierGroup
+class SequentialGroup : public SpecifierGroup
 {
 public:
 	int
@@ -252,11 +252,11 @@ public:
 	};
 	
 	error_t
-		Run(char const * & input, Memory * memory)
+		Run(char const * & input, Memory * memory, Delimiters * delimiters)
 	{
 		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, memory));
+			TRY((*i)->Run(input, memory, delimiters));
 		}
 		return OK;
 	};
@@ -265,6 +265,68 @@ public:
 class AltGroup : public SpecifierGroup
 {
 public:
+	// Global.
+	error_t
+		ReadToken(char const * & input)
+	{
+		Specifier *
+			child;
+		SequentialGroup *
+			alt;
+		// Avoids repetition of code.
+		goto ReadToken_new_alt;
+		do
+		{
+			if (child->m_specifier == '|')
+			{
+ReadToken_new_alt:
+				alt = new SequentialGroup();
+				Add(alt);
+			}
+			else
+			{
+				alt->Add(child);
+			}
+			TRY(gParser->GetNext(input, &child));
+		}
+		while (child);
+		return OK;
+	};
+	
+	// Local.
+	error_t
+		ReadToken(char const * & input)
+	{
+		NEXT(input, '(', ERROR_NO_GROUP_START);
+		Specifier *
+			child;
+		SequentialGroup *
+			alt;
+		// Avoids repetition of code.
+		goto ReadToken_new_alt;
+		do
+		{
+			if (child->m_specifier == '|')
+			{
+ReadToken_new_alt:
+				alt = new SequentialGroup();
+				Add(alt);
+			}
+			else
+			{
+				alt->Add(child);
+			}
+			TRY(gParser->GetNext(input, &child));
+		}
+		while (child && child->m_specifier != ')');
+		return child ? OK : ERROR_NO_GROUP_END;
+		// Only enters this when it hits a ')' specifier.  '|' and ')' are
+		// (currently) the only two UBER simple specifiers that just consume a
+		// single character, do nothing when run, and are discarded instantly.
+		// Actually, don't delete them, just use featherweights.  '>' is also
+		// one to end sub-specifiers, and '}' to end quiet sections.
+	};
+	
 	int
 		GetMemoryUsage()
 	{
@@ -278,7 +340,7 @@ public:
 	};
 	
 	error_t
-		Run(char const * & input, Memory * memory)
+		Run(char const * & input, Memory * memory, Delimiters * delimiters)
 	{
 		error_t
 			last = OK;
@@ -292,7 +354,44 @@ public:
 		{
 			char const *
 				start = input;
-			last = (*i)->Run(start, memory);
+			// Make a copy of the current state of the delimiters and pass THAT
+			// to children so that it resets for every alternate branch.
+			// 
+			// Example:
+			// 
+			//  p<,>ii|ff
+			// 
+			// That denotes either 2 integers separated by commas, or 2 floats.
+			// 
+			//  p<,>(ii|ff)
+			// 
+			// That denotes either 2 integers or 2 floats, separated by commas.
+			// 
+			//  p<,>(ii|p<;>ff)
+			// 
+			// That denotes either 2 integers separated by commas, or 2 floats
+			// separated by either commas or semicolons.
+			// 
+			//  p<,>(ii|-p<,>ff)
+			// 
+			// That has the same effect as the first example.
+			// 
+			// SCRAP THAT.  New "p" syntax:
+			// 
+			//  p<,> <- Set "," as the ONLY separator.
+			//  p<> <- Reset separators (i.e. any whitespace).
+			//  p< > <- Set " " as the ONLY separator (no tabs, newlines etc).
+			//  +p<,> <- Add "," to the list of possible separators.
+			//  -p<,> <- Remove "," from the list of possible separators.
+			//  +P<,> <- Add ONE OR MORE commas to the list of separators.
+			// 
+			// Note that doing "P<>" is like doing "+P< >+P<\t>+P<\r>+P<\n>".
+			// This makes "P<>" the default - i.e. any length of any whitespace
+			// between two values.
+			// 
+			Delimiters
+				delims(*delimiters);
+			last = (*i)->Run(start, memory, &delims);
 			if (last == OK)
 			{
 				// Found a group that works.

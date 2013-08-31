@@ -1,3 +1,69 @@
+error_t
+	Parser::
+	Compile(
+		char const * & input,
+		Specifier ** dest)
+{
+	*dest = nullptr;
+	try
+	{
+		// We ALWAYS start with an "alt" group.
+		GlobalGroup *
+			ret = new GlobalGroup(false); // Not ended by ')'.
+		// TODO: These checks don't clean up properly.
+		TRY(ret->ReadToken(input));
+		Utils::SkipWhitespace(input);
+		FAIL(*input == '\0', ERROR_EXPECTED_A_GOT_B, "<end of string>", *input);
+		*dest = ret;
+		// At this point, we could run an optimisation pass on the tree!  The
+		// only one I can think of at this point is to replace "Alt" groups with
+		// only one child by regular sequence groups.  Or merge hierarchical
+		// sequences.
+	}
+	catch (std::bad_alloc & e)
+	{
+		// Clean up the allocated memory.
+		delete *dest;
+		// Catch any memory allocation errors.
+		FAIL(false, ERROR_MEMORY_ALLOCATION_FAIL);
+	}
+	return OK;
+}
+
+error_t
+	Parser::
+	GetNext(
+		char const * & input,
+		Specifier ** dest)
+{
+	Utils::SkipWhitespace(input);
+	*dest = nullptr;
+	char
+		c = *input;
+	if (c)
+	{
+		// Get the specifier type from the list of known types, without ever
+		// needing to know the class of the object ("Prototype pattern").
+		FAIL(m_specifiers[c], ERROR_UNKNOWN_SPECIFIER);
+		TRY(m_specifiers[c]->Clone(dest));
+		return (*dest)->ReadToken(input);
+	}
+	return OK;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 enum E_SSCANF_ERROR
 {
 	OK,

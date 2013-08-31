@@ -22,6 +22,9 @@ public:
 	virtual error_t
 		ReadToken(char const * & input) = 0;
 	
+	error_t
+		Run(char const * & input, Memory * memory, Delimiters * delimiters) = 0;
+	
 	Specifier *
 		Clone();
 	
