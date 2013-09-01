@@ -11,24 +11,6 @@ public:
 	{
 	};
 	
-	error_t
-		Get(char const * & input, cell & result)
-	{
-		Utils::SkipWhitespace(input);
-		ReadValue(input, result);
-		Utils::SkipWhitespace(input);
-		if (*input == '\0') return OK;
-		while (*delimiters)
-		{
-			if (Matches(input, *delimiters, input))
-			{
-				return OK;
-			}
-			++delimiters;
-		}
-		return ERROR_NO_DELIMITER;
-	};
-	
 	virtual error_t
 		ReadToken(char const * & input)
 	{
@@ -42,7 +24,20 @@ public:
 				// Capital letter - read in the deafult.
 				// Skip the opening bracket.
 				NEXT(input, '(', ERROR_NO_DEAFULT_START);
-				// Now read in a value.  This function is ALWAYS pure virtual.
+				for ( ; ; )
+				{
+					error_t
+						error = Run(input, gDefaultEnvironment);
+					switch (error)
+					{
+						case OK:
+							continue;
+						case DONE:
+							break;
+					}
+				}
+				
+				
 				error_t
 					error = ReadValue(input, m_default);
 				// Skip the closing bracket.
@@ -60,12 +55,13 @@ public:
 	};
 	
 	error_t
-		Run(char const * & input, Memory * memory, Delimiters * delimiters)
+		Run(char const * & input, Environment & env)
 	{
-		Utils::SkipWhitespace(input);
+		cell
+			dest;
 		TRY(ReadValue(input, dest));
-		Utils::SkipWhitespace(input);
-		return delimiters->Skip();
+		env.SetNextValue(dest);
+		return env.SkipDelimiters();
 	};
 	
 	int
