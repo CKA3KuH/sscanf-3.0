@@ -4,10 +4,11 @@ class SimpleSpecifier : public Specifier
 {
 public:
 	// cons
-		SimpleSpecifier(char c)
+		SimpleSpecifier(char c, ReadFunction_t f)
 	:
 		Specifier(c),
-		m_default(0)
+		m_default(0),
+		m_read(f)
 	{
 	};
 	
@@ -24,22 +25,7 @@ public:
 				// Capital letter - read in the deafult.
 				// Skip the opening bracket.
 				NEXT(input, '(', ERROR_NO_DEAFULT_START);
-				for ( ; ; )
-				{
-					error_t
-						error = Run(input, gDefaultEnvironment);
-					switch (error)
-					{
-						case OK:
-							continue;
-						case DONE:
-							break;
-					}
-				}
-				
-				
-				error_t
-					error = ReadValue(input, m_default);
+				TRY(Run(input, gDefaultEnvironment(&m_default)));
 				// Skip the closing bracket.
 				NEXT(input, ')', ERROR_NO_DEAFULT_END);
 			}
@@ -54,7 +40,14 @@ public:
 		return (*m_read)(input, result);
 	};
 	
-	error_t
+	virtual error_t
+		Clone(Specifier ** dest)
+	{
+		*dest = new SimpleSpecifier(*this);
+		return OK;
+	};
+	
+	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
 		cell
@@ -64,48 +57,29 @@ public:
 		return env.SkipDelimiters();
 	};
 	
-	int
+	virtual int
 		GetMemoryUsage() { return 1; };
 	
-private:
-	ReadFunction_t
-		m_read;
+	virtual // dest
+		~SimpleSpecifier()
+	{
+	};
 	
+protected:
+	// cons
+		SimpleSpecifier(SimpleSpecifier const & that)
+	:
+		Specifier(that),
+		m_default(that.m_default),
+		m_read(that.m_read)
+	{
+	};
+		
+private:
 	cell
 		m_default;
-};
-
-class CharSpecifier : public SimpleSpecifier
-{
-public:
-	// cons
-		Specifier_c
-	:
-		SimpleSpecifier('c', nullptr)
-	{
-		
-	};
 	
-	error_t
-		ReadValue(char const * & input, cell & result)
-	{
-		// Detect enclosing quotes.
-		bool
-			quotes = false;
-		if (*input == '\'')
-		{
-			quotes = true;
-			++input;
-		}
-		error_t
-			error = Utils::ReadChar(input, result);
-		if (error != OK) return error;
-		if (quotes)
-		{
-			FAIL(*input == '\'', ERROR_UNCLOSED_CHARACTER_LITERAL);
-			++input;
-		}
-		return OK;
-	};
+	ReadFunction_t
+		m_read;
 };
 

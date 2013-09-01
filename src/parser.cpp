@@ -90,6 +90,7 @@ error_t
 	Add(new SimpleSpecifier('n', &Utils::ReadNumber ));
 	Add(new SimpleSpecifier('o', &Utils::ReadOctal  ));
 	Add(new SimpleSpecifier('x', &Utils::ReadHex    ));
+	Add(new SimpleSpecifier('c', &Utils::ReadCharEx ));
 	
 	// Detect group closes.
 	Add(new TrivialSpecifier('|')); // Alternate.
@@ -118,7 +119,6 @@ error_t
 	
 	// More complex specifiers.
 	Add(new DelimSpecifier());  // 'p'.
-	Add(new CharSpecifier());   // 'c'.
 	Add(new ArraySpecifier());  // 'a'.
 	Add(new KustomSpecifier()); // 'k'.
 	AddAs(new StringSpecifier(false), 's'); // Unpacked.

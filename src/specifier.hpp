@@ -1,5 +1,6 @@
 #pragma once
 
+template <class Child>
 class Specifier
 {
 public:
@@ -25,6 +26,10 @@ public:
 	virtual error_t
 		Clone(Specifier ** dest) = 0;
 	
+	// Can't have a default for this because the class is pure virtual.
+	virtual error_t
+		Clone(Specifier ** dest) = 0;
+	
 	void
 		SetOptional() { m_optional = true; };
 	
@@ -40,18 +45,21 @@ public:
 	char
 		GetSpecifier() { return m_specifier; };
 	
-protected:
+	virtual int
+		GetMemoryUsage() = 0;
+	
 	virtual // dest
 		~Specifier()
 	{
 	};
 	
+protected:
 	// cons
-		Specifier(Specifier const & s)
+		Specifier(Specifier const & that)
 	:
-		m_specifier(s.m_specifier),
-		m_minus(s.m_minus),
-		m_optional(s.m_optional)
+		m_specifier(that.m_specifier),
+		m_minus(that.m_minus),
+		m_optional(that.m_optional)
 	{
 	};
 	
