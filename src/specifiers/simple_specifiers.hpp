@@ -16,10 +16,10 @@ public:
 		ReadToken(char const * & input)
 	{
 		// Check this has the correct specifier.
-		if (*input | 0x20 == m_specifier)
+		if (*input | 0x20 == GetSpecifier())
 		{
 			// Skip it - simple as!
-			if (*input++ != m_specifier)
+			if (*input++ != GetSpecifier())
 			{
 				SetOptional();
 				// Capital letter - read in the deafult.
@@ -30,39 +30,20 @@ public:
 				NEXT(input, ')', ERROR_NO_DEAFULT_END);
 			}
 		}
-		else FAIL(false, ERROR_EXPECTED_A_GOT_B, m_specifier, *input);
+		else FAIL(false, ERROR_EXPECTED_A_GOT_B, GetSpecifier(), *input);
 		return OK;
 	};
 	
-	virtual error_t
-		ReadValue(char const * & input, cell & result)
-	{
-		return (*m_read)(input, result);
-	};
-	
-	virtual error_t
-		Clone(Specifier ** dest)
-	{
-		*dest = new SimpleSpecifier(*this);
-		return OK;
-	};
+	CLONE();
 	
 	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
 		cell
 			dest;
-		TRY(ReadValue(input, dest));
-		env.SetNextValue(dest);
-		return env.SkipDelimiters();
-	};
-	
-	virtual int
-		GetMemoryUsage() { return 1; };
-	
-	virtual // dest
-		~SimpleSpecifier()
-	{
+		TRY((*m_read)(input, dest));
+		return env.SetNextValue(dest);
+		//return env.SkipDelimiters();
 	};
 	
 protected:
@@ -74,7 +55,7 @@ protected:
 		m_read(that.m_read)
 	{
 	};
-		
+	
 private:
 	cell
 		m_default;

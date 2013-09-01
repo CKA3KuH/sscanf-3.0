@@ -54,7 +54,7 @@ error_t
 	Parser::
 	Add(Specifier * prototype)
 {
-	return AddAs(prototype, prototype->m_specifier);
+	return AddAs(prototype, prototype->GetSpecifier());
 }
 
 error_t

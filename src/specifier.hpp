@@ -1,6 +1,20 @@
 #pragma once
 
-template <class Child>
+template <class T>
+inline error_t
+	DoClone(Specifier ** dest, T const * that)
+{
+	*dest = new T(*that);
+	return OK;
+}
+
+#define CLONE()                         \
+	virtual error_t                     \
+		Clone(Specifier ** dest)        \
+	{                                   \
+		return DoClone(dest, this);     \
+	}
+
 class Specifier
 {
 public:
@@ -26,27 +40,23 @@ public:
 	virtual error_t
 		Clone(Specifier ** dest) = 0;
 	
-	// Can't have a default for this because the class is pure virtual.
-	virtual error_t
-		Clone(Specifier ** dest) = 0;
-	
 	void
 		SetOptional() { m_optional = true; };
 	
 	bool
-		GetOptional() { return m_optional; };
+		GetOptional() { return m_optional; } const;
 	
 	void
 		SetSkip() { m_minus = true; };
 	
 	bool
-		GetSkip() { return m_minus; };
+		GetSkip() { return m_minus; } const;
 	
 	char
-		GetSpecifier() { return m_specifier; };
+		GetSpecifier() { return m_specifier; } const;
 	
 	virtual int
-		GetMemoryUsage() = 0;
+		GetMemoryUsage() { return 1; };
 	
 	virtual // dest
 		~Specifier()
@@ -81,5 +91,7 @@ private:
 		m_minus,
 		// Doesn't have to exist (i.e. "T()").
 		m_optional;
+	
+	friend class MinusSpecifier;
 };
 

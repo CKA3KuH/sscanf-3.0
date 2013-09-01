@@ -3,7 +3,42 @@
 // This is the class representing some collection of multiple other specifiers.
 class SpecifierGroup : public Specifier
 {
-protected:
+public:
+	// cons
+		SpecifierGroup(char c)
+	:
+		Specifier(c),
+		m_children()
+	{
+	};
+	
+	// cons
+		SpecifierGroup(SpecifierGroup const & that)
+	:
+		Specifier(that),
+		m_children()
+	{
+	};
+	
+	void
+		Add(Specifier * child)
+	{
+		m_children.push_back(child);
+	};
+	
+	std::list<Specifier *>::iterator
+		Begin()
+	{
+		return m_children.begin();
+	};
+	
+	std::list<Specifier *>::iterator
+		End()
+	{
+		return m_children.end();
+	};
+	
+private:
 	std::list<Specifier *>
 		m_children;
 };
@@ -11,20 +46,62 @@ protected:
 class QuietGroup : public SpecifierGroup
 {
 public:
+	// cons
+		QuietGroup()
+	:
+		SpecifierGroup('{')
+	{
+	};
+	
+	// cons
+		QuietGroup(QuietGroup const & that)
+	:
+		SpecifierGroup(that)
+	{
+	};
+	
+	virtual error_t
+		ReadToken(char const * & input)
+	{
+		++input;
+		Specifier *
+			child;
+		// Avoids repetition of code.
+		goto ReadToken_new_quiet;
+		do
+		{
+			Add(child);
+ReadToken_new_quiet:
+			TRY(gParser->GetNext(input, &child));
+		}
+		while (child && child->GetSpecifier() != '}');
+		FAIL(child, ERROR_NO_QUIET_END);
+		return OK;
+	};
+	
+	CLONE();
+	
 	// This needs to count all READS, but not WRITES.
-	int
+	virtual int
 		GetMemoryUsage() { return 0; };
 	
-	error_t
-		Run(char const * & input, Memory * memory, Delimiters * delimiters)
+	virtual error_t
+		Run(char const * & input, Environment & env)
 	{
+		// Store a copy of the old memory system.
+		Memory *
+			om = env.GetMemory();
 		// Just takes all writes and null-routes them, but still serves reads.
 		QuietMemory
-			quiet(memory);
-		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
+			quiet(env.GetMemory());
+		env.SetMemory(&quiet);
+		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, quiet, delimiters));
+			TRY((*i)->Run(input, local));
+			TRY(env.SkipDelimiters());
 		}
+		// Restore the old memory system.
+		env.SetMemory(om);
 		return OK;
 	};
 };
@@ -33,38 +110,88 @@ public:
 class SequentialGroup : public SpecifierGroup
 {
 public:
-	int
+	// cons
+		SequentialGroup()
+	:
+		m_memory(-1),
+		SpecifierGroup('\0') // Invalid specifier (can't be reached).
+	{
+	};
+	
+	// cons
+		SequentialGroup(SequentialGroup const & that)
+	:
+		m_memory(-1),
+		SpecifierGroup(that)
+	{
+	};
+	
+	virtual error_t
+		ReadToken(char const * & input)
+	{
+		FAIL(false, ERROR_PARSE_SEQUENTIAL_GROUP);
+		return OK;
+	};
+	
+	CLONE();
+	
+	virtual int
 		GetMemoryUsage()
 	{
 		if (m_memory != -1) return m_memory;
-		int
-			mem = 0;
-		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
+		m_memory = 0;
+		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			mem += (*i)->GetMemoryUsage();
+			m_memory += (*i)->GetMemoryUsage();
 		}
-		return mem;
+		return m_memory;
 	};
 	
-	error_t
-		Run(char const * & input, Memory * memory, Delimiters * delimiters)
+	virtual error_t
+		Run(char const * & input, Environment & env)
 	{
-		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
+		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, memory, delimiters));
+			TRY((*i)->Run(input, env));
+			TRY(env.SkipDelimiters());
 		}
 		return OK;
 	};
+	
+private:
+	int
+		m_memory;
 }
 
 class AltGroup : public SpecifierGroup
 {
 public:
+	// cons
+		AltGroup()
+	:
+		m_storeAlt(true),
+		m_memory(-1),
+		SpecifierGroup('(')
+	{
+	};
+	
+	// cons
+		AltGroup(AltGroup const & that)
+	:
+		m_storeAlt(that.m_storeAlt),
+		m_memory(-1),
+		SpecifierGroup(that)
+	{
+		GetMemoryUsage();
+	};
+	
+	CLONE();
+	
 	// Local.
 	virtual error_t
 		ReadToken(char const * & input)
 	{
-		FAIL(*input == '(', ERROR_NO_GROUP_START);
+		++input;
 		Specifier *
 			child;
 		SequentialGroup *
@@ -73,7 +200,7 @@ public:
 		goto ReadToken_new_alt;
 		do
 		{
-			if (child->m_specifier == '|')
+			if (child->GetSpecifier() == '|')
 			{
 ReadToken_new_alt:
 				alt = new SequentialGroup();
@@ -85,37 +212,45 @@ ReadToken_new_alt:
 			}
 			TRY(gParser->GetNext(input, &child));
 		}
-		while (child && child->m_specifier != ')');
-		return child ? OK : ERROR_NO_GROUP_END;
+		while (child && child->GetSpecifier() != ')');
+		FAIL(child, ERROR_NO_GROUP_END);
 		// Only enters this when it hits a ')' specifier.  '|' and ')' are
 		// (currently) the only two UBER simple specifiers that just consume a
 		// single character, do nothing when run, and are discarded instantly.
 		// Actually, don't delete them, just use featherweights.  '>' is also
 		// one to end sub-specifiers, and '}' to end quiet sections.
+		if (child->GetSkip())
+		{
+			m_storeAlt = false;
+			// HACK HACK HACK.
+			dynamic_cast<MinusSpecifier *>(child)->m_child = nullptr;
+			delete child;
+		}
+		return OK;
 	};
 	
-	int
+	virtual int
 		GetMemoryUsage()
 	{
-		int
-			mem = 1;
-		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
+		if (m_memory != -1) return m_memory;
+		m_memory = m_storeAlt ? 1 : 0;
+		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			mem += (*i)->GetMemoryUsage();
+			m_memory += (*i)->GetMemoryUsage();
 		}
-		return mem;
+		return m_memory;
 	};
 	
-	error_t
-		Run(char const * & input, Memory * memory, Delimiters * delimiters)
+	virtual error_t
+		Run(char const * & input, Environment & env)
 	{
 		error_t
 			last = OK;
 		cell
 			alt = 0;
-		std::list<Specifier *>::iterator
-			i = m_children.begin(),
-			e = m_children.end();
+		auto
+			i = Begin(),
+			e = End();
 		// Parse this alternate.
 		while (i != e)
 		{
@@ -123,49 +258,17 @@ ReadToken_new_alt:
 				start = input;
 			// Make a copy of the current state of the delimiters and pass THAT
 			// to children so that it resets for every alternate branch.
-			// 
-			// Example:
-			// 
-			//  p<,>ii|ff
-			// 
-			// That denotes either 2 integers separated by commas, or 2 floats.
-			// 
-			//  p<,>(ii|ff)
-			// 
-			// That denotes either 2 integers or 2 floats, separated by commas.
-			// 
-			//  p<,>(ii|p<;>ff)
-			// 
-			// That denotes either 2 integers separated by commas, or 2 floats
-			// separated by either commas or semicolons.
-			// 
-			//  p<,>(ii|-p<,>ff)
-			// 
-			// That has the same effect as the first example.
-			// 
-			// SCRAP THAT.  New "p" syntax:
-			// 
-			//  p<,> <- Set "," as the ONLY separator.
-			//  p<> <- Reset separators (i.e. any whitespace).
-			//  p< > <- Set " " as the ONLY separator (no tabs, newlines etc).
-			//  +p<,> <- Add "," to the list of possible separators.
-			//  -p<,> <- Remove "," from the list of possible separators.
-			//  +P<,> <- Add ONE OR MORE commas to the list of separators.
-			// 
-			// Note that doing "P<>" is like doing "+P< >+P<\t>+P<\r>+P<\n>".
-			// This makes "P<>" the default - i.e. any length of any whitespace
-			// between two values.
-			// 
-			Delimiters
-				delims(*delimiters);
-			last = (*i)->Run(start, memory, &delims);
+			Environment
+				local(env);
+			last = (*i)->Run(start, local);
+			++i;
 			if (last == OK)
 			{
 				// Found a group that works.
+				input = start;
 				break;
 			}
 			++alt;
-			++i;
 		}
 		// Don't bother writing the alternate if there was no solution.
 		TRY(last);
@@ -180,8 +283,8 @@ ReadToken_new_alt:
 			++i;
 		}
 		// Store the value of the alternate used.
-		TRY(memory->Skip(skip));
-		TRY(memory->WriteNextCell(alt));
+		TRY(env.GetMemory()->Skip(skip));
+		if (m_storeAlt) TRY(env.GetMemory()->WriteNextCell(alt));
 		return OK;
 		// Return the last error, whatever it was (may be useful, may not - will
 		// be if there's only one alternate (but we can optimise that case)).
@@ -189,11 +292,25 @@ ReadToken_new_alt:
 		// above will fail, because when there is only one version, there is no
 		// alternate write target.
 	};
+	
+private:
+	bool
+		m_storeAlt;
+	
+	int
+		m_memory;
 };
 
 class GlobalGroup : public AltGroup
 {
 public:
+	// cons
+		GlobalGroup()
+	:
+		AltGroup() // Derived from that, but not in the valid parser list.
+	{
+	};
+	
 	// Global.
 	error_t
 		ReadToken(char const * & input)
@@ -206,7 +323,7 @@ public:
 		goto ReadToken_new_alt;
 		do
 		{
-			if (child->m_specifier == '|')
+			if (child->GetSpecifier() == '|')
 			{
 ReadToken_new_alt:
 				alt = new SequentialGroup();

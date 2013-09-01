@@ -542,3 +542,10 @@ error_t
 		Utils::Get(read, input, dest, end);
 };
 
+void
+	Utils::
+	SkipWhitespace(char const * & input)
+{
+	while ('\0' < *input && *input < '!') ++input;
+};
+
