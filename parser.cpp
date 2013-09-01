@@ -63,6 +63,11 @@ error_t
 {
 	FAIL(m_specifiers[specifier] == nullptr, ERROR_DUPLICATE_SPECIFIER);
 	m_specifiers[specifier] = prototype;
+	if ('a' <= specifier && specifier <= 'z')
+	{
+		// Add the optional variant.
+		return AddAs(prototype, specifier & ~0x20);
+	}
 	return OK;
 }
 
