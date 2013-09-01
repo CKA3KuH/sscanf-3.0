@@ -75,65 +75,66 @@ error_t
 	Parser::
 	AddAll()
 {
-Specifier *
-	temp;
-
+	Specifier *
+		temp;
+	
 	// There is no reason in this design why we can't have different parsers
 	// with different specifier sets.  That's pretty cool IMHO.
-	gParser->Add(new SimpleSpecifier('b', &Utils::ReadBinary ));
-	gParser->Add(new SimpleSpecifier('d', &Utils::ReadDecimal));
-	gParser->Add(new SimpleSpecifier('f', &Utils::ReadFloat  ));
-	gParser->Add(new SimpleSpecifier('g', &Utils::ReadIEEE754));
-	gParser->Add(new SimpleSpecifier('h', &Utils::ReadHex    ));
-	gParser->Add(new SimpleSpecifier('i', &Utils::ReadDecimal));
-	gParser->Add(new SimpleSpecifier('l', &Utils::ReadLogical));
-	gParser->Add(new SimpleSpecifier('n', &Utils::ReadNumber ));
-	gParser->Add(new SimpleSpecifier('o', &Utils::ReadOctal  ));
-	gParser->Add(new SimpleSpecifier('x', &Utils::ReadHex    ));
+	Add(new SimpleSpecifier('b', &Utils::ReadBinary ));
+	Add(new SimpleSpecifier('d', &Utils::ReadDecimal));
+	Add(new SimpleSpecifier('f', &Utils::ReadFloat  ));
+	Add(new SimpleSpecifier('g', &Utils::ReadIEEE754));
+	Add(new SimpleSpecifier('h', &Utils::ReadHex    ));
+	Add(new SimpleSpecifier('i', &Utils::ReadDecimal));
+	Add(new SimpleSpecifier('l', &Utils::ReadLogical));
+	Add(new SimpleSpecifier('n', &Utils::ReadNumber ));
+	Add(new SimpleSpecifier('o', &Utils::ReadOctal  ));
+	Add(new SimpleSpecifier('x', &Utils::ReadHex    ));
 	
 	// Detect group closes.
-	gParser->Add(new EndingSpecifier('|')); // Alternate.
-	gParser->Add(new EndingSpecifier(')')); // End group.
-	gParser->Add(new EndingSpecifier('}')); // End quiet mode.
-	gParser->Add(new EndingSpecifier('>')); // End subtype.
+	Add(new TrivialSpecifier('|')); // Alternate.
+	Add(new TrivialSpecifier(')')); // End group.
+	Add(new TrivialSpecifier('}')); // End quiet mode.
+	Add(new TrivialSpecifier('>')); // End subtype.
 	
 	// Add all 10 numeric specifiers.
 	temp = new NumericSpecifier();
-	gParser->AddAs(temp, '0');
-	gParser->AddAs(temp, '1');
-	gParser->AddAs(temp, '2');
-	gParser->AddAs(temp, '3');
-	gParser->AddAs(temp, '4');
-	gParser->AddAs(temp, '5');
-	gParser->AddAs(temp, '6');
-	gParser->AddAs(temp, '7');
-	gParser->AddAs(temp, '8');
-	gParser->AddAs(temp, '9');
-	gParser->AddAs(temp, '*'); // Special case - unknown count.
+	AddAs(temp, '0');
+	AddAs(temp, '1');
+	AddAs(temp, '2');
+	AddAs(temp, '3');
+	AddAs(temp, '4');
+	AddAs(temp, '5');
+	AddAs(temp, '6');
+	AddAs(temp, '7');
+	AddAs(temp, '8');
+	AddAs(temp, '9');
+	AddAs(temp, '*'); // Special case - unknown count.
 	
 	// Add string literals.
 	temp = new LiteralSpecifier();
-	gParser->AddAs(temp, '\'');
-	gParser->AddAs(temp, '\"');
+	AddAs(temp, '\'');
+	AddAs(temp, '\"');
 	
 	// More complex specifiers.
-	gParser->Add(new DelimSpecifier());  // 'p'.
-	gParser->Add(new CharSpecifier());   // 'c'.
-	gParser->Add(new ArraySpecifier());  // 'a'.
-	gParser->Add(new KustomSpecifier()); // 'k'.
-	gParser->AddAs(new StringSpecifier(false), 's'); // Unpacked.
-	gParser->AddAs(new StringSpecifier(true ), 'z'); // Packed.
-	gParser->AddAs(new PlayerSpecifier(false, true ), 'q'); // Bots only.
-	gParser->AddAs(new PlayerSpecifier(true,  false), 'r'); // Players only.
-	gParser->AddAs(new PlayerSpecifier(true,  true ), 'u'); // Players and Bots.
+	Add(new DelimSpecifier());  // 'p'.
+	Add(new CharSpecifier());   // 'c'.
+	Add(new ArraySpecifier());  // 'a'.
+	Add(new KustomSpecifier()); // 'k'.
+	AddAs(new StringSpecifier(false), 's'); // Unpacked.
+	AddAs(new StringSpecifier(true ), 'z'); // Packed.
+	AddAs(new PlayerSpecifier(false, true ), 'q'); // Bots only.
+	AddAs(new PlayerSpecifier(true,  false), 'r'); // Players only.
+	AddAs(new PlayerSpecifier(true,  true ), 'u'); // Players and Bots.
 	
 	// Complex groups.
-	gParser->Add(new EnumSpecifier()); // 'e'.
-	gParser->Add(new QuietGroup());    // '{'.
-	gParser->Add(new AltGroup());      // '('.
+	Add(new EnumSpecifier()); // 'e'.
+	Add(new QuietGroup());    // '{'.
+	Add(new AltGroup());      // '('.
 	
 	// Others.
-	gParser->Add(new SkipSpecifier());   // '-'.
-	gParser->Add(new OptionSpecifier()); // '?'.
+	Add(new SkipSpecifier());   // '-'.
+	Add(new PlusSpecifier());   // '+'.
+	Add(new OptionSpecifier()); // '?'.
 }
 
