@@ -7,14 +7,13 @@ error_t
 	*dest = nullptr;
 	try
 	{
-		// We ALWAYS start with an "alt" group.
-		GlobalGroup *
-			ret = new GlobalGroup(false); // Not ended by ')'.
+		// We ALWAYS start with an "alt" group (the special one written just for
+		// this purpose and that doesn't end with a close bracket).
+		*dest = new GlobalGroup();
 		// TODO: These checks don't clean up properly.
-		TRY(ret->ReadToken(input));
+		TRY((*dest)->ReadToken(input));
 		Utils::SkipWhitespace(input);
 		FAIL(*input == '\0', ERROR_EXPECTED_A_GOT_B, "<end of string>", *input);
-		*dest = ret;
 		// At this point, we could run an optimisation pass on the tree!  The
 		// only one I can think of at this point is to replace "Alt" groups with
 		// only one child by regular sequence groups.  Or merge hierarchical
@@ -51,195 +50,85 @@ error_t
 	return OK;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-enum E_SSCANF_ERROR
+error_t
+	Parser::
+	Add(Specifier * prototype)
 {
-	OK,
-	ERROR_NO_TOKEN,
-	ERROR_CHILD_NOT_SPECIFIER,
-};
-
-typedef
-	enum E_SSCANF_ERROR
-	error_t;
-
-static int
-	CUtils::GetUnsigned(char ** c)
-{
-	int
-		n = 0;
-	while ('0' <= **c && **c <= '9')
-	{
-		n = n * 10 + **c - '0';
-		*c++;
-	}
-	return n;
-}
-
-static char
-	CUtils::GetOneChar(char ** c)
-{
-	char
-		cur = **c;
-	*c++;
-	if (cur == '\\')
-	{
-		cur = **c;
-		*c++;
-		switch (cur)
-		{
-			case 'a': case 'A':
-				cur = '\a';
-				break;
-			case 'b': case 'B':
-				cur = '\b';
-				break;
-			case 'f': case 'F':
-				cur = '\f';
-				break;
-			case 'n': case 'N':
-				cur = '\n';
-				break;
-			case 'r': case 'R':
-				cur = '\r';
-				break;
-			case 't': case 'T':
-				cur = '\t';
-				break;
-			case 'v': case 'V':
-				cur = '\v';
-				break;
-			case 'u': case 'U':
-				cur = '\n';
-				break;
-			case 'x': case 'X':
-				cur = '\n';
-				break;
-			case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-				cur = cur - '0';
-				break;
-		}
-	}
-	return cur;
+	return AddAs(prototype, prototype->m_specifier);
 }
 
 error_t
-	ParseSpecifierCount(char ** c, CTokens &tokens)
+	Parser::
+	AddAs(Specifier * prototype, char specifier)
 {
-	int
-		n = CUtils::GetUnsigned(c);
-	CTokens
-		child;
-	error_t
-		e = GetToken(c, child);
-	if (e) return e;
-	if (child.Size() == 0) return ERROR_NO_CHILD;
-	if (child.Size() != 1) return ERROR_NOT_ONE_CHILD;
-	CToken
-		theOne = child[0];
-	if (!theOne.IsSpecifier()) return ERROR_CHILD_NOT_SPECIFIER;
-	// Add this token on to the main set of tokens multiple times.
-	while (n--) tokens.Add(theOne);
+	FAIL(m_specifiers[specifier] == nullptr, ERROR_DUPLICATE_SPECIFIER);
+	m_specifiers[specifier] = prototype;
 	return OK;
 }
 
 error_t
-	GetToken(char const * & input, CTokens &tokens)
+	Parser::
+	AddAll()
 {
-	SkipWhitespace(input);
-	unsigned char
-		c = (unsigned char)(*input);
-	switch (c)
-	{
-		case '\0': return ERROR_NO_TOKEN;
-		case '|': // Very special case.
-	}
-	Specifier *
-		s = GetSpecifier(c);
-	if (!s) return UNKNOWN_SPECIFIER
-	tokens.Add(s);
+Specifier *
+	temp;
+
+	// There is no reason in this design why we can't have different parsers
+	// with different specifier sets.  That's pretty cool IMHO.
+	gParser->Add(new SimpleSpecifier('b', &Utils::ReadBinary ));
+	gParser->Add(new SimpleSpecifier('d', &Utils::ReadDecimal));
+	gParser->Add(new SimpleSpecifier('f', &Utils::ReadFloat  ));
+	gParser->Add(new SimpleSpecifier('g', &Utils::ReadIEEE754));
+	gParser->Add(new SimpleSpecifier('h', &Utils::ReadHex    ));
+	gParser->Add(new SimpleSpecifier('i', &Utils::ReadDecimal));
+	gParser->Add(new SimpleSpecifier('l', &Utils::ReadLogical));
+	gParser->Add(new SimpleSpecifier('n', &Utils::ReadNumber ));
+	gParser->Add(new SimpleSpecifier('o', &Utils::ReadOctal  ));
+	gParser->Add(new SimpleSpecifier('x', &Utils::ReadHex    ));
 	
+	// Detect group closes.
+	gParser->Add(new EndingSpecifier('|')); // Alternate.
+	gParser->Add(new EndingSpecifier(')')); // End group.
+	gParser->Add(new EndingSpecifier('}')); // End quiet mode.
+	gParser->Add(new EndingSpecifier('>')); // End subtype.
 	
+	// Add all 10 numeric specifiers.
+	temp = new NumericSpecifier();
+	gParser->AddAs(temp, '0');
+	gParser->AddAs(temp, '1');
+	gParser->AddAs(temp, '2');
+	gParser->AddAs(temp, '3');
+	gParser->AddAs(temp, '4');
+	gParser->AddAs(temp, '5');
+	gParser->AddAs(temp, '6');
+	gParser->AddAs(temp, '7');
+	gParser->AddAs(temp, '8');
+	gParser->AddAs(temp, '9');
+	gParser->AddAs(temp, '*'); // Special case - unknown count.
 	
+	// Add string literals.
+	temp = new LiteralSpecifier();
+	gParser->AddAs(temp, '\'');
+	gParser->AddAs(temp, '\"');
 	
-
-
-
-
-
-	if (**c == '\0')
-	{
-		// End of the line.
-		return ERROR_NO_TOKEN;
-	}
-	else if ('0' <= **c && **c <= '9')
-	{
-		// A number (specifically an integer).
-		return ParseSpecifierCount(c, tokens);
-	}
-	else if ('a' <= **c && **c <= 'z')
-	{
-		// A specifier.
-		return ParseSpecifier(c, tokens);
-	}
-	else if ('A' <= **c && **c <= 'Z')
-	{
-		// An optional specifier.
-		return ParseOptionalSpecifier(c, tokens);
-	}
-	else switch (*c)
-	{
-		// A special character.
-		case '|':
-			// Alternate specifier.
-			break;
-		case '*':
-			// Variable input count.
-			break;
-		case '-':
-			// Skipped element.
-			break;
-		case '(':
-			// Group start.
-			break;
-		case ')':
-			// Group end.
-			break;
-		case '?':
-			// Option.
-			break;
-		case '%':
-			// Format type.
-			break;
-		case '{':
-			// Quiet mode start.
-			break;
-		case '}':
-			// Quiet mode end.
-			break;
-		case '\'':
-		case '\"':
-			// String literal.
-			break;
-	}
+	// More complex specifiers.
+	gParser->Add(new DelimSpecifier());  // 'p'.
+	gParser->Add(new CharSpecifier());   // 'c'.
+	gParser->Add(new ArraySpecifier());  // 'a'.
+	gParser->Add(new KustomSpecifier()); // 'k'.
+	gParser->AddAs(new StringSpecifier(false), 's'); // Unpacked.
+	gParser->AddAs(new StringSpecifier(true ), 'z'); // Packed.
+	gParser->AddAs(new PlayerSpecifier(false, true ), 'q'); // Bots only.
+	gParser->AddAs(new PlayerSpecifier(true,  false), 'r'); // Players only.
+	gParser->AddAs(new PlayerSpecifier(true,  true ), 'u'); // Players and Bots.
+	
+	// Complex groups.
+	gParser->Add(new EnumSpecifier()); // 'e'.
+	gParser->Add(new QuietGroup());    // '{'.
+	gParser->Add(new AltGroup());      // '('.
+	
+	// Others.
+	gParser->Add(new SkipSpecifier());   // '-'.
+	gParser->Add(new OptionSpecifier()); // '?'.
 }
 
-/*
-
-TODO:
-- Remove the requirement of quiet strings to contain lengths.
-- All the new operators.
-
-*/

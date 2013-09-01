@@ -1,3 +1,14 @@
+enum E_SSCANF_ERROR
+{
+	OK,
+	ERROR_NO_TOKEN,
+	ERROR_CHILD_NOT_SPECIFIER,
+};
+
+typedef
+	enum E_SSCANF_ERROR
+	error_t;
+
 #if 0
 	// The constructor runs the test, so just declaring this runs it.
 	#define TEST(name, code)                \

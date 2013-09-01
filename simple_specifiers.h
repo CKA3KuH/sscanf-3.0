@@ -78,7 +78,7 @@ private:
 		m_default;
 };
 
-class Specifier_c : public SimpleSpecifier
+class CharSpecifier : public SimpleSpecifier
 {
 public:
 	// cons
@@ -112,17 +112,59 @@ public:
 	};
 };
 
-SimpleSpecifier
-	gSpecifierD('b', &Utils::ReadBinary ),
-	gSpecifierD('d', &Utils::ReadDecimal),
-	gSpecifierF('f', &Utils::ReadFloat  ),
-	gSpecifierG('g', &Utils::ReadIEEE754),
-	gSpecifierH('h', &Utils::ReadHex    ),
-	gSpecifierI('i', &Utils::ReadDecimal),
-	gSpecifierL('l', &Utils::ReadLogical),
-	gSpecifierN('n', &Utils::ReadNumber ),
-	gSpecifierO('o', &Utils::ReadOctal  ),
-	gSpecifierX('x', &Utils::ReadHex    );
+class EndingSpecifier : public Specifier
+{
+public:
+	// cons
+		EndingSpecifier(char c)
+	:
+		Specifier(c)
+	{
+	};
+	
+	error_t
+		Get(char const * & input, cell & result)
+	{
+		return OK;
+	};
+	
+	error_t
+		Clone(
+			Specifier ** that)
+	{
+		// Flyweight pattern.
+		*that = this;
+		return OK;
+	};
+	
+	virtual error_t
+		ReadToken(char const * & input)
+	{
+		NEXT(input, m_specifier, ERROR_EXPECTED_A_GOT_B, m_specifier, *input);
+		return OK;
+	};
+	
+	virtual error_t
+		ReadValue(char const * & input, cell & result)
+	{
+		return OK;
+	};
+	
+	error_t
+		Run(char const * & input, Memory * memory, Delimiters * delimiters)
+	{
+		return OK;
+	};
+	
+	int
+		GetMemoryUsage() { return 0; };
+	
+private:
+	// dest
+		~EndingSpecifier()
+	{
+	};
+};
 
 class NumericSpecifier : public Specifier
 {
@@ -265,39 +307,11 @@ public:
 class AltGroup : public SpecifierGroup
 {
 public:
-	// Global.
-	error_t
-		ReadToken(char const * & input)
-	{
-		Specifier *
-			child;
-		SequentialGroup *
-			alt;
-		// Avoids repetition of code.
-		goto ReadToken_new_alt;
-		do
-		{
-			if (child->m_specifier == '|')
-			{
-ReadToken_new_alt:
-				alt = new SequentialGroup();
-				Add(alt);
-			}
-			else
-			{
-				alt->Add(child);
-			}
-			TRY(gParser->GetNext(input, &child));
-		}
-		while (child);
-		return OK;
-	};
-	
 	// Local.
-	error_t
+	virtual error_t
 		ReadToken(char const * & input)
 	{
-		NEXT(input, '(', ERROR_NO_GROUP_START);
+		FAIL(*input == '(', ERROR_NO_GROUP_START);
 		Specifier *
 			child;
 		SequentialGroup *
@@ -421,6 +435,38 @@ ReadToken_new_alt:
 		// In fact we will HAVE to optimise that case or the "WriteNextCell"
 		// above will fail, because when there is only one version, there is no
 		// alternate write target.
+	};
+};
+
+class GlobalGroup : public AltGroup
+{
+public:
+	// Global.
+	error_t
+		ReadToken(char const * & input)
+	{
+		Specifier *
+			child;
+		SequentialGroup *
+			alt;
+		// Avoids repetition of code.
+		goto ReadToken_new_alt;
+		do
+		{
+			if (child->m_specifier == '|')
+			{
+ReadToken_new_alt:
+				alt = new SequentialGroup();
+				Add(alt);
+			}
+			else
+			{
+				alt->Add(child);
+			}
+			TRY(gParser->GetNext(input, &child));
+		}
+		while (child);
+		return OK;
 	};
 };
 
