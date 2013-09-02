@@ -97,7 +97,7 @@ ReadToken_new_quiet:
 		env.SetMemory(&quiet);
 		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, local));
+			TRY((*i)->Run(input, env));
 			TRY(env.SkipDelimiters());
 		}
 		// Restore the old memory system.

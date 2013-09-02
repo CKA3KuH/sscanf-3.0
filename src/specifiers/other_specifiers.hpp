@@ -70,7 +70,7 @@ public:
 		input += m_length;
 		return OK;
 	};
-
+	
 	virtual int
 		GetMemoryUsage() { return 0; };
 	
@@ -143,6 +143,16 @@ public:
 		~MinusSpecifier()
 	{
 		delete m_child;
+	};
+	
+	static void
+		DeleteTrivial(Specifier * that)
+	{
+		if (that->GetSkip())
+		{
+			dynamic_cast<MinusSpecifier *>(that)->m_child = nullptr;
+			delete that;
+		}
 	};
 	
 private:
