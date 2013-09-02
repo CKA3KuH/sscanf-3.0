@@ -76,6 +76,7 @@ ReadToken_new_quiet:
 		}
 		while (child && child->GetSpecifier() != '}');
 		FAIL(child, ERROR_NO_QUIET_END);
+		MinusSpecifier::DeleteTrivial(child);
 		return OK;
 	};
 	
@@ -214,18 +215,7 @@ ReadToken_new_alt:
 		}
 		while (child && child->GetSpecifier() != ')');
 		FAIL(child, ERROR_NO_GROUP_END);
-		// Only enters this when it hits a ')' specifier.  '|' and ')' are
-		// (currently) the only two UBER simple specifiers that just consume a
-		// single character, do nothing when run, and are discarded instantly.
-		// Actually, don't delete them, just use featherweights.  '>' is also
-		// one to end sub-specifiers, and '}' to end quiet sections.
-		if (child->GetSkip())
-		{
-			m_storeAlt = false;
-			// HACK HACK HACK.
-			dynamic_cast<MinusSpecifier *>(child)->m_child = nullptr;
-			delete child;
-		}
+		MinusSpecifier::DeleteTrivial(child);
 		return OK;
 	};
 	

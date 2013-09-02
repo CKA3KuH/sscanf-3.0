@@ -19,8 +19,11 @@ public:
 		m_length(that.m_length),
 		m_literal(nullptr)
 	{
-		m_literal = new char [m_length + 1];
-		strcpy(m_literal, that.m_literal);
+		if (that.m_literal)
+		{
+			m_literal = new char [m_length + 1];
+			strcpy(m_literal, that.m_literal);
+		}
 	};
 	
 	virtual // cons
@@ -82,8 +85,116 @@ private:
 		m_literal;
 };
 
-// See the note attached to the "friend" declaration below.
-class AddGroup;
+class OptionSpecifier : public Specifier
+{
+public:
+	// cons
+		OptionSpecifier()
+	:
+		Specifier('?'),
+		m_option(nullptr),
+		m_value(nullptr)
+	{
+	};
+	
+	// cons
+		OptionSpecifier(OptionSpecifier const & that)
+	:
+		Specifier(that),
+		m_option(nullptr),
+		m_value(nullptr)
+	{
+		if (that.m_option)
+		{
+			m_option = new char [strlen(that.m_option) + 1];
+			strcpy(m_option, that.m_option);
+		}
+		if (that.m_value)
+		{
+			m_value = new char [strlen(that.m_value) + 1];
+			strcpy(m_value, that.m_value);
+		}
+	};
+	
+	virtual // cons
+		~OptionSpecifier()
+	{
+		delete m_option;
+		delete m_value;
+	};
+	
+	CLONE();
+	
+	virtual error_t
+		ReadToken(char const * & input)
+	{
+		// Skip the "?".
+		++input;
+		static char const * const
+			sDelimList[] = {">", "=", nullptr};
+		// Skip the "<".
+		NEXT(input, '<', ERROR_NO_PARAM_START);
+		size_t
+			lenName = Utils::GetStringLength(input, sDelimList);
+		char *
+			ptr = input + lenName;
+		// Check if there is a value for the option.
+		Utils::SkipWhitespace(ptr);
+		if (*ptr == '=')
+		{
+			// Get the length of the value.
+			++ptr;
+			size_t
+				lenValue = Utils::GetStringLength(ptr, sDelimList);
+			// Check that the option is ended correctly.
+			char *
+				ptr2 = ptr + lenValue;
+			NEXT(ptr2, '>', ERROR_NO_PARAM_END);
+			// Allocate a single block of memory.
+			m_option = new char [lenName + lenValue + 2];
+			m_value = m_option + lenName + 1;
+			// Copy the data.
+			Utils::GetString(input, m_option, lenName + 1);
+			Utils::GetString(ptr, m_value, lenValue + 1);
+			// Finish.
+			input = ptr2;
+		}
+		else if (*ptr == '>')
+		{
+			// Does not have a value.
+			m_option = new char [lenName + 1];
+			// Copy the data.
+			Utils::GetString(input, m_option, lenName + 1);
+			// Finish (skip the ">").
+			input = ptr + 1;
+		}
+		else
+		{
+			FAIL(false, ERROR_NO_PARAM_END);
+		}
+		// Option neatly stored for later!
+		return OK;
+	};
+	
+	virtual error_t
+		Run(char const * & input, Environment & env)
+	{
+		return env.SetOption(m_option, m_value);
+	};
+	
+	virtual int
+		GetMemoryUsage() { return 0; };
+	
+private:
+	size_t
+		m_length;
+	
+	char *
+		m_option;
+	
+	char *
+		m_value;
+};
 
 class MinusSpecifier : public Specifier
 {
@@ -161,16 +272,5 @@ private:
 	
 	int
 		m_count;
-	
-	// When "AltGroup" encounters "-)", it needs to delete the token to free up
-	// memory, unfortunately this would mean attempting to delete the child ")"
-	// token too, which is a "TrivialToken" flyweight and thus CAN'T be deleted.
-	// Therefore, to HACK HACK HACK around this problem, class "AltGroup" can
-	// blank out the "m_child" field of this class before deleting it so that
-	// the error is not propogated.  It does seem like a need a more generic
-	// solution for flyweights in the future, but I don't have one at this point
-	// (I actually don't have another need for one either TBH, I just like to be
-	// thorough in my code and not introduce hacks).
-	friend class AltGroup;
 };
 

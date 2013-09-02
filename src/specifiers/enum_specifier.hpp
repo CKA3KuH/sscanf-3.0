@@ -2,22 +2,6 @@
 
 class EnumSpecifier : public SpecifierGroup
 {
-	error_t
-		Run(char const * & input, Memory * memory, Delimiters * delimiters)
-	{
-		EnumMemory
-			mem(memory->GetNextPointer());
-		for (var i = m_children.begin(), e = m_children.end(); i != e; ++i)
-		{
-			TRY((*i)->Run(input, mem, delimiters));
-		}
-		return OK;
-	}
-};
-
-
-class EnumSpecifier : public SpecifierGroup
-{
 public:
 	// cons
 		EnumSpecifier()
@@ -42,9 +26,9 @@ public:
 	virtual error_t
 		ReadToken(char const * & input)
 	{
+		// Is this a required, or optional, enum?
 		if (*input++ != GetSpecifier()) SetOptional();
 		NEXT('<', ERROR_NO_TYPE_START);
-		++input;
 		Specifier *
 			child;
 		// Avoids repetition of code.

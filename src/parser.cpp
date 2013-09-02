@@ -134,7 +134,7 @@ error_t
 	
 	// Others.
 	Add(new SkipSpecifier());   // '-'.
-	Add(new PlusSpecifier());   // '+'.
+	//Add(new PlusSpecifier());   // '+'.
 	Add(new OptionSpecifier()); // '?'.
 }
 

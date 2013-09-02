@@ -475,7 +475,7 @@ error_t
 
 error_t
 	Utils::
-	NextChars(char const * & input, char const * val)
+	NextChars(char const * & input, char const * const val)
 {
 	Utils::SkipWhitespace(input);
 	char const *
