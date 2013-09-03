@@ -6,6 +6,7 @@ public:
 	// cons
 		EnumSpecifier()
 	:
+		m_default(nullptr),
 		m_memory(-1),
 		SpecifierGroup('e')
 	{
@@ -14,10 +15,16 @@ public:
 	// cons
 		EnumSpecifier(EnumSpecifier const & that)
 	:
+		m_default(nullptr),
 		m_memory(-1),
 		SpecifierGroup(that)
 	{
 		GetMemoryUsage();
+		if (that.m_default)
+		{
+			m_default = new cell [m_memory];
+			memcpy(m_default, that.m_default, m_memory * sizeof (cell));
+		}
 	};
 	
 	CLONE();
@@ -42,6 +49,17 @@ ReadToken_new_quiet:
 		while (child && child->GetSpecifier() != '>');
 		FAIL(child, ERROR_NO_GROUP_END);
 		MinusSpecifier::DeleteTrivial(child);
+		if (GetOptional())
+		{
+			NEXT(input, '(', ERROR_NO_DEAFULT_START);
+			int
+				mem = GetMemoryUsage();
+			m_default = new cell[mem];
+			TRY(Run(input, gDefaultEnvironment(m_default)));
+			// Skip the closing bracket.
+			NEXT(input, ')', ERROR_NO_DEAFULT_END);
+			// Whatever.
+		}
 		return OK;
 	};
 	
@@ -57,7 +75,7 @@ ReadToken_new_quiet:
 		return m_memory;
 	};
 	
-	error_t
+	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
 		// Store a copy of the old memory system.
@@ -65,7 +83,7 @@ ReadToken_new_quiet:
 			om = env.GetMemory();
 		// Just takes all writes and null-routes them, but still serves reads.
 		EnumMemory
-			mem(env.GetMemory());
+			mem(om);
 		env.SetMemory(&mem);
 		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
@@ -75,9 +93,23 @@ ReadToken_new_quiet:
 		// Restore the old memory system.
 		env.SetMemory(om);
 		return OK;
-	}
+	};
+	
+	virtual std::ostream &
+		Render(std::ostream & out) const
+	{
+		out = out << "e<";
+		for (auto i = Begin(), e = End(); i != e; ++i)
+		{
+			(*i)->Render(out);
+		}
+		return out << ">";
+	};
 	
 private:
+	cell *
+		m_default;
+	
 	bool
 		m_storeAlt;
 	

@@ -63,6 +63,18 @@ public:
 	{
 	};
 	
+	virtual std::ostream &
+		Render(std::ostream & out) const
+	{
+		return out << m_specifier;
+	};
+	
+	friend std::ostream &
+		operator<<(std::ostream & out, Specifier const & s)
+	{
+		return s.Render(out);
+	};
+	
 protected:
 	// cons
 		Specifier(Specifier const & that)

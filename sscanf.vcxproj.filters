@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="SDK\amxplugin.cpp" />
+    <ClCompile Include="SDK\amx\getch.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SDK\amx\amx.h" />
+    <ClInclude Include="SDK\amx\getch.h" />
+    <ClInclude Include="SDK\plugin.h" />
+    <ClInclude Include="SDK\plugincommon.h" />
+    <ClInclude Include="SDK\amx\sclinux.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="YSF.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{a1f0d59f-5264-4fc2-8934-47744307c68a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\memories">
+      <UniqueIdentifier>{a2008d47-1ec2-4248-8fab-1a1e2a8c986a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\specifiers">
+      <UniqueIdentifier>{226f6008-3964-45d7-9950-1f4e78b9df5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk">
+      <UniqueIdentifier>{c8ad1365-3073-49db-ab9d-292191d4e31a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk\amx">
+      <UniqueIdentifier>{647634d3-19e1-4c90-8be9-08a05e11de0f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

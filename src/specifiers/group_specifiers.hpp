@@ -105,6 +105,17 @@ ReadToken_new_quiet:
 		env.SetMemory(om);
 		return OK;
 	};
+	
+	virtual std::ostream &
+		Render(std::ostream & out) const
+	{
+		out = out << "{";
+		for (auto i = Begin(), e = End(); i != e; ++i)
+		{
+			(*i)->Render(out);
+		}
+		return out << "}";
+	};
 };
 
 // This is just a set of specifiers, to be run one after the other - simple as!
@@ -157,6 +168,17 @@ public:
 			TRY(env.SkipDelimiters());
 		}
 		return OK;
+	};
+	
+	virtual std::ostream &
+		Render(std::ostream & out) const
+	{
+		out = out << "(";
+		for (auto i = Begin(), e = End(); i != e; ++i)
+		{
+			(*i)->Render(out);
+		}
+		return out << ")";
 	};
 	
 private:
@@ -281,6 +303,20 @@ ReadToken_new_alt:
 		// In fact we will HAVE to optimise that case or the "WriteNextCell"
 		// above will fail, because when there is only one version, there is no
 		// alternate write target.
+	};
+	
+	virtual std::ostream &
+		Render(std::ostream & out) const
+	{
+		out = out << "(";
+		for (auto i = Begin(), e = End(); ; )
+		{
+			(*i)->Render(out);
+			++i;
+			if (i == e) break;
+			out = out << "|";
+		}
+		return out << ")";
 	};
 	
 private:

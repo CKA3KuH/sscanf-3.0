@@ -179,6 +179,8 @@ public:
 	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
+		// So that the environment doesn't try to skip two sets of delimiters.
+		env.ZeroRead();
 		return env.SetOption(m_option, m_value);
 	};
 	
@@ -246,6 +248,8 @@ public:
 	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
+		// So that the environment doesn't try to skip two sets of delimiters.
+		env.ZeroRead();
 		// Skips don't do anything but "skip".
 		return env.GetMemory()->Skip(GetMemoryUsage());
 	};

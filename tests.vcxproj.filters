@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{a1b26836-0cd8-49c7-8713-c20abcdc5bc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\memories">
+      <UniqueIdentifier>{9dc21211-8082-4499-a921-ebc1a68004cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\specifiers">
+      <UniqueIdentifier>{f080866b-25f9-46ad-8c1c-6ec97e5d35d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk">
+      <UniqueIdentifier>{ad54652f-cc8b-4827-a997-ca1b154609d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdk\amx">
+      <UniqueIdentifier>{d2c9b1b7-575e-4f8f-83cf-25210f14bf69}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp" />
+    <ClCompile Include="src\errors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\errors.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h" />
+  </ItemGroup>
+</Project>

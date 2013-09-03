@@ -1,38 +1,7 @@
-enum E_SSCANF_ERROR
-{
-	OK,
-	ERROR_NO_TOKEN,
-	ERROR_CHILD_NOT_SPECIFIER,
-};
+#include "utils.h"
+#include "errors.h"
 
-typedef
-	enum E_SSCANF_ERROR
-	error_t;
-
-#if 0
-	// The constructor runs the test, so just declaring this runs it.
-	#define TEST(name, code)                \
-		class Test##name : public Test      \
-		{                                   \
-		public:                             \
-			Test##name : Test(#name) {};    \
-			bool Run code;                  \
-		};                                  \
-		Test##name gTest##name;
-#else
-	#define TEST(name, code)
-#endif
-
-// TODO better.
-#define FAIL(test,error) do { if (!(test)) return (error); } while (false)
-#define TRY(n) do { error_t _error = (n); if (_error != OK) return _error; } while (false)
-//#define NEXT(i,c,e) do { if (NextChar(i, c) != OK) return e; } while (false)
-#define NEXT(i,c,e) do { SkipWhitespace(i); if (*i++ != c) return (e); SkipWhitespace(i); } while (false)
-
-typedef
-	error_t (*ReadFunction_t)(char const * &, cell &);
-
-static error_t
+error_t
 	Utils::
 	ReadOctal(char const * & input, cell & n)
 {
@@ -51,20 +20,20 @@ static error_t
 };
 
 // Test valid formats.
-TEST(Oct0,  { cell n; return Utils::ReadOctal("0", n) == OK && n == 0; })
-TEST(Oct1,  { cell n; return Utils::ReadOctal("066", n) == OK && n == 066; })
-TEST(Oct2,  { cell n; return Utils::ReadOctal("088", n) == OK && n == 0; })
-TEST(Oct4,  { cell n; return Utils::ReadOctal("01234", n) == OK && n == 01234; })
-TEST(Oct6,  { cell n; return Utils::ReadOctal("5k", n) == OK && n == 05; })
-TEST(Oct7,  { cell n; return Utils::ReadOctal("7|", n) == OK && n == 07; })
-TEST(Oct8,  { cell n; return Utils::ReadOctal("0044(", n) == OK && n == 044; })
+TEST(Oct0,  { cell n; return Utils::ReadOctal(S"0", n) == OK && n == 0; })
+TEST(Oct1,  { cell n; return Utils::ReadOctal(S"066", n) == OK && n == 066; })
+TEST(Oct2,  { cell n; return Utils::ReadOctal(S"088", n) == OK && n == 0; })
+TEST(Oct4,  { cell n; return Utils::ReadOctal(S"01234", n) == OK && n == 01234; })
+TEST(Oct6,  { cell n; return Utils::ReadOctal(S"5k", n) == OK && n == 05; })
+TEST(Oct7,  { cell n; return Utils::ReadOctal(S"7|", n) == OK && n == 07; })
+TEST(Oct8,  { cell n; return Utils::ReadOctal(S"0044(", n) == OK && n == 044; })
 // Test fails.
-TEST(Oct5,  { cell n; return Utils::ReadOctal("-0", n) == ERROR_NAN; })
-TEST(Oct3,  { cell n; return Utils::ReadOctal("99", n) == ERROR_NAN; })
-TEST(Oct9,  { cell n; return Utils::ReadOctal("(3)", n) == ERROR_NAN; })
-TEST(Oct10, { cell n; return Utils::ReadOctal("", n) == ERROR_NAN; })
+TEST(Oct5,  { cell n; return Utils::ReadOctal(S"-0", n) == ERROR_NAN; })
+TEST(Oct3,  { cell n; return Utils::ReadOctal(S"99", n) == ERROR_NAN; })
+TEST(Oct9,  { cell n; return Utils::ReadOctal(S"(3)", n) == ERROR_NAN; })
+TEST(Oct10, { cell n; return Utils::ReadOctal(S"", n) == ERROR_NAN; })
 
-static error_t
+error_t
 	Utils::
 	ReadDecimal(char const * & input, cell & n)
 {
@@ -91,39 +60,39 @@ static error_t
 };
 
 // Test valid formats.
-TEST(Dec0,  { cell n; return Utils::ReadDecimal("0", n) == OK && n == 0; })
-TEST(Dec1,  { cell n; return Utils::ReadDecimal("24", n) == OK && n == 24; })
-TEST(Dec1c, { cell n; return Utils::ReadDecimal("-55", n) == OK && n == -55; })
-TEST(Dec1d, { cell n; return Utils::ReadDecimal("-193", n) == OK && n == -193; })
-TEST(Dec1e, { cell n; return Utils::ReadDecimal("-067", n) == OK && n == -67; })
-TEST(Dec5b, { cell n; return Utils::ReadDecimal("0000088", n) == OK && n == 88; })
+TEST(Dec0,  { cell n; return Utils::ReadDecimal(S"0", n) == OK && n == 0; })
+TEST(Dec1,  { cell n; return Utils::ReadDecimal(S"24", n) == OK && n == 24; })
+TEST(Dec1c, { cell n; return Utils::ReadDecimal(S"-55", n) == OK && n == -55; })
+TEST(Dec1d, { cell n; return Utils::ReadDecimal(S"-193", n) == OK && n == -193; })
+TEST(Dec1e, { cell n; return Utils::ReadDecimal(S"-067", n) == OK && n == -67; })
+TEST(Dec5b, { cell n; return Utils::ReadDecimal(S"0000088", n) == OK && n == 88; })
 // Test ends.
-TEST(Dec6,  { cell n; return Utils::ReadDecimal("7!", n) == OK && n == 7; })
-TEST(Dec7,  { cell n; return Utils::ReadDecimal("6)", n) == OK && n == 6; })
-TEST(Dec8,  { cell n; return Utils::ReadDecimal("5G", n) == OK && n == 5; })
+TEST(Dec6,  { cell n; return Utils::ReadDecimal(S"7!", n) == OK && n == 7; })
+TEST(Dec7,  { cell n; return Utils::ReadDecimal(S"6)", n) == OK && n == 6; })
+TEST(Dec8,  { cell n; return Utils::ReadDecimal(S"5G", n) == OK && n == 5; })
 // Test not hex.
-TEST(Dec2,  { cell n; return Utils::ReadDecimal("0x1", n) == OK && n == 0; })
-TEST(Dec3,  { cell n; return Utils::ReadDecimal("FF", n) == ERROR_NAN; })
-TEST(Dec4,  { cell n; return Utils::ReadDecimal("5C", n) == OK && n == 5; })
+TEST(Dec2,  { cell n; return Utils::ReadDecimal(S"0x1", n) == OK && n == 0; })
+TEST(Dec3,  { cell n; return Utils::ReadDecimal(S"FF", n) == ERROR_NAN; })
+TEST(Dec4,  { cell n; return Utils::ReadDecimal(S"5C", n) == OK && n == 5; })
 // Test invalid formats.
-TEST(Dec9,  { cell n; return Utils::ReadDecimal("q", n) == ERROR_NAN; })
-TEST(Dec10, { cell n; return Utils::ReadDecimal("(6)", n) == ERROR_NAN; })
-TEST(Dec12, { cell n; return Utils::ReadDecimal("!", n) == ERROR_NAN; })
-TEST(Dec12, { cell n; return Utils::ReadDecimal("-", n) == ERROR_NAN; })
-TEST(Dec12, { cell n; return Utils::ReadDecimal("", n) == ERROR_NAN; })
+TEST(Dec9,  { cell n; return Utils::ReadDecimal(S"q", n) == ERROR_NAN; })
+TEST(Dec10, { cell n; return Utils::ReadDecimal(S"(6)", n) == ERROR_NAN; })
+TEST(Dec12, { cell n; return Utils::ReadDecimal(S"!", n) == ERROR_NAN; })
+TEST(Dec17, { cell n; return Utils::ReadDecimal(S"-", n) == ERROR_NAN; })
+TEST(Dec18, { cell n; return Utils::ReadDecimal(S"", n) == ERROR_NAN; })
 // Test all digits.
-TEST(Dec13, { cell n; return Utils::ReadDecimal("123", n) == OK && n == 123; })
-TEST(Dec14, { cell n; return Utils::ReadDecimal("456", n) == OK && n == 456; })
-TEST(Dec15, { cell n; return Utils::ReadDecimal("789", n) == OK && n == 789; })
-TEST(Dec16, { cell n; return Utils::ReadDecimal("-0", n) == OK && n == 0; })
+TEST(Dec13, { cell n; return Utils::ReadDecimal(S"123", n) == OK && n == 123; })
+TEST(Dec14, { cell n; return Utils::ReadDecimal(S"456", n) == OK && n == 456; })
+TEST(Dec15, { cell n; return Utils::ReadDecimal(S"789", n) == OK && n == 789; })
+TEST(Dec16, { cell n; return Utils::ReadDecimal(S"-0", n) == OK && n == 0; })
 
 cell
 	GetHexCharacter(char const c)
 {
 	return
-		('0' <= c <= '9') ? (c - '0') : (
-		('a' <= c <= 'f') ? (c - 'a' + 10) : (
-		('A' <= c <= 'F') ? (c - 'A' + 10) : (
+		('0' <= c && c <= '9') ? (c - '0') : (
+		('a' <= c && c <= 'f') ? (c - 'a' + 10) : (
+		('A' <= c && c <= 'F') ? (c - 'A' + 10) : (
 		(-1))));
 }
 
@@ -157,7 +126,7 @@ TEST(HexCharo1, { return GetHexCharacter('\\') == -1; })
 TEST(HexCharo2, { return GetHexCharacter('z') == -1; })
 TEST(HexCharo3, { return GetHexCharacter(':') == -1; })
 
-static error_t
+error_t
 	Utils::
 	ReadHex(char const * & input, cell & n)
 {
@@ -172,7 +141,7 @@ static error_t
 		{
 			++input;
 		}
-		else if (GetHexCharacter(*input) == -1) return 0;
+		else if (GetHexCharacter(*input) == -1) return OK;
 	}
 	if ((cur = GetHexCharacter(*input++)) == -1) return ERROR_NAN;
 	else
@@ -187,42 +156,40 @@ static error_t
 };
 
 // Test valid formats.
-TEST(Hex0,  { cell n; return Utils::ReadHex("0", n) == OK && n == 0; })
-TEST(Hex1,  { cell n; return Utils::ReadHex("24", n) == OK && n == 0x24; })
-TEST(Hex2,  { cell n; return Utils::ReadHex("0x24", n) == OK && n == 0x24; })
-TEST(Hex3,  { cell n; return Utils::ReadHex("0X24", n) == OK && n == 0x24; })
-TEST(Hex4a, { cell n; return Utils::ReadHex("2f", n) == OK && n == 0x2F; })
-TEST(Hex4b, { cell n; return Utils::ReadHex("2F", n) == OK && n == 0x2f; })
-TEST(Hex5a, { cell n; return Utils::ReadHex("0x000088", n) == OK && n == 0x88; })
-TEST(Hex5b, { cell n; return Utils::ReadHex("0000088", n) == OK && n == 0x88; })
-TEST(Hex5c, { cell n; return Utils::ReadHex("00000x88", n) == OK && n == 0; })
-TEST(Hex5d, { cell n; return Utils::ReadHex("000x88", n) == OK && n == 0; })
-TEST(Hex5e, { cell n; return Utils::ReadHex("0X88", n) == OK && n == 0x88; })
+TEST(Hex0,  { cell n; return Utils::ReadHex(S"0", n) == OK && n == 0; })
+TEST(Hex1,  { cell n; return Utils::ReadHex(S"24", n) == OK && n == 0x24; })
+TEST(Hex2,  { cell n; return Utils::ReadHex(S"0x24", n) == OK && n == 0x24; })
+TEST(Hex3,  { cell n; return Utils::ReadHex(S"0X24", n) == OK && n == 0x24; })
+TEST(Hex4a, { cell n; return Utils::ReadHex(S"2f", n) == OK && n == 0x2F; })
+TEST(Hex4b, { cell n; return Utils::ReadHex(S"2F", n) == OK && n == 0x2f; })
+TEST(Hex5a, { cell n; return Utils::ReadHex(S"0x000088", n) == OK && n == 0x88; })
+TEST(Hex5b, { cell n; return Utils::ReadHex(S"0000088", n) == OK && n == 0x88; })
+TEST(Hex5c, { cell n; return Utils::ReadHex(S"00000x88", n) == OK && n == 0; })
+TEST(Hex5d, { cell n; return Utils::ReadHex(S"000x88", n) == OK && n == 0; })
+TEST(Hex5e, { cell n; return Utils::ReadHex(S"0X88", n) == OK && n == 0x88; })
 // Test ends.
-TEST(Hex6,  { cell n; return Utils::ReadHex("E!", n) == OK && n == 0xE; })
-TEST(Hex7,  { cell n; return Utils::ReadHex("B)", n) == OK && n == 0xB; })
-TEST(Hex8,  { cell n; return Utils::ReadHex("CG", n) == OK && n == 0xC; })
+TEST(Hex6,  { cell n; return Utils::ReadHex(S"E!", n) == OK && n == 0xE; })
+TEST(Hex7,  { cell n; return Utils::ReadHex(S"B)", n) == OK && n == 0xB; })
+TEST(Hex8,  { cell n; return Utils::ReadHex(S"CG", n) == OK && n == 0xC; })
 // Test invalid formats.
-TEST(Hex9,  { cell n; return Utils::ReadHex("G", n) == ERROR_NAN; })
-TEST(Hex10, { cell n; return Utils::ReadHex("(6)", n) == ERROR_NAN; })
-TEST(Hex11, { cell n; return Utils::ReadHex("-8", n) == ERROR_NAN; })
-TEST(Hex12, { cell n; return Utils::ReadHex("", n) == ERROR_NAN; })
+TEST(Hex9,  { cell n; return Utils::ReadHex(S"G", n) == ERROR_NAN; })
+TEST(Hex10, { cell n; return Utils::ReadHex(S"(6)", n) == ERROR_NAN; })
+TEST(Hex11, { cell n; return Utils::ReadHex(S"-8", n) == ERROR_NAN; })
+TEST(Hex12, { cell n; return Utils::ReadHex(S"", n) == ERROR_NAN; })
 // Test all digits.
-TEST(Hex13, { cell n; return Utils::ReadHex("0x123", n) == OK && n == 0x123; })
-TEST(Hex14, { cell n; return Utils::ReadHex("0x456", n) == OK && n == 0x456; })
-TEST(Hex15, { cell n; return Utils::ReadHex("0x789", n) == OK && n == 0x789; })
-TEST(Hex16, { cell n; return Utils::ReadHex("0x0AB", n) == OK && n == 0x0AB; })
-TEST(Hex17, { cell n; return Utils::ReadHex("0xCDE", n) == OK && n == 0xCDE; })
-TEST(Hex18, { cell n; return Utils::ReadHex("0xFab", n) == OK && n == 0xFab; })
-TEST(Hex19, { cell n; return Utils::ReadHex("0xcde", n) == OK && n == 0xcde; })
-TEST(Hex19, { cell n; return Utils::ReadHex("0xf77", n) == OK && n == 0xf77; })
+TEST(Hex13, { cell n; return Utils::ReadHex(S"0x123", n) == OK && n == 0x123; })
+TEST(Hex14, { cell n; return Utils::ReadHex(S"0x456", n) == OK && n == 0x456; })
+TEST(Hex15, { cell n; return Utils::ReadHex(S"0x789", n) == OK && n == 0x789; })
+TEST(Hex16, { cell n; return Utils::ReadHex(S"0x0AB", n) == OK && n == 0x0AB; })
+TEST(Hex17, { cell n; return Utils::ReadHex(S"0xCDE", n) == OK && n == 0xCDE; })
+TEST(Hex18, { cell n; return Utils::ReadHex(S"0xFab", n) == OK && n == 0xFab; })
+TEST(Hex19, { cell n; return Utils::ReadHex(S"0xcde", n) == OK && n == 0xcde; })
+TEST(Hex20, { cell n; return Utils::ReadHex(S"0xf77", n) == OK && n == 0xf77; })
 
-static error_t
+error_t
 	Utils::
 	ReadBinary(char const * & input, cell & n)
 {
-	cell
-		cur;
 	n = 0;
 	if (*input == '\0') return ERROR_NAN;
 	else if (*input == '0')
@@ -232,7 +199,7 @@ static error_t
 		{
 			++input;
 		}
-		else if (*input != '0' && *input != '1') return 0;
+		else if (*input != '0' && *input != '1') return OK;
 	}
 	if (*input == '0' || *input == '1')
 	{
@@ -256,24 +223,25 @@ static error_t
 };
 
 // Test valid formats (annoyingly, C doesn't support 0b0 syntax).
-TEST(Bin0,  { cell n; return Utils::ReadBinary("0", n) == OK && n == 0; })
-TEST(Bin1,  { cell n; return Utils::ReadBinary("1", n) == OK && n == 1; })
-TEST(Bin2,  { cell n; return Utils::ReadBinary("010101", n) == OK && n == 21; })
-TEST(Bin3,  { cell n; return Utils::ReadBinary("111000", n) == OK && n == 56; })
-TEST(Bin4a, { cell n; return Utils::ReadBinary("0b000111", n) == OK && n == 7; })
-TEST(Bin4b, { cell n; return Utils::ReadBinary("0B11", n) == OK && n == 3; })
-TEST(Bin5a, { cell n; return Utils::ReadBinary("10121", n) == OK && n == 5; })
+TEST(Bin0,  { cell n; return Utils::ReadBinary(S"0", n) == OK && n == 0; })
+TEST(Bin1,  { cell n; return Utils::ReadBinary(S"1", n) == OK && n == 1; })
+TEST(Bin2,  { cell n; return Utils::ReadBinary(S"010101", n) == OK && n == 21; })
+TEST(Bin3,  { cell n; return Utils::ReadBinary(S"111000", n) == OK && n == 56; })
+TEST(Bin4a, { cell n; return Utils::ReadBinary(S"0b000111", n) == OK && n == 7; })
+TEST(Bin4b, { cell n; return Utils::ReadBinary(S"0B11", n) == OK && n == 3; })
+TEST(Bin5a, { cell n; return Utils::ReadBinary(S"10121", n) == OK && n == 5; })
 // Test ends.
-TEST(Bin6,  { cell n; return Utils::ReadBinary("1100!", n) == OK && n == 12; })
-TEST(Bin7,  { cell n; return Utils::ReadBinary("0b1001)", n) == OK && n == 6; })
-TEST(Bin8,  { cell n; return Utils::ReadBinary("0B1111G", n) == OK && n == 15; })
+TEST(Bin6,  { cell n; return Utils::ReadBinary(S"1100!", n) == OK && n == 12; })
+TEST(Bin7,  { cell n; return Utils::ReadBinary(S"0b1001)", n) == OK && n == 9; })
+TEST(Bin7b, { cell n; return Utils::ReadBinary(S"0b0110)", n) == OK && n == 6; })
+TEST(Bin8,  { cell n; return Utils::ReadBinary(S"0B1111G", n) == OK && n == 15; })
 // Test invalid formats.
-TEST(Bin9,  { cell n; return Utils::ReadBinary("2", n) == ERROR_NAN; })
-TEST(Bin10, { cell n; return Utils::ReadBinary("(1)", n) == ERROR_NAN; })
-TEST(Bin11, { cell n; return Utils::ReadBinary("-0", n) == ERROR_NAN; })
-TEST(Bin12, { cell n; return Utils::ReadBinary("", n) == ERROR_NAN; })
+TEST(Bin9,  { cell n; return Utils::ReadBinary(S"2", n) == ERROR_NAN; })
+TEST(Bin10, { cell n; return Utils::ReadBinary(S"(1)", n) == ERROR_NAN; })
+TEST(Bin11, { cell n; return Utils::ReadBinary(S"-0", n) == ERROR_NAN; })
+TEST(Bin12, { cell n; return Utils::ReadBinary(S"", n) == ERROR_NAN; })
 
-static error_t
+error_t
 	Utils::
 	ReadChar(char const * & input, cell & n)
 {
@@ -293,19 +261,17 @@ static error_t
 				case 'b':  n = '\b'; break;
 				case 'v':  n = '\v'; break;
 				case 'r':  n = '\r'; break;
-				case '0' .. '7':
+				case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
 				{
-					error_t
-						error = Utils::ReadOctal(input, n);
-					if (error != OK) return error;
+					// Can't fail, already validated.
+					Utils::ReadOctal(input, n);
 					if (*input == ';') ++input;
 					return OK;
 				}
-				case 'x', 'X':
+				case 'x': case 'X':
 				{
 					++input;
-					error_t
-						error = Utils::ReadHex(input, n);
+					TRY(Utils::ReadHex(input, n));
 					if (*input == ';') ++input;
 					return OK;
 				}
@@ -317,7 +283,7 @@ static error_t
 	return OK;
 }
 
-virtual error_t
+error_t
 	Utils::
 	ReadCharEx(char const * & input, cell & n)
 {
@@ -329,7 +295,7 @@ virtual error_t
 		quotes = true;
 		++input;
 	}
-	TRY(Utils::ReadChar(input, result));
+	TRY(Utils::ReadChar(input, n));
 	if (quotes)
 	{
 		FAIL(*input == '\'', ERROR_UNCLOSED_CHARACTER_LITERAL);
@@ -338,30 +304,30 @@ virtual error_t
 	return OK;
 };
 
-TEST(Char0,  { cell n; return Utils::ReadChar("0", n) == OK && n == '0'; })
-TEST(Char1,  { cell n; return Utils::ReadChar("x", n) == OK && n == 'x'; })
-TEST(Char2a, { cell n; return Utils::ReadChar("\\\\", n) == OK && n == '\\'; })
-TEST(Char2b, { cell n; return Utils::ReadChar("\\n", n) == OK && n == '\n'; })
-TEST(Char2c, { cell n; return Utils::ReadChar("\\0", n) == OK && n == 0; })
-TEST(Char2d, { cell n; return Utils::ReadChar("\\55", n) == OK && n == 055; })
-TEST(Char2e, { cell n; return Utils::ReadChar("\\55;", n) == OK && n == 055; })
-TEST(Char2f, { cell n; return Utils::ReadChar("\\'", n) == OK && n == '\''; })
-TEST(Char2g, { cell n; return Utils::ReadChar("\\", n) == ERROR_INVALID_ESCAPE; })
-TEST(Char2h, { cell n; return Utils::ReadChar("\\y", n) == ERROR_INVALID_ESCAPE; })
-TEST(Char2i, { cell n; return Utils::ReadChar("\\9", n) == ERROR_INVALID_ESCAPE; })
-TEST(Char2j, { cell n; return Utils::ReadChar("\\x;", n) == ERROR_NAN; })
-TEST(Char2k, { cell n; return Utils::ReadChar("\\xH;", n) == ERROR_NAN; })
-TEST(Char3,  { cell n; return Utils::ReadChar("'g'", n) == OK && n == '\''; })
-TEST(Char4a, { cell n; return Utils::ReadCharEx("'g'", n) == OK && n == 'g'; })
-TEST(Char4b, { cell n; return Utils::ReadCharEx("g", n) == OK && n == 'g'; })
-TEST(Char4c, { cell n; return Utils::ReadCharEx("", n) == ERROR_NAN; })
-TEST(Char4d, { cell n; return Utils::ReadCharEx("\\'", n) == OK && n == '\''; })
-TEST(Char4e, { cell n; return Utils::ReadCharEx("'\\''", n) == OK && n == '\''; })
-TEST(Char4f, { cell n; return Utils::ReadCharEx("\\'j'", n) == OK && n == '\''; })
-
+TEST(Char0,  { cell n; return Utils::ReadChar(S"0", n) == OK && n == '0'; })
+TEST(Char1,  { cell n; return Utils::ReadChar(S"x", n) == OK && n == 'x'; })
+TEST(Char2a, { cell n; return Utils::ReadChar(S"\\\\", n) == OK && n == '\\'; })
+TEST(Char2b, { cell n; return Utils::ReadChar(S"\\n", n) == OK && n == '\n'; })
+TEST(Char2c, { cell n; return Utils::ReadChar(S"\\0", n) == OK && n == 0; })
+TEST(Char2d, { cell n; return Utils::ReadChar(S"\\55", n) == OK && n == 055; })
+TEST(Char2e, { cell n; return Utils::ReadChar(S"\\55;", n) == OK && n == 055; })
+TEST(Char2f, { cell n; return Utils::ReadChar(S"\\'", n) == OK && n == '\''; })
+TEST(Char2g, { cell n; return Utils::ReadChar(S"\\", n) == ERROR_INVALID_ESCAPE; })
+TEST(Char2h, { cell n; return Utils::ReadChar(S"\\y", n) == ERROR_INVALID_ESCAPE; })
+TEST(Char2i, { cell n; return Utils::ReadChar(S"\\9", n) == ERROR_INVALID_ESCAPE; })
+TEST(Char2j, { cell n; return Utils::ReadChar(S"\\x;", n) == ERROR_NAN; })
+TEST(Char2k, { cell n; return Utils::ReadChar(S"\\xH;", n) == ERROR_NAN; })
+TEST(Char3,  { cell n; return Utils::ReadChar(S"'g'", n) == OK && n == '\''; })
+TEST(Char4a, { cell n; return Utils::ReadCharEx(S"'g'", n) == OK && n == 'g'; })
+TEST(Char4b, { cell n; return Utils::ReadCharEx(S"g", n) == OK && n == 'g'; })
+TEST(Char4c, { cell n; return Utils::ReadCharEx(S"", n) == ERROR_NAN; })
+TEST(Char4d, { cell n; return Utils::ReadCharEx(S"\\'", n) == OK && n == '\''; })
+TEST(Char4e, { cell n; return Utils::ReadCharEx(S"'\\''", n) == OK && n == '\''; })
+TEST(Char4f, { cell n; return Utils::ReadCharEx(S"\\'j'", n) == OK && n == '\''; })
+/*
 error_t
 	Utils::
-	GetDefaults(char const * & input, char ** optional)
+	GetDefaults(char const * & input, char const ** optional)
 {
 	// Capital letter - read in the deafult.
 	// Skip the opening bracket.
@@ -386,80 +352,84 @@ error_t
 	}
 	return OK;
 }
-
+*/
 error_t
 	Utils::
-	GetArraySize(char const * & input, size_t * size, bool empty = false)
+	GetArraySize(char const * & input, int * size, bool empty)
 {
 	NEXT(input, '[', ERROR_NO_ARRAY_START);
 	// Capital letter - read in the deafult.
+	*size = -1;
 	// Skip the opening bracket.
 	if (*input == '*')
 	{
-		*size = -1;
 		++input;
 	}
 	else
 	{
+		cell
+			dest;
 		error_t
-			error = ReadDecimal(input, *size);
+			error = ReadDecimal(input, dest);
+		*size = dest;
 		if (error == ERROR_NAN)
 		{
 			if (!empty) return ERROR_NAN;
-			NEXT(input, ']', ERROR_UNCLOSED_ARRAY);
+			if (!*input) return ERROR_NO_ARRAY_END;
+			NEXT(input, ']', ERROR_NAN);
 			return OK;
 		}
 		else
 		{
 			TRY(error);
-			if (size < 1) return ERROR_INVALID_ARRAY_SIZE;
+			if (*size < 1) return ERROR_INVALID_ARRAY_SIZE;
 		}
 	}
-	NEXT(input, ']', ERROR_UNCLOSED_ARRAY);
+	NEXT(input, ']', ERROR_NO_ARRAY_END);
 	return OK;
 }
 
 // No size given.
-TEST(Arr0a, { size_t size; return Utils::GetArraySize("[]", &size) == ERROR_NAN; })
-TEST(Arr0b, { size_t size; return Utils::GetArraySize("[]", &size, false) == ERROR_NAN; })
-TEST(Arr0c, { size_t size; return Utils::GetArraySize("[]", &size, true) == OK && size == 0; })
-TEST(Arr0d, { size_t size; return Utils::GetArraySize("[ ]", &size) == ERROR_NAN; })
-TEST(Arr0e, { size_t size; return Utils::GetArraySize("[ ]", &size, false) == ERROR_NAN; })
-TEST(Arr0f, { size_t size; return Utils::GetArraySize("[ ]", &size, true) == OK && size == 0; })
-TEST(Arr0g, { size_t size; return Utils::GetArraySize("[  ]", &size) == ERROR_NAN; })
-TEST(Arr0h, { size_t size; return Utils::GetArraySize("[  ]", &size, false) == ERROR_NAN; })
-TEST(Arr0i, { size_t size; return Utils::GetArraySize("[  ]", &size, true) == OK && size == 0; })
+TEST(Arr0a, { int size; return Utils::GetArraySize(S"[]", &size) == ERROR_NAN; })
+TEST(Arr0b, { int size; return Utils::GetArraySize(S"[]", &size, false) == ERROR_NAN; })
+TEST(Arr0c, { int size; return Utils::GetArraySize(S"[]", &size, true) == OK && size == 0; })
+TEST(Arr0d, { int size; return Utils::GetArraySize(S"[ ]", &size) == ERROR_NAN; })
+TEST(Arr0e, { int size; return Utils::GetArraySize(S"[ ]", &size, false) == ERROR_NAN; })
+TEST(Arr0f, { int size; return Utils::GetArraySize(S"[ ]", &size, true) == OK && size == 0; })
+TEST(Arr0g, { int size; return Utils::GetArraySize(S"[  ]", &size) == ERROR_NAN; })
+TEST(Arr0h, { int size; return Utils::GetArraySize(S"[  ]", &size, false) == ERROR_NAN; })
+TEST(Arr0i, { int size; return Utils::GetArraySize(S"[  ]", &size, true) == OK && size == 0; })
 // Failures.
-TEST(Arr1a, { size_t size; return Utils::GetArraySize("[5", &size) == ERROR_UNCLOSED_ARRAY; })
-TEST(Arr1b, { size_t size; return Utils::GetArraySize("[", &size) == ERROR_NAN; })
-TEST(Arr1b, { size_t size; return Utils::GetArraySize("[", &size, true) == ERROR_UNCLOSED_ARRAY; })
-TEST(Arr1c, { size_t size; return Utils::GetArraySize("[g]", &size) == ERROR_NAN; })
-TEST(Arr1d, { size_t size; return Utils::GetArraySize("[g]", &size, true) == ERROR_NAN; })
-TEST(Arr1e, { size_t size; return Utils::GetArraySize("", &size, true) == ERROR_NO_ARRAY_START; })
-TEST(Arr1f, { size_t size; return Utils::GetArraySize("5", &size, true) == ERROR_NO_ARRAY_START; })
-TEST(Arr1g, { size_t size; return Utils::GetArraySize("]", &size, true) == ERROR_NO_ARRAY_START; })
+TEST(Arr1a, { int size; return Utils::GetArraySize(S"[5", &size) == ERROR_NO_ARRAY_END; })
+TEST(Arr1b, { int size; return Utils::GetArraySize(S"[", &size) == ERROR_NAN; })
+TEST(Arr1h, { int size; return Utils::GetArraySize(S"[", &size, true) == ERROR_NO_ARRAY_END; })
+TEST(Arr1c, { int size; return Utils::GetArraySize(S"[g]", &size) == ERROR_NAN; })
+TEST(Arr1d, { int size; return Utils::GetArraySize(S"[g]", &size, true) == ERROR_NAN; }) // FAILED.
+TEST(Arr1e, { int size; return Utils::GetArraySize(S"", &size, true) == ERROR_NO_ARRAY_START; })
+TEST(Arr1f, { int size; return Utils::GetArraySize(S"5", &size, true) == ERROR_NO_ARRAY_START; })
+TEST(Arr1g, { int size; return Utils::GetArraySize(S"]", &size, true) == ERROR_NO_ARRAY_START; })
 // OK.
-TEST(Arr2, { size_t size; return Utils::GetArraySize("[42]", &size) == OK && size == 42; })
-TEST(Arr2a, { size_t size; return Utils::GetArraySize(" [43]", &size) == OK && size == 43; })
-TEST(Arr2b, { size_t size; return Utils::GetArraySize("  [44]", &size) == OK && size == 44; })
-TEST(Arr2c, { size_t size; return Utils::GetArraySize("   [45]", &size) == OK && size == 45; })
-TEST(Arr3, { size_t size; return Utils::GetArraySize("[ 11 ]", &size) == OK && size == 11; })
-TEST(Arr4, { size_t size; return Utils::GetArraySize("[6 ]", &size) == OK && size == 6; })
-TEST(Arr5, { size_t size; return Utils::GetArraySize("[ 7]", &size) == OK && size == 7; })
-TEST(Arr6, { size_t size; return Utils::GetArraySize("[  8888  ]", &size) == OK && size == 8888; })
+TEST(Arr2,  { int size; return Utils::GetArraySize(S"[42]", &size) == OK && size == 42; })
+TEST(Arr2a, { int size; return Utils::GetArraySize(S" [43]", &size) == OK && size == 43; })
+TEST(Arr2b, { int size; return Utils::GetArraySize(S"  [44]", &size) == OK && size == 44; })
+TEST(Arr2c, { int size; return Utils::GetArraySize(S"   [45]", &size) == OK && size == 45; })
+TEST(Arr3,  { int size; return Utils::GetArraySize(S"[ 11 ]", &size) == OK && size == 11; })
+TEST(Arr4,  { int size; return Utils::GetArraySize(S"[6 ]", &size) == OK && size == 6; })
+TEST(Arr5,  { int size; return Utils::GetArraySize(S"[ 7]", &size) == OK && size == 7; })
+TEST(Arr6,  { int size; return Utils::GetArraySize(S"[  8888  ]", &size) == OK && size == 8888; })
 // More fails.
-TEST(Arr7, { size_t size; return Utils::GetArraySize("[3 9]", &size) == ERROR_UNCLOSED_ARRAY; })
-TEST(Arr8a, { size_t size; return Utils::GetArraySize("[0]", &size) == ERROR_INVALID_ARRAY_SIZE; })
-TEST(Arr9a, { size_t size; return Utils::GetArraySize("[-05]", &size) == ERROR_INVALID_ARRAY_SIZE; })
-TEST(Arr8b, { size_t size; return Utils::GetArraySize("[-90]", &size, true) == ERROR_INVALID_ARRAY_SIZE; })
-TEST(Arr9b, { size_t size; return Utils::GetArraySize("[-111]", &size, true) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(Arr7,  { int size; return Utils::GetArraySize(S"[3 9]", &size) == ERROR_NO_ARRAY_END; })
+TEST(Arr8a, { int size; return Utils::GetArraySize(S"[0]", &size) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(Arr9a, { int size; return Utils::GetArraySize(S"[-05]", &size) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(Arr8b, { int size; return Utils::GetArraySize(S"[-90]", &size, true) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(Arr9b, { int size; return Utils::GetArraySize(S"[-111]", &size, true) == ERROR_INVALID_ARRAY_SIZE; })
 // Variable.
-TEST(Arr10a, { size_t size; return Utils::GetArraySize("[*]", &size) == OK && size == -1; })
-TEST(Arr10b, { size_t size; return Utils::GetArraySize("[ *]", &size, true) == OK && size == -1; })
-TEST(Arr10c, { size_t size; return Utils::GetArraySize("[* ]", &size) == OK && size == -1; })
-TEST(Arr10d, { size_t size; return Utils::GetArraySize("[ * ]", &size, true) == OK && size == -1; })
-TEST(Arr10e, { size_t size; return Utils::GetArraySize(" [*]", &size) == OK && size == -1; })
-TEST(Arr10f, { size_t size; return Utils::GetArraySize(" [ * ]", &size, true) == OK && size == -1; })
+TEST(Arr10a, { int size; return Utils::GetArraySize(S"[*]", &size) == OK && size == -1; })
+TEST(Arr10b, { int size; return Utils::GetArraySize(S"[ *]", &size, true) == OK && size == -1; })
+TEST(Arr10c, { int size; return Utils::GetArraySize(S"[* ]", &size) == OK && size == -1; })
+TEST(Arr10d, { int size; return Utils::GetArraySize(S"[ * ]", &size, true) == OK && size == -1; })
+TEST(Arr10e, { int size; return Utils::GetArraySize(S" [*]", &size) == OK && size == -1; })
+TEST(Arr10f, { int size; return Utils::GetArraySize(S" [ * ]", &size, true) == OK && size == -1; })
 
 // Was used by the "NEXT" macro, but now isn't.
 error_t
@@ -490,7 +460,7 @@ error_t
 	return OK;
 };
 
-bool
+/*bool
 	Matches(char const * input, char const * val, char const * & output)
 {
 	while (*val)
@@ -540,7 +510,7 @@ error_t
 	return
 		Utils::NextChar(input, start) ||
 		Utils::Get(read, input, dest, end);
-};
+};*/
 
 void
 	Utils::
