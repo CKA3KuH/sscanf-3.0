@@ -1,4 +1,4 @@
-#include "specifiers/array_specifier.hpp"
+/*#include "specifiers/array_specifier.hpp"
 #include "specifiers/delim_specifier.hpp"
 #include "specifiers/group_specifiers.hpp"
 #include "specifiers/enum_specifier.hpp" // Relies on group_specifiers.
@@ -7,5 +7,5 @@
 #include "specifiers/player_specifier.hpp"
 #include "specifiers/simple_specifiers.hpp"
 #include "specifiers/string_specifier.hpp"
-#include "specifiers/trivial_specifiers.hpp"
+#include "specifiers/trivial_specifiers.hpp"*/
 

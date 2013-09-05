@@ -16,6 +16,8 @@ enum E_SSCANF_ERROR
 	ERROR_NO_ARRAY_END, // No ] on arrays.
 	ERROR_INVALID_ARRAY_SIZE, // [] or [0].
 	ERROR_EXPECTED_A_GOT_B, // Expected "A", got "B".
+	ERROR_RAN_TRIVIAL, // Called "Run" on a trivial specifier.
+	ERROR_INVALID_MEMORY, // There's no valid memory location available;
 };
 
 typedef
@@ -24,27 +26,18 @@ typedef
 
 #ifdef SSCANF_DEBUG
 	#include <stdio.h>
+	#include <sstream>
+	
+	typedef
+		std::basic_stringstream<char>
+		ss;
 	
 	class SscanfTest
 	{
 	protected:
 		// cons
-			SscanfTest(char * name); //, std::function<bool()> func);
+			SscanfTest(char * name);
 	};
-	
-	// The constructor runs the test, so just declaring this runs it.
-/*	#define TEST(name, code)                         \
-		class Test##name : public SscanfTest {       \
-		public: Test##name() : SscanfTest(#name) {}; \
-		protected: virtual bool Run() code;          \
-		}; Test##name gTest##name;*/
-	
-	// The constructor runs the test, so just declaring this runs it.
-	/*#define TEST(name, ...)                         \
-		class Test##name : public SscanfTest {       \
-		public: Test##name() :                       \
-			SscanfTest(#name, [] () -> bool __VA_ARGS__) {};        \
-		}; Test##name gTest##name;*/
 	
 	#define TEST(name, ...)                         \
 		class Test##name : public SscanfTest {      \
@@ -55,13 +48,37 @@ typedef
 			};                                      \
 		}; Test##name gTest##name;
 	
+	// This declares a test for a class.
+	#define CTEST(name, ...)                        \
+		public: friend class Test##name;            \
+		class Test##name : public SscanfTest {      \
+		public: Test##name() :                      \
+			SscanfTest(#name) {                     \
+				auto f = [] () -> bool __VA_ARGS__; \
+				if (!f()) printf(" - FAILED!\n\n"); \
+			};                                      \
+		}; static Test##name mTest##name;
+	
+	// This defines the memory for a class test.
+	#define ITEST(cls, name)                        \
+		cls::Test##name cls::mTest##name;
+	
 	class SscanfConverter
 	{
 	public:
+		// Operator to convert a literal string to a reference to a constant 
+		// string pointer.  There is no automatic conversion, and we can't
+		// define a cast operator for that, so we use a prefix like "L" ("S").
 		char const * &
 			operator=(const char * str)
 		{
 			m_var = str;
+			return m_var;
+		};
+		
+		char const *
+			GetCurPos() const
+		{
 			return m_var;
 		};
 		
@@ -72,14 +89,17 @@ typedef
 	
 	extern SscanfConverter TESTER;
 	
+	#define CUR TESTER.GetCurPos()
+	
 	#define S TESTER=
 #else
-	#define TEST(name, code)
+	#define TEST(name, ...)
+	#define CTEST(name, ...)
+	#define ITEST(cls, name)
 #endif
 
 // TODO better.
 #define FAIL(test, error, ...) do { if (!(test)) return (error); } while (false)
 #define TRY(n) do { error_t _error = (n); if (_error != OK) return _error; } while (false)
-//#define NEXT(i,c,e) do { if (NextChar(i, c) != OK) return e; } while (false)
 #define NEXT(i, c, e) do { Utils::SkipWhitespace(i); if (*i++ != c) return (e); Utils::SkipWhitespace(i); } while (false)
 

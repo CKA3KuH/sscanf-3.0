@@ -1,12 +1,7 @@
 #pragma once
 
-template <class T>
-inline error_t
-	DoClone(Specifier ** dest, T const * that)
-{
-	*dest = new T(*that);
-	return OK;
-}
+#include "errors.h"
+#include <iostream>
 
 #define CLONE()                         \
 	virtual error_t                     \
@@ -33,8 +28,8 @@ public:
 	// "Run" takes a "Environment" parameter.  This includes the current memory
 	// system to use, what delimiters and options are active, and which parser
 	// is being used to separate up the string.
-	virtual error_t
-		Run(char const * & input, Environment & env) = 0;
+	//virtual error_t
+	//	Run(char const * & input, Environment & env) = 0;
 	
 	// Can't have a default for this because the class is pure virtual.
 	virtual error_t
@@ -44,16 +39,16 @@ public:
 		SetOptional() { m_optional = true; };
 	
 	bool
-		GetOptional() { return m_optional; } const;
+		GetOptional() const { return m_optional; };
 	
 	void
 		SetSkip() { m_minus = true; };
 	
 	bool
-		GetSkip() { return m_minus; } const;
+		GetSkip() const { return m_minus; };
 	
 	char
-		GetSpecifier() { return m_specifier; } const;
+		GetSpecifier() const { return m_specifier; };
 	
 	virtual int
 		GetMemoryUsage() { return 1; };
@@ -89,7 +84,7 @@ private:
 	// cons
 		Specifier()
 	:
-		m_specifier(s),
+		m_specifier('\0'),
 		m_minus(false),
 		m_optional(false)
 	{
@@ -104,6 +99,14 @@ private:
 		// Doesn't have to exist (i.e. "T()").
 		m_optional;
 	
-	friend class MinusSpecifier;
+	//friend class MinusSpecifier;
+};
+
+template <class T>
+inline error_t
+	DoClone(Specifier ** dest, T const * that)
+{
+	*dest = new T(*that);
+	return OK;
 };
 
