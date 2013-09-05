@@ -58,3 +58,5 @@ tests-af8a0b7f.ipch
 /sscanf.vcxproj.user
 /tests.vcxproj.user
 /sscanf.sdf
+*.obj
+/Debug/tests.vcxprojResolveAssemblyReference.cache

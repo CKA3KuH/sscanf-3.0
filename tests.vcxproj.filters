@@ -25,6 +25,15 @@
     <ClCompile Include="src\errors.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\specifiers.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk\amxplugin.cpp">
+      <Filter>sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk\amx\getch.c">
+      <Filter>sdk\amx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
@@ -34,5 +43,53 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="test.h" />
+    <ClInclude Include="src\specifiers.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\trivial_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\simple_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\player_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\other_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\numeric_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\group_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\enum_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\delim_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\array_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\string_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\plugincommon.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\plugin.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\amx\amx.h">
+      <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\amx\getch.h">
+      <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\amx\sclinux.h">
+      <Filter>sdk\amx</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

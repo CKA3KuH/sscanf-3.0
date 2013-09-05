@@ -49,7 +49,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;SSCANF_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;SSCANF_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -64,7 +64,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;SSCANF_DEBUG=1;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;SSCANF_DEBUG=1;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -74,12 +74,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="sdk\amxplugin.cpp" />
+    <ClCompile Include="sdk\amx\getch.c" />
     <ClCompile Include="src\errors.cpp" />
+    <ClCompile Include="src\specifiers.cpp" />
     <ClCompile Include="src\utils.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sdk\amx\amx.h" />
+    <ClInclude Include="sdk\amx\getch.h" />
+    <ClInclude Include="sdk\amx\sclinux.h" />
+    <ClInclude Include="sdk\plugin.h" />
+    <ClInclude Include="sdk\plugincommon.h" />
     <ClInclude Include="src\errors.h" />
+    <ClInclude Include="src\specifiers.h" />
+    <ClInclude Include="src\specifiers\array_specifier.h" />
+    <ClInclude Include="src\specifiers\delim_specifier.h" />
+    <ClInclude Include="src\specifiers\enum_specifier.h" />
+    <ClInclude Include="src\specifiers\group_specifiers.h" />
+    <ClInclude Include="src\specifiers\numeric_specifier.h" />
+    <ClInclude Include="src\specifiers\other_specifiers.h" />
+    <ClInclude Include="src\specifiers\player_specifier.h" />
+    <ClInclude Include="src\specifiers\simple_specifiers.h" />
+    <ClInclude Include="src\specifiers\string_specifier.h" />
+    <ClInclude Include="src\specifiers\trivial_specifiers.h" />
     <ClInclude Include="src\utils.h" />
     <ClInclude Include="test.h" />
   </ItemGroup>
