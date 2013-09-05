@@ -23,6 +23,9 @@ public:
 		ReadBinary(char const * & input, cell & n);
 	
 	static error_t
+		ReadNum(char const * & input, cell & n);
+	
+	static error_t
 		ReadChar(char const * & input, cell & n);
 	
 	static error_t

@@ -77,6 +77,12 @@ private:
 	CTEST(Simple9j, { cell dest; SimpleSpecifier that('o', &Utils::ReadOctal);   return that.Run(S"054", DefaultEnvironment::Get(&dest)) == OK && dest == 054; })
 	CTEST(Simple9g, { cell dest; SimpleSpecifier that('b', &Utils::ReadBinary);  return that.Run(S"010101", DefaultEnvironment::Get(&dest)) == OK && dest == 21; })
 	CTEST(Simple9k, { cell dest; SimpleSpecifier that('b', &Utils::ReadBinary);  return that.Run(S"0b101010", DefaultEnvironment::Get(&dest)) == OK && dest == 42; })
+	CTEST(Simple9r, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"1234", DefaultEnvironment::Get(&dest)) == OK && dest == 1234; })
+	CTEST(Simple9m, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"01234", DefaultEnvironment::Get(&dest)) == OK && dest == 668; })
+	CTEST(Simple9n, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0b9876", DefaultEnvironment::Get(&dest)) == OK && dest == 0xB9876; })
+	CTEST(Simple9o, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0x01234", DefaultEnvironment::Get(&dest)) == OK && dest == 0x1234; })
+	CTEST(Simple9p, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0b1110", DefaultEnvironment::Get(&dest)) == OK && dest == 14; })
+	CTEST(Simple9q, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0b0", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
 	
 	// Valid formats.
 	CTEST(Simple1a, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i") == OK; })
@@ -103,28 +109,16 @@ private:
 	CTEST(Simple1s, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(1234)") == OK && that.m_default == 1234; })
 	CTEST(Simple1t, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(595)") == OK && that.m_default == 595; })
 	CTEST(Simple1u, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(0x11)") == ERROR_NO_DEAFULT_END; })
-	// Older tests from mid-development...
-	/*CTEST(Simple1d, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I()") == OK && *CUR == '\0'; })
-	CTEST(Simple1h, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I ()") == OK && *CUR == '\0'; })
-	CTEST(Simple1f, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I( )") == OK && *CUR == '\0'; })
-	CTEST(Simple1g, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I ( )  ") == OK && *CUR == '\0'; })
-	CTEST(Simple1e, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(") == ERROR_NO_DEAFULT_END; })*/
 	
 	CTEST(Simple2a, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"d") == OK; })
 	CTEST(Simple2b, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"i") == ERROR_EXPECTED_A_GOT_B; })
 	CTEST(Simple2c, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D") == ERROR_NO_DEAFULT_START; })
-	/*CTEST(Simple2d, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D()") == OK; })
-	CTEST(Simple2e, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D(") == ERROR_NO_DEAFULT_END; })
-	CTEST(Simple2f, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D   (") == ERROR_NO_DEAFULT_END; })
-	CTEST(Simple2g, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D  (") == ERROR_NO_DEAFULT_END; })*/
 	
 	CTEST(Simple3a, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"c") == OK; })
 	CTEST(Simple3b, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"v") == ERROR_EXPECTED_A_GOT_B; })
 	CTEST(Simple3c, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C") == ERROR_NO_DEAFULT_START; })
 	CTEST(Simple3f, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C ") == ERROR_NO_DEAFULT_START; })
 	CTEST(Simple3g, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C  ") == ERROR_NO_DEAFULT_START; })
-	/*CTEST(Simple3d, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C()") == OK; })
-	CTEST(Simple3e, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C(") == ERROR_NO_DEAFULT_END; })*/
 	
 	// Valid copies.
 	// Note that some of these leak memory - don't use in production...  "p" is
@@ -144,7 +138,6 @@ private:
 	CTEST(Simple5a, { SimpleSpecifier that('x', &Utils::ReadHex); ss s; return dynamic_cast<ss &>(s << that).str() == "x"; })
 	
 	// Test chains (sort of).
-	
 	CTEST(Simple6a,
 	{
 		SimpleSpecifier that('x', &Utils::ReadHex);
@@ -168,19 +161,11 @@ private:
 		cell
 			d[2];
 		char
-			str[] = "'-'\r\n'\\\\'";
+			str[] = "'-'\r\n\\\\";
 		char const *
 			s = str;
 		DefaultEnvironment &
 			env = DefaultEnvironment::Get(d);
-		// printf("d = 0x%08x\n", (int)d);
-		// if (that.Run(s, env) != OK) printf("f1\n");
-		// else {printf("f4: %c %c, %s\n", d[0], d[1], s);if (Utils::SkipWhitespaceOK(s) != OK) printf("f2\n");
-		// else if (that.Run(s, env) != OK) printf("f3\n");
-		// else if (d[0] != '-' || d[1] != '\\') printf("f4: %c %c\n", d[0], d[1]);
-		// else return true;}
-		// delete [] d;
-		// return false;
 		return
 			that.Run(s, env) == OK &&
 			Utils::SkipWhitespaceOK(s) == OK &&
@@ -216,16 +201,10 @@ ITEST(SimpleSpecifier, Simple1w)
 ITEST(SimpleSpecifier, Simple2a)
 ITEST(SimpleSpecifier, Simple2b)
 ITEST(SimpleSpecifier, Simple2c)
-// ITEST(SimpleSpecifier, Simple2d)
-// ITEST(SimpleSpecifier, Simple2e)
-// ITEST(SimpleSpecifier, Simple2f)
-// ITEST(SimpleSpecifier, Simple2g)
 
 ITEST(SimpleSpecifier, Simple3a)
 ITEST(SimpleSpecifier, Simple3b)
 ITEST(SimpleSpecifier, Simple3c)
-// ITEST(SimpleSpecifier, Simple3d)
-// ITEST(SimpleSpecifier, Simple3e)
 ITEST(SimpleSpecifier, Simple3f)
 ITEST(SimpleSpecifier, Simple3g)
 
@@ -254,6 +233,12 @@ ITEST(SimpleSpecifier, Simple9f)
 ITEST(SimpleSpecifier, Simple9j)
 ITEST(SimpleSpecifier, Simple9g)
 ITEST(SimpleSpecifier, Simple9k)
+ITEST(SimpleSpecifier, Simple9m)
+ITEST(SimpleSpecifier, Simple9n)
+ITEST(SimpleSpecifier, Simple9o)
+ITEST(SimpleSpecifier, Simple9p)
+ITEST(SimpleSpecifier, Simple9q)
+ITEST(SimpleSpecifier, Simple9r)
 
 ITEST(SimpleSpecifier, Simple6a)
 ITEST(SimpleSpecifier, Simple6b)
