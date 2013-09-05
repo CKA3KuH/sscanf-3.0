@@ -175,6 +175,3 @@ private:
 		m_storage;
 };
 
-DefaultEnvironment
-	DefaultEnvironment::m_defaultEnvironment;
-

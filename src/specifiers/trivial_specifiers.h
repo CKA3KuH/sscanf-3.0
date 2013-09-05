@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\specifiers.h"
+#include "../specifiers.h"
 
 class TrivialSpecifier : public Specifier
 {

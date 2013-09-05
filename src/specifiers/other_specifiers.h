@@ -1,6 +1,9 @@
 #pragma once
 
-class LiteralSpecifier : public Specifier
+#include "../specifiers.h"
+#include "../utils.h"
+
+/*class LiteralSpecifier : public Specifier
 {
 public:
 	// cons
@@ -276,5 +279,80 @@ private:
 	
 	int
 		m_count;
+};*/
+
+
+class NumSpecifier : public Specifier
+{
+public:
+	// cons
+		NumSpecifier()
+	:
+		Specifier('n'),
+		m_default(0)
+	{
+	};
+	
+	// cons
+		NumSpecifier(char c)
+	:
+		Specifier(c),
+		m_default(0)
+	{
+	};
+	
+	virtual error_t
+		ReadToken(char const * & input)
+	{
+		// Check this has the correct specifier.
+		FAIL((*input | 0x20) == GetSpecifier(), ERROR_EXPECTED_A_GOT_B, GetSpecifier(), *input);
+		// Check if this is upper-case (optional).
+		if (*input++ != GetSpecifier())
+		{
+			SetOptional();
+			// Capital letter - read in the deafult.
+			// Skip the opening bracket.
+			NEXT(input, '(', ERROR_NO_DEAFULT_START);
+			TRY(Run(input, DefaultEnvironment::Get(&m_default)));
+			// Skip the closing bracket.
+			NEXT(input, ')', ERROR_NO_DEAFULT_END);
+		}
+		return OK;
+	};
+	
+	CLONE();
+	
+	virtual error_t
+		Run(char const * & input, Environment & env)
+	{
+		cell
+			dest;
+		TRY(ReadNum(input, dest));
+		return env.SetNextValue(dest);
+		//return env.SkipDelimiters();
+	};
+	
+private:
+	cell
+		m_default;
+	
+	CTEST(NumXr, { cell dest; NumSpecifier that; return that.Run(S"1234", DefaultEnvironment::Get(&dest)) == OK && dest == 1234; })
+	CTEST(NumXm, { cell dest; NumSpecifier that; return that.Run(S"01234", DefaultEnvironment::Get(&dest)) == OK && dest == 668; })
+	CTEST(NumXn, { cell dest; NumSpecifier that; return that.Run(S"0b9876", DefaultEnvironment::Get(&dest)) == OK && dest == 0xB9876; })
+	CTEST(NumXo, { cell dest; NumSpecifier that; return that.Run(S"0x01234", DefaultEnvironment::Get(&dest)) == OK && dest == 0x1234; })
+	CTEST(NumXp, { cell dest; NumSpecifier that; return that.Run(S"0b1110", DefaultEnvironment::Get(&dest)) == OK && dest == 14; })
+	CTEST(NumXq, { cell dest; NumSpecifier that; return that.Run(S"0b0", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
+	CTEST(NumXs, { cell dest; NumSpecifier that; return that.Run(S"-56", DefaultEnvironment::Get(&dest)) == OK && dest == -56; })
+	CTEST(NumXt, { cell dest; NumSpecifier that; return that.Run(S"G", DefaultEnvironment::Get(&dest)) == ERROR_NAN; })
+	CTEST(NumXu, { cell dest; NumSpecifier that; return that.Run(S"-a", DefaultEnvironment::Get(&dest)) == ERROR_NAN; })
+	
+#if defined SSCANF_DEBUG
+public:
+	static error_t
+		ReadNum(char const * & input, cell & n);
+#else
+	static inline error_t
+		ReadNum(char const * & input, cell & n);
+#endif
 };
 

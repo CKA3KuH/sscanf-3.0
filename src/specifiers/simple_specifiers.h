@@ -1,9 +1,9 @@
 #pragma once
 
-#include "..\specifiers.h"
+#include "../specifiers.h"
 
 #ifdef SSCANF_DEBUG
-	#include "..\utils.h"
+	#include "../utils.h"
 #endif
 
 class SimpleSpecifier : public Specifier
@@ -77,12 +77,6 @@ private:
 	CTEST(Simple9j, { cell dest; SimpleSpecifier that('o', &Utils::ReadOctal);   return that.Run(S"054", DefaultEnvironment::Get(&dest)) == OK && dest == 054; })
 	CTEST(Simple9g, { cell dest; SimpleSpecifier that('b', &Utils::ReadBinary);  return that.Run(S"010101", DefaultEnvironment::Get(&dest)) == OK && dest == 21; })
 	CTEST(Simple9k, { cell dest; SimpleSpecifier that('b', &Utils::ReadBinary);  return that.Run(S"0b101010", DefaultEnvironment::Get(&dest)) == OK && dest == 42; })
-	CTEST(Simple9r, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"1234", DefaultEnvironment::Get(&dest)) == OK && dest == 1234; })
-	CTEST(Simple9m, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"01234", DefaultEnvironment::Get(&dest)) == OK && dest == 668; })
-	CTEST(Simple9n, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0b9876", DefaultEnvironment::Get(&dest)) == OK && dest == 0xB9876; })
-	CTEST(Simple9o, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0x01234", DefaultEnvironment::Get(&dest)) == OK && dest == 0x1234; })
-	CTEST(Simple9p, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0b1110", DefaultEnvironment::Get(&dest)) == OK && dest == 14; })
-	CTEST(Simple9q, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum);  return that.Run(S"0b0", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
 	
 	// Valid formats.
 	CTEST(Simple1a, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i") == OK; })
@@ -233,12 +227,6 @@ ITEST(SimpleSpecifier, Simple9f)
 ITEST(SimpleSpecifier, Simple9j)
 ITEST(SimpleSpecifier, Simple9g)
 ITEST(SimpleSpecifier, Simple9k)
-ITEST(SimpleSpecifier, Simple9m)
-ITEST(SimpleSpecifier, Simple9n)
-ITEST(SimpleSpecifier, Simple9o)
-ITEST(SimpleSpecifier, Simple9p)
-ITEST(SimpleSpecifier, Simple9q)
-ITEST(SimpleSpecifier, Simple9r)
 
 ITEST(SimpleSpecifier, Simple6a)
 ITEST(SimpleSpecifier, Simple6b)

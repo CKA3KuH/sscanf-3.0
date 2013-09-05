@@ -1,7 +1,7 @@
 #pragma once
 
 #include <malloc.h>
-#include "..\sdk\plugin.h"
+#include "../sdk/plugin.h"
 #include "errors.h"
 
 typedef

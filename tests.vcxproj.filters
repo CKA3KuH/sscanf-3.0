@@ -34,6 +34,12 @@
     <ClCompile Include="sdk\amx\getch.c">
       <Filter>sdk\amx</Filter>
     </ClCompile>
+    <ClCompile Include="src\specifiers\other_specifiers.cpp">
+      <Filter>src\specifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\environment.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
@@ -90,6 +96,9 @@
     </ClInclude>
     <ClInclude Include="sdk\amx\sclinux.h">
       <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\environment.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
