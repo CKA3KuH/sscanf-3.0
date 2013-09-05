@@ -2,6 +2,7 @@
 
 #include "errors.h"
 #include <iostream>
+#include "environment.h"
 
 #define CLONE()                         \
 	virtual error_t                     \
@@ -28,8 +29,8 @@ public:
 	// "Run" takes a "Environment" parameter.  This includes the current memory
 	// system to use, what delimiters and options are active, and which parser
 	// is being used to separate up the string.
-	//virtual error_t
-	//	Run(char const * & input, Environment & env) = 0;
+	virtual error_t
+		Run(char const * & input, Environment & env) = 0;
 	
 	// Can't have a default for this because the class is pure virtual.
 	virtual error_t

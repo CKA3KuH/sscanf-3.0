@@ -12,6 +12,7 @@ public:
 	{
 	};
 	
+	// Mostly just simple pass-throughs to the memory subsystem.
 	error_t
 		GetNextPointer(cell ** const ret) { return m_memory->GetNextPointer(ret); }
 	
@@ -49,6 +50,8 @@ private:
 		m_memory;
 };
 
+// The "default" environment is the code used to read in default values from the
+// format specifier itself and store the values in the classes themselves.
 class DefaultEnvironment : public Environment
 {
 private:

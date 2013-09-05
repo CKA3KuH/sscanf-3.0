@@ -27,12 +27,12 @@ public:
 		return OK;
 	};
 	
-	//virtual error_t
-	//	Run(char const * & input, Memory * memory, Delimiters * delimiters)
-	//{
-	//	// This shouldn't ever by run.
-	//	return ERROR_RAN_TRIVIAL;
-	//};
+	virtual error_t
+		Run(char const * & input, Environment & env)
+	{
+		// This shouldn't ever by run.
+		return ERROR_RAN_TRIVIAL;
+	};
 	
 	virtual int
 		GetMemoryUsage() { return 0; };
@@ -72,6 +72,8 @@ private:
 	CTEST(Trivial7a, { TrivialSpecifier that('+'); that.ReadToken(S"+"); return *CUR == '\0'; })
 	CTEST(Trivial7b, { TrivialSpecifier that('+'); that.ReadToken(S"++"); return *CUR == '+'; })
 	CTEST(Trivial7c, { TrivialSpecifier that('+'); that.ReadToken(S"+|"); return *CUR == '|'; })
+	
+	CTEST(Trivial81, { TrivialSpecifier that('+'); return that.Run(S"+|", DefaultEnvironment::Get(nullptr)) == ERROR_RAN_TRIVIAL; })
 };
 
 ITEST(TrivialSpecifier, Trivial1)
@@ -95,4 +97,6 @@ ITEST(TrivialSpecifier, Trivial6d)
 ITEST(TrivialSpecifier, Trivial7a)
 ITEST(TrivialSpecifier, Trivial7b)
 ITEST(TrivialSpecifier, Trivial7c)
+
+ITEST(TrivialSpecifier, Trivial81)
 
