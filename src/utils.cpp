@@ -519,3 +519,11 @@ void
 	while ('\0' < *input && *input < '!') ++input;
 };
 
+error_t
+	Utils::
+	SkipWhitespaceOK(char const * & input)
+{
+	while ('\0' < *input && *input < '!') ++input;
+	return OK;
+};
+

@@ -84,6 +84,7 @@ private:
 			SetNextValue(cell const val, size_t idx = 0)
 		{
 			if (!idx) ++m_save;
+			//printf("Write to: 0x%08x\n", (int)m_save);
 			// No increments in here.
 			m_save[idx] = val;
 			return OK;

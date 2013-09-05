@@ -142,6 +142,51 @@ private:
 	
 	// Valid renders.
 	CTEST(Simple5a, { SimpleSpecifier that('x', &Utils::ReadHex); ss s; return dynamic_cast<ss &>(s << that).str() == "x"; })
+	
+	// Test chains (sort of).
+	
+	CTEST(Simple6a,
+	{
+		SimpleSpecifier that('x', &Utils::ReadHex);
+		cell
+			d0,
+			d1;
+		char
+			str[] = "0x543 \t 78AA";
+		char const *
+			s = str;
+		return
+			that.Run(s, DefaultEnvironment::Get(&d0)) == OK &&
+			Utils::SkipWhitespaceOK(s) == OK &&
+			that.Run(s, DefaultEnvironment::Get(&d1)) == OK &&
+			d0 == 0x543 && d1 == 0x78AA;
+	})
+	
+	CTEST(Simple6b,
+	{
+		SimpleSpecifier that('c', &Utils::ReadCharEx);
+		cell
+			d[2];
+		char
+			str[] = "'-'\r\n'\\\\'";
+		char const *
+			s = str;
+		DefaultEnvironment &
+			env = DefaultEnvironment::Get(d);
+		// printf("d = 0x%08x\n", (int)d);
+		// if (that.Run(s, env) != OK) printf("f1\n");
+		// else {printf("f4: %c %c, %s\n", d[0], d[1], s);if (Utils::SkipWhitespaceOK(s) != OK) printf("f2\n");
+		// else if (that.Run(s, env) != OK) printf("f3\n");
+		// else if (d[0] != '-' || d[1] != '\\') printf("f4: %c %c\n", d[0], d[1]);
+		// else return true;}
+		// delete [] d;
+		// return false;
+		return
+			that.Run(s, env) == OK &&
+			Utils::SkipWhitespaceOK(s) == OK &&
+			that.Run(s, env) == OK &&
+			d[0] == '-' && d[1] == '\\';
+	})
 };
 
 ITEST(SimpleSpecifier, Simple1a)
@@ -209,4 +254,7 @@ ITEST(SimpleSpecifier, Simple9f)
 ITEST(SimpleSpecifier, Simple9j)
 ITEST(SimpleSpecifier, Simple9g)
 ITEST(SimpleSpecifier, Simple9k)
+
+ITEST(SimpleSpecifier, Simple6a)
+ITEST(SimpleSpecifier, Simple6b)
 

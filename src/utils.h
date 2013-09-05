@@ -42,5 +42,8 @@ public:
 	
 	static void
 		SkipWhitespace(char const * & input);
+	
+	static error_t
+		SkipWhitespaceOK(char const * & input);
 };
 
