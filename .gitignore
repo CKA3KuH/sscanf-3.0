@@ -60,3 +60,4 @@ tests-af8a0b7f.ipch
 /sscanf.sdf
 *.obj
 /Debug/tests.vcxprojResolveAssemblyReference.cache
+/src/defaults.h
