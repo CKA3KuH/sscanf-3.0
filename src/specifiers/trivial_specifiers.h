@@ -76,27 +76,3 @@ private:
 	CTEST(Trivial81, { TrivialSpecifier that('+'); return that.Run(S"+|", DefaultEnvironment::Get(nullptr)) == ERROR_RAN_TRIVIAL; })
 };
 
-ITEST(TrivialSpecifier, Trivial1)
-ITEST(TrivialSpecifier, Trivial2a)
-ITEST(TrivialSpecifier, Trivial2b)
-ITEST(TrivialSpecifier, Trivial3a)
-ITEST(TrivialSpecifier, Trivial3b)
-ITEST(TrivialSpecifier, Trivial3c)
-ITEST(TrivialSpecifier, Trivial3d)
-ITEST(TrivialSpecifier, Trivial3e)
-ITEST(TrivialSpecifier, Trivial4)
-ITEST(TrivialSpecifier, Trivial5a)
-ITEST(TrivialSpecifier, Trivial5b)
-ITEST(TrivialSpecifier, Trivial5c)
-ITEST(TrivialSpecifier, Trivial5d)
-ITEST(TrivialSpecifier, Trivial6a)
-ITEST(TrivialSpecifier, Trivial6b)
-ITEST(TrivialSpecifier, Trivial6c)
-ITEST(TrivialSpecifier, Trivial6d)
-
-ITEST(TrivialSpecifier, Trivial7a)
-ITEST(TrivialSpecifier, Trivial7b)
-ITEST(TrivialSpecifier, Trivial7c)
-
-ITEST(TrivialSpecifier, Trivial81)
-

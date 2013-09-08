@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../specifiers.h"
+#include <list>
+
 // This is the class representing some collection of multiple other specifiers.
 class SpecifierGroup : public Specifier
 {
@@ -43,6 +46,7 @@ private:
 		m_children;
 };
 
+/*
 class QuietGroup : public SpecifierGroup
 {
 public:
@@ -117,6 +121,7 @@ ReadToken_new_quiet:
 		return out << "}";
 	};
 };
+*/
 
 // This is just a set of specifiers, to be run one after the other - simple as!
 class SequentialGroup : public SpecifierGroup
@@ -225,6 +230,7 @@ public:
 		{
 			if (child->GetSpecifier() == '|')
 			{
+				MinusSpecifier::DeleteTrivial(child);
 ReadToken_new_alt:
 				alt = new SequentialGroup();
 				Add(alt);
@@ -351,6 +357,7 @@ public:
 		{
 			if (child->GetSpecifier() == '|')
 			{
+				MinusSpecifier::DeleteTrivial(child);
 ReadToken_new_alt:
 				alt = new SequentialGroup();
 				Add(alt);

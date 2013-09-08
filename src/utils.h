@@ -48,5 +48,11 @@ public:
 	
 	static error_t
 		SkipWhitespaceOK(char const * & input);
+	
+	static error_t
+		GetStringLength(char const * start, char * delims, size_t * len);
+	
+	static error_t
+		GetString(cell * dest, char const * & input, size_t len);
 };
 

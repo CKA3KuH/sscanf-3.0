@@ -17,7 +17,7 @@ error_t
 	}
 	else return ERROR_NAN;
 	return OK;
-};
+}
 
 // Test valid formats.
 TEST(Oct0,  { cell n; return Utils::ReadOctal(S"0", n) == OK && n == 0; })
@@ -57,7 +57,7 @@ error_t
 	else return ERROR_NAN;
 	if (neg) n = -n;
 	return OK;
-};
+}
 
 // Test valid formats.
 TEST(Dec0,  { cell n; return Utils::ReadDecimal(S"0", n) == OK && n == 0; })
@@ -152,8 +152,9 @@ error_t
 		}
 		while ((cur = GetHexCharacter(*input++)) != -1);
 	}
+	--input;
 	return OK;
-};
+}
 
 // Test valid formats.
 TEST(Hex0,  { cell n; return Utils::ReadHex(S"0", n) == OK && n == 0; })
@@ -220,7 +221,7 @@ error_t
 		}
 	}
 	return ERROR_NAN;
-};
+}
 
 // Test valid formats (annoyingly, C doesn't support 0b0 syntax).
 TEST(Bin0,  { cell n; return Utils::ReadBinary(S"0", n) == OK && n == 0; })
@@ -302,7 +303,7 @@ error_t
 		++input;
 	}
 	return OK;
-};
+}
 
 TEST(Char0,  { cell n; return Utils::ReadChar(S"0", n) == OK && n == '0'; })
 TEST(Char1,  { cell n; return Utils::ReadChar(S"x", n) == OK && n == 'x'; })
@@ -324,35 +325,7 @@ TEST(Char4c, { cell n; return Utils::ReadCharEx(S"", n) == ERROR_NAN; })
 TEST(Char4d, { cell n; return Utils::ReadCharEx(S"\\'", n) == OK && n == '\''; })
 TEST(Char4e, { cell n; return Utils::ReadCharEx(S"'\\''", n) == OK && n == '\''; })
 TEST(Char4f, { cell n; return Utils::ReadCharEx(S"\\'j'", n) == OK && n == '\''; })
-/*
-error_t
-	Utils::
-	GetDefaults(char const * & input, char const ** optional)
-{
-	// Capital letter - read in the deafult.
-	// Skip the opening bracket.
-	NEXT(input, '(', ERROR_NO_DEAFULT_START);
-	*optional = input;
-	static char const * const
-		sDelimList[] = {")", nullptr};
-	size_t
-		len = Utils::GetStringLength(input, sDelimList);
-	input += len;
-	if (*input == ')')
-	{
-		*const_cast<char *>(input) = '\0';
-		++input;
-		Utils::SkipWhitespace(input);
-	}
-	else
-	{
-		*const_cast<char *>(input) = '\0';
-		++input;
-		NEXT(input, ')', ERROR_NO_DEAFULT_END);
-	}
-	return OK;
-}
-*/
+
 error_t
 	Utils::
 	GetArraySize(char const * & input, int * size, bool empty)
@@ -441,7 +414,7 @@ error_t
 	++input;
 	Utils::SkipWhitespace(input);
 	return OK;
-};
+}
 
 error_t
 	Utils::
@@ -458,7 +431,7 @@ error_t
 	}
 	Utils::SkipWhitespace(input);
 	return OK;
-};
+}
 
 /*bool
 	Matches(char const * input, char const * val, char const * & output)
@@ -516,14 +489,97 @@ void
 	Utils::
 	SkipWhitespace(char const * & input)
 {
-	while ('\0' < *input && *input < '!') ++input;
-};
+	while ('\0' < (unsigned char)*input && (unsigned char)*input <= ' ') ++input;
+}
 
 error_t
 	Utils::
 	SkipWhitespaceOK(char const * & input)
 {
-	while ('\0' < *input && *input < '!') ++input;
+	while ('\0' < (unsigned char)*input && (unsigned char)*input <= ' ') ++input;
 	return OK;
-};
+}
+
+bool
+	IsIn(char c, char * ls)
+{
+	while (*ls) if (c == *ls++) return true;
+	return false;
+}
+
+error_t
+	Utils::
+	GetStringLength(char const * start, char * delims, size_t * len)
+{
+	Utils::SkipWhitespace(start);
+	cell
+		ch;
+	size_t
+		tlen = 0,
+		possibleLen = 0;
+	while (*start)
+	{
+		if (IsIn(*start, delims)) break;
+		else if ((unsigned char)*start > ' ')
+		{
+			TRY(ReadChar(start, ch));
+			possibleLen = ++tlen;
+		}
+		else
+		{
+			++start;
+			++tlen;
+		}
+	}
+	FAIL(*start, ERROR_NO_STRING_END);
+	// Skip trailing spaces.
+	*len = possibleLen;
+	return OK;
+}
+
+TEST(GetStringLen1,  { size_t len; return Utils::GetStringLength("'", "'", &len) == OK && len == 0; })
+TEST(GetStringLen2,  { size_t len; return Utils::GetStringLength("aa'", "'", &len) == OK && len == 2; })
+TEST(GetStringLen3,  { size_t len; return Utils::GetStringLength("aaabb2 '", "'", &len) == OK && len == 6; })
+TEST(GetStringLen4,  { size_t len; return Utils::GetStringLength("aaabb2 #'", "'", &len) == OK && len == 8; })
+TEST(GetStringLen5,  { size_t len; return Utils::GetStringLength("  342t'", "'", &len) == OK && len == 4; })
+TEST(GetStringLen6,  { size_t len; return Utils::GetStringLength(" etl4  #  '", "'", &len) == OK && len == 7; })
+TEST(GetStringLen7,  { size_t len; return Utils::GetStringLength(" et\\'4  #  '", "'", &len) == OK && len == 7; })
+TEST(GetStringLen8,  { size_t len; return Utils::GetStringLength("\\\\'", "'", &len) == OK && len == 1; })
+TEST(GetStringLen9,  { size_t len; return Utils::GetStringLength("\\\"'", "'", &len) == OK && len == 1; })
+TEST(GetStringLen10, { size_t len; return Utils::GetStringLength("\"  g '", "'", &len) == OK && len == 4; })
+TEST(GetStringLen11, { size_t len; return Utils::GetStringLength("asd", "'", &len) == ERROR_NO_STRING_END; })
+TEST(GetStringLen12, { size_t len; return Utils::GetStringLength("\\x56;'", "'", &len) == OK && len == 1; })
+TEST(GetStringLen13, { size_t len; return Utils::GetStringLength("\\123'", "'", &len) == OK && len == 1; })
+// Valid octal number.
+TEST(GetStringLen14, { size_t len; return Utils::GetStringLength("\\476;'", "'", &len) == OK && len == 1; })
+// Not a valid octal number, just return the rest as characters.
+TEST(GetStringLen15, { size_t len; return Utils::GetStringLength("\\478;'", "'", &len) == OK && len == 3; })
+
+error_t
+	Utils::
+	GetString(cell * dest, char const * & input, size_t len)
+{
+	Utils::SkipWhitespace(input);
+	size_t
+		read = 0;
+	while (*input && read < len)
+	{
+		TRY(Utils::ReadChar(input, *dest));
+		++read;
+		++dest;
+	}
+	*dest = '\0';
+	return OK;
+}
+
+TEST(GetString1a, { cell dest[28]; return Utils::GetString(dest, S"  a\\\\\\\' \\x1235D;'", 5) == OK; })
+TEST(GetString1e, { cell dest[28]; Utils::GetString(dest, S"  a\\\\\\\' \\x1235D;'", 5); return true; })
+TEST(GetString1b, { cell dest[28]; return Utils::GetString(dest, S"  a\\\\\\\' \\x1235D;'", 5) == OK && *CUR == '\''; })
+TEST(GetString1c, { cell dest[28]; return Utils::GetString(dest, S"  a\\\\\\\' \\x1235D;'", 5) == OK &&
+	dest[0] == 'a' &&
+	dest[1] == '\\' &&
+	dest[2] == '\''; })
+TEST(GetString1d, { cell dest[28]; return Utils::GetString(dest, S"  a\\\\\\\' \\x1235D;'", 5) == OK &&
+	dest[3] == ' ' &&
+	dest[4] == 0x1235D; })
 

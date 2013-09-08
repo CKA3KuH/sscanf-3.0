@@ -5,7 +5,7 @@
 	SscanfTest::
 	SscanfTest(char * name)
 {
-	printf("Running: %s...\n", name);
+	//printf("Running: %s...\n", name);
 }
 
 SscanfConverter TESTER;

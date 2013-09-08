@@ -1,6 +1,7 @@
 #pragma once
 
 #include "memory.h"
+#include <map>
 
 class Environment
 {
@@ -8,28 +9,41 @@ public:
 	// cons
 		Environment(Memory * m) //, Delimiter * d, Options * o)
 	:
-		m_memory(m)
+		m_memory(m),
+		m_options()
 	{
 	};
 	
 	// Mostly just simple pass-throughs to the memory subsystem.
 	error_t
-		GetNextPointer(cell ** const ret) { return m_memory->GetNextPointer(ret); }
+		GetNextPointer(cell ** const ret) { return m_memory->GetNextPointer(ret); };
 	
 	error_t
-		GetNextValue(cell * const ret) { return m_memory->GetNextValue(ret); }
+		GetNextValue(cell * const ret) { return m_memory->GetNextValue(ret); };
 	
 	error_t
-		GetNextString(char * ret, size_t len) { return m_memory->GetNextString(ret, len); }
+		GetNextString(char * ret, size_t len) { return m_memory->GetNextString(ret, len); };
 	
 	error_t
-		SetNextValue(cell const val, size_t idx = 0) { return m_memory->SetNextValue(val, idx); }
+		SetNextValue(cell const val, size_t idx = 0) { return m_memory->SetNextValue(val, idx); };
 	
 	error_t
-		SetNextString(char const * val, size_t idx = 0, bool pack = false) { return m_memory->SetNextString(val, idx, pack); }
+		SetNextString(char const * val, size_t idx = 0, bool pack = false) { return m_memory->SetNextString(val, idx, pack); };
 	
 	error_t
-		Skip(size_t n) { return m_memory->Skip(n); }
+		Skip(size_t n) { return m_memory->Skip(n); };
+	
+	void
+		SetOption(char const * name, int const value)
+	{
+		m_options[std::string(name)] = value;
+	};
+	
+	int
+		GetOption(char const * name)
+	{
+		return m_options[std::string(name)];
+	};
 	
 	// Not used by this environment.  They should throw an error, but we control
 	// when and where this one is used, so I can just never use it like that.
@@ -48,6 +62,9 @@ public:
 private:
 	Memory *
 		m_memory;
+	
+	std::map<std::string, int>
+		m_options;
 };
 
 // The "default" environment is the code used to read in default values from the

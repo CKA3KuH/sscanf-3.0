@@ -3,7 +3,7 @@
 #include "../specifiers.h"
 #include "../utils.h"
 
-/*class LiteralSpecifier : public Specifier
+class LiteralSpecifier : public Specifier
 {
 public:
 	// cons
@@ -24,8 +24,8 @@ public:
 	{
 		if (that.m_literal)
 		{
-			m_literal = new char [m_length + 1];
-			strcpy(m_literal, that.m_literal);
+			m_literal = new cell [m_length + 1];
+			memcpy(m_literal, that.m_literal, (m_length + 1) * sizeof (cell));
 		}
 	};
 	
@@ -45,10 +45,6 @@ public:
 		// acceptable if you want to put in the extra effort.
 		char
 			start = *input++;
-		// Only end on the correct close.
-		static char * const
-			sDelimList[] = {"?", nullptr};
-		sDelimList[0][0] = start;
 		// This MUST be done because the reader ALWAYS skips leading spaces, so
 		// there's no way to detect them because the have already been passed
 		// over by the time this class' "Run" method is called.  I could back-
@@ -56,25 +52,45 @@ public:
 		// start of the string and give a buffer underflow (or worse, crash).
 		// Shame C strings aren't doubly NULL terminated (maybe mine will be)...
 		// Whitespace should be EXPLICITLY escaped.
-		m_length = Utils::GetStringLength(input, sDelimList);
-		FAIL(*(input + m_length) == start, ERROR_UNCLOSED_STRING_LITERAL);
+		char
+			delims[2] = { start, '\0' };
+		TRY(Utils::GetStringLength(input, delims, &m_length));
+		FAIL(m_length, ERROR_NO_STRING_LITERAL);
 		// This might throw, but we catch that generically later.
-		m_literal = new char [m_length + 1];
-		Utils::GetString(input, m_literal, m_length + 1);
-		// Skip the end character.
-		++input;
+		m_literal = new cell [m_length + 1];
+		// Currently has no failure modes when called after "GetStringLength".
+		Utils::GetString(m_literal, input, m_length);
+		// Skip the end character and whitespace.
+		NEXT(input, start, ERROR_NO_STRING_END);
 		return OK;
 	};
 	
 	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
-		size_t
-			len = strlen(input);
-		if (len < m_length) return ERROR_NO_STRING_MATCH;
-		if (strncmp(input, m_literal, m_length)) return ERROR_NO_STRING_MATCH;
-		input += m_length;
-		return OK;
+		if (!m_literal) return OK;
+		char const *
+			end = input + strlen(input) - m_length;
+		while (input <= end)
+		{
+			if (LiteralSpecifier::Matches(input, m_literal, m_length))
+			{
+				input += m_length;
+				return OK;
+			}
+			++input;
+		}
+		return ERROR_NO_STRING_MATCH;
+	};
+	
+	static bool
+		Matches(char const * one, cell const * two, size_t len)
+	{
+		while (len--)
+		{
+			if (*one++ != *two++) return false;
+		}
+		return true;
 	};
 	
 	virtual int
@@ -84,8 +100,19 @@ private:
 	size_t
 		m_length;
 	
-	char *
+	cell *
 		m_literal;
+	
+	CTEST(LitSpec0a, { LiteralSpecifier ls; return ls.ReadToken(S"'hello") == ERROR_NO_STRING_END; })
+	CTEST(LitSpec0b, { LiteralSpecifier ls; return ls.ReadToken(S"'   hello   \\'") == ERROR_NO_STRING_END; })
+	CTEST(LitSpec1,  { LiteralSpecifier ls; return ls.ReadToken(S"'hello'") == OK && ls.Run(S"hello there", DefaultEnvironment::Get(nullptr)) == OK; })
+	CTEST(LitSpec2,  { LiteralSpecifier ls; return ls.ReadToken(S"'hello'") == OK && ls.Run(S"there", DefaultEnvironment::Get(nullptr)) == ERROR_NO_STRING_MATCH; })
+	CTEST(LitSpec3,  { LiteralSpecifier ls; return ls.ReadToken(S"'   hello'") == OK && ls.Run(S"hello there", DefaultEnvironment::Get(nullptr)) == OK; })
+	CTEST(LitSpec4,  { LiteralSpecifier ls; return ls.ReadToken(S"'  hello  '") == OK && ls.Run(S"hello there", DefaultEnvironment::Get(nullptr)) == OK; })
+	CTEST(LitSpec5,  { LiteralSpecifier ls; return ls.ReadToken(S"'  hello  '") == OK && ls.Run(S" therehello", DefaultEnvironment::Get(nullptr)) == OK; })
+	CTEST(LitSpec6,  { LiteralSpecifier ls; return ls.ReadToken(S"'  hello  '") == OK && ls.Run(S"woop helloSS", DefaultEnvironment::Get(nullptr)) == OK && *CUR == 'S'; })
+	CTEST(LitSpec7,  { LiteralSpecifier ls; return ls.ReadToken(S"'  hello  '") == OK && ls.Run(S"helhello__Q", DefaultEnvironment::Get(nullptr)) == OK && *CUR == '_'; })
+	CTEST(LitSpec8,  { LiteralSpecifier ls; return ls.ReadToken(S"'  hello  '") == OK && ls.Run(S"hell", DefaultEnvironment::Get(nullptr)) == ERROR_NO_STRING_MATCH; })
 };
 
 class OptionSpecifier : public Specifier
@@ -96,7 +123,7 @@ public:
 	:
 		Specifier('?'),
 		m_option(nullptr),
-		m_value(nullptr)
+		m_value(0)
 	{
 	};
 	
@@ -105,25 +132,19 @@ public:
 	:
 		Specifier(that),
 		m_option(nullptr),
-		m_value(nullptr)
+		m_value(0)
 	{
 		if (that.m_option)
 		{
 			m_option = new char [strlen(that.m_option) + 1];
 			strcpy(m_option, that.m_option);
 		}
-		if (that.m_value)
-		{
-			m_value = new char [strlen(that.m_value) + 1];
-			strcpy(m_value, that.m_value);
-		}
 	};
 	
 	virtual // cons
 		~OptionSpecifier()
 	{
-		delete m_option;
-		delete m_value;
+		delete [] m_option;
 	};
 	
 	CLONE();
@@ -133,48 +154,42 @@ public:
 	{
 		// Skip the "?".
 		++input;
-		static char const * const
-			sDelimList[] = {">", "=", nullptr};
 		// Skip the "<".
 		NEXT(input, '<', ERROR_NO_PARAM_START);
 		size_t
-			lenName = Utils::GetStringLength(input, sDelimList);
-		char *
-			ptr = input + lenName;
+			lenName;
+		if (Utils::GetStringLength(input, ">=", &lenName) == ERROR_NO_STRING_END) return ERROR_NO_PARAM_END;
 		// Check if there is a value for the option.
-		Utils::SkipWhitespace(ptr);
-		if (*ptr == '=')
+		m_option = new char [lenName + 1];
+		cell *
+			dest;
+		try
+		{
+			dest = new cell [lenName + 1];
+		}
+		catch (...)
+		{
+			delete [] m_option;
+			throw;
+		}
+		// Copy the data.
+		Utils::GetString(dest, input, lenName);
+		Utils::SkipWhitespace(input);
+		m_option[lenName] = '\0';
+		while (lenName--)
+		{
+			m_option[lenName] = (char)dest[lenName];
+		}
+		delete [] dest;
+		// Finish (skip the ">").
+		if (*input == '=')
 		{
 			// Get the length of the value.
-			++ptr;
-			size_t
-				lenValue = Utils::GetStringLength(ptr, sDelimList);
-			// Check that the option is ended correctly.
-			char *
-				ptr2 = ptr + lenValue;
-			NEXT(ptr2, '>', ERROR_NO_PARAM_END);
-			// Allocate a single block of memory.
-			m_option = new char [lenName + lenValue + 2];
-			m_value = m_option + lenName + 1;
-			// Copy the data.
-			Utils::GetString(input, m_option, lenName + 1);
-			Utils::GetString(ptr, m_value, lenValue + 1);
-			// Finish.
-			input = ptr2;
+			++input;
+			Utils::SkipWhitespace(input);
+			Utils::ReadDecimal(input, m_value);
 		}
-		else if (*ptr == '>')
-		{
-			// Does not have a value.
-			m_option = new char [lenName + 1];
-			// Copy the data.
-			Utils::GetString(input, m_option, lenName + 1);
-			// Finish (skip the ">").
-			input = ptr + 1;
-		}
-		else
-		{
-			FAIL(false, ERROR_NO_PARAM_END);
-		}
+		NEXT(input, '>', ERROR_NO_PARAM_END);
 		// Option neatly stored for later!
 		return OK;
 	};
@@ -183,25 +198,28 @@ public:
 		Run(char const * & input, Environment & env)
 	{
 		// So that the environment doesn't try to skip two sets of delimiters.
-		env.ZeroRead();
-		return env.SetOption(m_option, m_value);
+		//env.ZeroRead();
+		env.SetOption(m_option, m_value);
+		return OK;
 	};
 	
 	virtual int
 		GetMemoryUsage() { return 0; };
 	
 private:
-	size_t
-		m_length;
-	
 	char *
 		m_option;
 	
-	char *
+	cell
 		m_value;
+	
+	CTEST(Opt1, { OptionSpecifier opt; return opt.ReadToken(S"?<MOO>") == OK && !strcmp(opt.m_option, "MOO"); })
+	CTEST(Opt2, { OptionSpecifier opt; return opt.ReadToken(S"?<HAHAH=56>") == OK && !strcmp(opt.m_option, "HAHAH") && opt.m_value == 56; })
+	CTEST(Opt3, { OptionSpecifier opt; return opt.ReadToken(S"?") == ERROR_NO_PARAM_START; })
+	CTEST(Opt4, { OptionSpecifier opt; return opt.ReadToken(S"?<") == ERROR_NO_PARAM_END; })
 };
 
-class MinusSpecifier : public Specifier
+/*class MinusSpecifier : public Specifier
 {
 public:
 	// cons

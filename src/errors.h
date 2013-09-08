@@ -14,10 +14,17 @@ enum E_SSCANF_ERROR
 	ERROR_NO_DEAFULT_END, // No ) on defaults.
 	ERROR_NO_ARRAY_START, // No [ on arrays.
 	ERROR_NO_ARRAY_END, // No ] on arrays.
+	ERROR_NO_PARAM_START, // No < on parameters.
+	ERROR_NO_PARAM_END, // No > on parameters.
+	ERROR_NO_STRING_END, // No ' on stringa.
 	ERROR_INVALID_ARRAY_SIZE, // [] or [0].
 	ERROR_EXPECTED_A_GOT_B, // Expected "A", got "B".
 	ERROR_RAN_TRIVIAL, // Called "Run" on a trivial specifier.
 	ERROR_INVALID_MEMORY, // There's no valid memory location available;
+	ERROR_NO_STRING_MATCH, // Can't match "'xyz'".
+	ERROR_NO_STRING_LITERAL, // Found '' as a string literal.
+	ERROR_UNKNOWN_SPECIFIER, // Found an unrecognised letter.
+	ERROR_DUPLICATE_SPECIFIER, // Two things the same.
 };
 
 typedef
@@ -44,7 +51,7 @@ typedef
 		public: Test##name() :                      \
 			SscanfTest(#name) {                     \
 				auto f = [] () -> bool __VA_ARGS__; \
-				if (!f()) printf(" - FAILED!\n\n"); \
+				if (!f()) printf(#name " - FAILED!\n\n"); \
 			};                                      \
 		}; Test##name gTest##name;
 	
@@ -55,7 +62,7 @@ typedef
 		public: Test##name() :                      \
 			SscanfTest(#name) {                     \
 				auto f = [] () -> bool __VA_ARGS__; \
-				if (!f()) printf(" - FAILED!\n\n"); \
+				if (!f()) printf(#name " - FAILED!\n\n"); \
 			};                                      \
 		}; static Test##name mTest##name;
 	

@@ -40,6 +40,9 @@
     <ClCompile Include="src\environment.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\parser.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
@@ -98,6 +101,9 @@
       <Filter>sdk\amx</Filter>
     </ClInclude>
     <ClInclude Include="src\environment.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

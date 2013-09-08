@@ -1,9 +1,26 @@
+#include "parser.h"
+#include "utils.h"
+#include "specifiers.h"
+/*#include "specifiers/array_specifier.hpp"
+#include "specifiers/delim_specifier.hpp"
+#include "specifiers/group_specifiers.hpp"
+#include "specifiers/enum_specifier.hpp" // Relies on group_specifiers.
+#include "specifiers/player_specifier.hpp"
+#include "specifiers/string_specifier.hpp"*/
+//#include "specifiers/numeric_specifier.h"
+#include "specifiers/trivial_specifiers.h"
+#include "specifiers/simple_specifiers.h"
+#include "specifiers/other_specifiers.h"
+
+Parser
+	gParser;
+
 error_t
 	Parser::
 	Compile(
 		char const * & input,
 		Specifier ** dest)
-{
+{/*
 	*dest = nullptr;
 	try
 	{
@@ -25,7 +42,7 @@ error_t
 		delete *dest;
 		// Catch any memory allocation errors.
 		FAIL(false, ERROR_MEMORY_ALLOCATION_FAIL);
-	}
+	}*/
 	return OK;
 }
 
@@ -37,10 +54,11 @@ error_t
 {
 	Utils::SkipWhitespace(input);
 	*dest = nullptr;
-	char
+	unsigned char
 		c = *input;
-	if (c)
+	if (c > 0)
 	{
+		FAIL(c < 128, ERROR_UNKNOWN_SPECIFIER);
 		// Get the specifier type from the list of known types, without ever
 		// needing to know the class of the object ("Prototype pattern").
 		FAIL(m_specifiers[c], ERROR_UNKNOWN_SPECIFIER);
@@ -49,6 +67,37 @@ error_t
 	}
 	return OK;
 }
+
+TEST(GN7,  { Specifier * s = nullptr; return gParser.GetNext(S"\xFF;", &s) == ERROR_UNKNOWN_SPECIFIER; })
+TEST(GN8,  { Specifier * s = nullptr; return gParser.GetNext(S"		", &s) == OK; })
+TEST(GN9,  { Specifier * s = nullptr; return gParser.GetNext(S"~", &s) == ERROR_UNKNOWN_SPECIFIER; })
+TEST(GN10, { Specifier * s = nullptr; return gParser.GetNext(S"^", &s) == ERROR_UNKNOWN_SPECIFIER; })
+
+TEST(GN0,  { Specifier * s = nullptr; return gParser.GetNext(S"i", &s) == OK && s && s->GetSpecifier() == 'i'; })
+TEST(GN1,  { Specifier * s = nullptr; return gParser.GetNext(S"", &s) == OK && !s; })
+TEST(GN2,  { Specifier * s = nullptr; return gParser.GetNext(S"d", &s) == OK && s && s->GetSpecifier() == 'd'; })
+TEST(GN3,  { Specifier * s = nullptr; return gParser.GetNext(S"x", &s) == OK && s && s->GetSpecifier() == 'x'; })
+TEST(GN4,  { Specifier * s = nullptr; return gParser.GetNext(S"'", &s) == ERROR_NO_STRING_END; })
+
+TEST(GN5,  { Specifier * s = nullptr; char const * p = "oxc"; return
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'o' &&
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'x' &&
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'c' &&
+	gParser.GetNext(p, &s) == OK && !s; })
+
+TEST(GN6,  { Specifier * s = nullptr; char const * p = "   o   x   c   "; return
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'o' &&
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'x' &&
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'c' &&
+	gParser.GetNext(p, &s) == OK && !s; })
+
+TEST(GN11, { Specifier * s = nullptr; return gParser.GetNext(S"I(45)", &s) == OK && s && s->GetSpecifier() == 'i'; })
+
+TEST(GN12, { Specifier * s = nullptr; char const * p = "   B  (  0b001101  )   d  H(FF) "; return
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'b' &&
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'd' &&
+	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'h' &&
+	gParser.GetNext(p, &s) == OK && !s; })
 
 error_t
 	Parser::
@@ -80,61 +129,62 @@ error_t
 	
 	// There is no reason in this design why we can't have different parsers
 	// with different specifier sets.  That's pretty cool IMHO.
-	Add(new SimpleSpecifier('b', &Utils::ReadBinary ));
-	Add(new SimpleSpecifier('d', &Utils::ReadDecimal));
-	Add(new SimpleSpecifier('f', &Utils::ReadFloat  ));
-	Add(new SimpleSpecifier('g', &Utils::ReadIEEE754));
-	Add(new SimpleSpecifier('h', &Utils::ReadHex    ));
-	Add(new SimpleSpecifier('i', &Utils::ReadDecimal));
-	Add(new SimpleSpecifier('l', &Utils::ReadLogical));
-	Add(new SimpleSpecifier('n', &Utils::ReadNumber ));
-	Add(new SimpleSpecifier('o', &Utils::ReadOctal  ));
-	Add(new SimpleSpecifier('x', &Utils::ReadHex    ));
-	Add(new SimpleSpecifier('c', &Utils::ReadCharEx ));
+	TRY(Add(new SimpleSpecifier('b', &Utils::ReadBinary )));
+	TRY(Add(new SimpleSpecifier('d', &Utils::ReadDecimal)));
+//	TRY(Add(new SimpleSpecifier('f', &Utils::ReadFloat  )));
+//	TRY(Add(new SimpleSpecifier('g', &Utils::ReadIEEE754)));
+	TRY(Add(new SimpleSpecifier('h', &Utils::ReadHex    )));
+	TRY(Add(new SimpleSpecifier('i', &Utils::ReadDecimal)));
+//	TRY(Add(new SimpleSpecifier('l', &Utils::ReadLogical)));
+	TRY(Add(new SimpleSpecifier('o', &Utils::ReadOctal  )));
+	TRY(Add(new SimpleSpecifier('x', &Utils::ReadHex    )));
+	TRY(Add(new SimpleSpecifier('c', &Utils::ReadCharEx )));
+	TRY(Add(new NumSpecifier())); // 'n'.
 	
 	// Detect group closes.
-	Add(new TrivialSpecifier('|')); // Alternate.
-	Add(new TrivialSpecifier(')')); // End group.
-	Add(new TrivialSpecifier('}')); // End quiet mode.
-	Add(new TrivialSpecifier('>')); // End subtype.
+	TRY(Add(new TrivialSpecifier('|'))); // Alternate.
+	TRY(Add(new TrivialSpecifier(')'))); // End group.
+	TRY(Add(new TrivialSpecifier('}'))); // End quiet mode.
+	TRY(Add(new TrivialSpecifier('>'))); // End subtype.
 	
 	// Add all 10 numeric specifiers.
-	temp = new NumericSpecifier();
-	AddAs(temp, '0');
-	AddAs(temp, '1');
-	AddAs(temp, '2');
-	AddAs(temp, '3');
-	AddAs(temp, '4');
-	AddAs(temp, '5');
-	AddAs(temp, '6');
-	AddAs(temp, '7');
-	AddAs(temp, '8');
-	AddAs(temp, '9');
-	AddAs(temp, '*'); // Special case - unknown count.
+	/*temp = new NumericSpecifier();
+	TRY(AddAs(temp, '0'));
+	TRY(AddAs(temp, '1'));
+	TRY(AddAs(temp, '2'));
+	TRY(AddAs(temp, '3'));
+	TRY(AddAs(temp, '4'));
+	TRY(AddAs(temp, '5'));
+	TRY(AddAs(temp, '6'));
+	TRY(AddAs(temp, '7'));
+	TRY(AddAs(temp, '8'));
+	TRY(AddAs(temp, '9'));
+	TRY(AddAs(temp, '*')); // Special case - unknown count.*/
 	
 	// Add string literals.
 	temp = new LiteralSpecifier();
-	AddAs(temp, '\'');
-	AddAs(temp, '\"');
-	
+	TRY(AddAs(temp, '\''));
+	TRY(AddAs(temp, '\"'));
+	/*
 	// More complex specifiers.
-	Add(new DelimSpecifier());  // 'p'.
-	Add(new ArraySpecifier());  // 'a'.
-	Add(new KustomSpecifier()); // 'k'.
-	AddAs(new StringSpecifier(false), 's'); // Unpacked.
-	AddAs(new StringSpecifier(true ), 'z'); // Packed.
-	AddAs(new PlayerSpecifier(false, true ), 'q'); // Bots only.
-	AddAs(new PlayerSpecifier(true,  false), 'r'); // Players only.
-	AddAs(new PlayerSpecifier(true,  true ), 'u'); // Players and Bots.
+	TRY(Add(new DelimSpecifier()));  // 'p'.
+	TRY(Add(new ArraySpecifier()));  // 'a'.
+	TRY(Add(new KustomSpecifier())); // 'k'.
+	TRY(AddAs(new StringSpecifier(false), 's')); // Unpacked.
+	TRY(AddAs(new StringSpecifier(true ), 'z')); // Packed.
+	TRY(AddAs(new PlayerSpecifier(false, true ), 'q')); // Bots only.
+	TRY(AddAs(new PlayerSpecifier(true,  false), 'r')); // Players only.
+	TRY(AddAs(new PlayerSpecifier(true,  true ), 'u')); // Players and Bots.
 	
 	// Complex groups.
-	Add(new EnumSpecifier()); // 'e'.
-	Add(new QuietGroup());    // '{'.
-	Add(new AltGroup());      // '('.
+	TRY(Add(new EnumSpecifier())); // 'e'.
+	TRY(Add(new QuietGroup()));    // '{'.
+	TRY(Add(new AltGroup()));      // '('.
 	
 	// Others.
-	Add(new SkipSpecifier());   // '-'.
-	//Add(new PlusSpecifier());   // '+'.
-	Add(new OptionSpecifier()); // '?'.
+	TRY(Add(new SkipSpecifier()));   // '-'.
+	//TRY(Add(new PlusSpecifier()));   // '+'.
+	TRY(Add(new OptionSpecifier())); // '?'.*/
+	return OK;
 }
 

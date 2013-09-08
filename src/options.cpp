@@ -1,11 +1,16 @@
-#include "specifiers/array_specifier.hpp"
-#include "specifiers/delim_specifier.hpp"
-#include "specifiers/group_specifiers.hpp"
-#include "specifiers/enum_specifier.hpp" // Relies on group_specifiers.
-#include "specifiers/numeric_specifier.hpp"
-#include "specifiers/other_specifiers.hpp"
-#include "specifiers/player_specifiers.hpp"
-#include "specifiers/simple_specifiers.hpp"
-#include "specifiers/string_specifier.hpp"
-#include "specifiers/trivial_specifiers.hpp"
+// cons
+	Option::
+	Option(char const * name, T const value)
+:
+	m_name(nullptr),
+	m_value(value)
+{
+	size_t
+		len = strlen(name);
+	if (len)
+	{
+		m_name = new char [len];
+		strcpy(m_name, name);
+	}
+};
 
