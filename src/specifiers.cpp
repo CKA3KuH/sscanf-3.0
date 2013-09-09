@@ -48,7 +48,7 @@
 			SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; }
 		
 		virtual error_t
-			Skip(size_t n) { return OK; }
+			Skip(size_t n) { pos += n; return OK; }
 		
 		int
 			pos;
@@ -61,8 +61,8 @@
 TEST(Numeric1,  { NumericSpecifier nm; return nm.ReadToken(S"12i") == OK && nm.CountChildren() == 12;  })
 TEST(Numeric2,  { NumericSpecifier nm; return nm.ReadToken(S"*i") == OK && nm.CountChildren() == -1;  })
 
-TEST(Numeric3,  { NumericSpecifier nm; return nm.ReadToken(S"55i") == OK && nm.GetMemoryUsage() == 55;  })
-TEST(Numeric4,  { NumericSpecifier nm; return nm.ReadToken(S"*i") == OK && nm.GetMemoryUsage() == 0;  })
+//TEST(Numeric3,  { NumericSpecifier nm; return nm.ReadToken(S"55i") == OK && nm.Skip(Environment & env) == 55;  })
+//TEST(Numeric4,  { NumericSpecifier nm; return nm.ReadToken(S"*i") == OK && nm.Skip(Environment & env) == 0;  })
 
 TEST(Numeric5, 
 	{
@@ -284,7 +284,7 @@ ITEST(SimpleSpecifier, Simple4f)
 ITEST(SimpleSpecifier, Simple4g)
 ITEST(SimpleSpecifier, Simple4h)
 ITEST(SimpleSpecifier, Simple4i)
-ITEST(SimpleSpecifier, Simple4j)
+//ITEST(SimpleSpecifier, Simple4j)
 
 ITEST(SimpleSpecifier, Simple5a)
 
@@ -427,4 +427,44 @@ ITEST(SimpleSpecifier, SimpleH28)
 ITEST(SimpleSpecifier, SimpleH29)
 ITEST(SimpleSpecifier, SimpleH30)
 ITEST(SimpleSpecifier, SimpleH31)*/
+
+
+
+
+
+TEST(TrueAlts1, {
+	Specifier * spec; gParser.Compile(S"i|c", &spec);
+	cell data[3] = { 42, '#', 0 }; TestMemory tm(data, 3); Environment env(&tm);
+	return spec->Run(S"42", env) == OK;
+});
+
+TEST(TrueAlts2, {
+	Specifier * spec; gParser.Compile(S"i|c", &spec);
+	cell data[3] = { 42, '#', 1 }; TestMemory tm(data, 3); Environment env(&tm);
+	return spec->Run(S"#", env) == OK;
+});
+
+TEST(TrueAlts3, {
+	Specifier * spec; gParser.Compile(S"i|c", &spec);
+	cell data[3] = { 42, '#', 1 }; TestMemory tm(data, 3); Environment env(&tm);
+	return spec->Run(S"'#'", env) == OK;
+});
+
+// TEST(TrueAlts4, {
+	// Specifier * spec; gParser.Compile(S"i|c", &spec);
+	// cell data[3] = { 42, '#', 1 }; TestMemory tm(data, 3); Environment env(&tm);
+	// return spec->Run(S"'#'", env) == OK;
+// });
+
+TEST(TrueAlts5, {
+	// Alts with matching prefixes.
+	Specifier * spec; gParser.Compile(S"ix|ic", &spec);
+	cell data[5] = { 70, 0, 70, 'g', 1 }; TestMemory tm(data, 5); Environment env(&tm);
+	return spec->Run(S"70 g", env) == OK;
+});
+
+
+
+
+
 

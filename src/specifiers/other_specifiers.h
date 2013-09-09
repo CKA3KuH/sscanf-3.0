@@ -94,9 +94,6 @@ public:
 		return true;
 	};
 	
-	virtual int
-		GetMemoryUsage() { return 0; };
-	
 private:
 	size_t
 		m_length;
@@ -204,9 +201,6 @@ public:
 		return OK;
 	};
 	
-	virtual int
-		GetMemoryUsage() { return 0; };
-	
 private:
 	char *
 		m_option;
@@ -259,10 +253,10 @@ public:
 	CLONE();
 	
 	// This needs to count all READS, but not WRITES.
-	virtual int
-		GetMemoryUsage()
+	virtual cell
+		Skip(Environment & env)
 	{
-		if (m_child) return m_child->GetMemoryUsage();
+		if (m_child) return m_child->Skip(env);
 		return 0;
 	};
 	
@@ -272,7 +266,9 @@ public:
 		// So that the environment doesn't try to skip two sets of delimiters.
 		//env.ZeroRead();
 		// Skips don't do anything but "skip".
-		return env.Skip(GetMemoryUsage());
+		//return env.Skip(Skip(env));
+		if (m_child) m_child->Skip(env);
+		return OK;
 	};
 	
 	virtual // dest

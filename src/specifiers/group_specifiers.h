@@ -106,7 +106,7 @@ ReadToken_new_quiet:
 	
 	// This needs to count all READS, but not WRITES.
 	virtual int
-		GetMemoryUsage() { return 0; };
+		Skip(Environment & env) { return 0; };
 	
 	virtual error_t
 		Run(char const * & input, Environment & env)
@@ -170,27 +170,50 @@ public:
 	
 	CLONE();
 	
-	virtual int
-		GetMemoryUsage()
+	virtual cell
+		Skip(Environment & env)
 	{
-		if (m_memory != -1) return m_memory;
-		m_memory = 0;
-		for (auto i = Begin(), e = End(); i != e; ++i)
+		// "-1" means "unknown" or "variable".
+		if (m_memory == -1)
 		{
-			m_memory += (*i)->GetMemoryUsage();
+			cell
+				ret = 0,
+				cur = 0;
+			for (auto i = Begin(), e = End(); i != e; ++i)
+			{
+				cur = (*i)->Skip(env);
+				if (cur == -1) ret = -1;
+				else if (ret != -1) ret += cur;
+			}
+			return (m_memory = ret);
 		}
-		return m_memory;
+		else
+		{
+			env.Skip(m_memory);
+			return m_memory;
+		}
 	};
 	
 	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
+		error_t
+			fail = OK;
 		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			TRY((*i)->Run(input, env));
-			TRY(env.SkipDelimiters(input));
+			if (fail)
+			{
+				// Skip the remaining associated memory.
+				(*i)->Skip(env);
+			}
+			else
+			{
+				fail = (*i)->Run(input, env);
+				if (fail) (*i)->Skip(env);
+				else fail = env.SkipDelimiters(input);
+			}
 		}
-		return OK;
+		return fail;
 	};
 	
 	virtual std::ostream &
@@ -230,7 +253,7 @@ public:
 		m_memory(-1),
 		SpecifierGroup(that)
 	{
-		GetMemoryUsage();
+		//Skip(env);
 	};
 	
 	CLONE();
@@ -270,31 +293,47 @@ ReadToken_new_alt:
 		}
 		return OK;
 	};
-	
-	virtual int
-		GetMemoryUsage()
+		
+	virtual cell
+		Skip(Environment & env)
 	{
-		if (m_memory != -1) return m_memory;
-		m_memory = m_storeAlt ? 1 : 0;
-		for (auto i = Begin(), e = End(); i != e; ++i)
+		// "-1" means "unknown" or "variable".
+		if (m_memory == -1)
 		{
-			m_memory += (*i)->GetMemoryUsage();
+			cell
+				ret = 0,
+				cur = 0;
+			for (auto i = Begin(), e = End(); i != e; ++i)
+			{
+				cur = (*i)->Skip(env);
+				if (cur == -1) ret = -1;
+				else if (ret != -1) ret += cur;
+			}
+			if (m_storeAlt)
+			{
+				if (ret != -1) ++ret;
+				env.Skip(1);
+			}
+			return (m_memory = ret);
 		}
-		return m_memory;
+		else
+		{
+			env.Skip(m_memory);
+			return m_memory;
+		}
 	};
 	
-	virtual error_t
-		Run(char const * & input, Environment & env)
-	{
-		for (auto i = Begin(), e = End(); i != e; ++i)
-		{
-			TRY((*i)->Run(input, env));
-			TRY(env.SkipDelimiters(input));
-		}
-		return OK;
-	};
+	// virtual error_t
+		// Run(char const * & input, Environment & env)
+	// {
+		// for (auto i = Begin(), e = End(); i != e; ++i)
+		// {
+			// TRY((*i)->Run(input, env));
+			// TRY(env.SkipDelimiters(input));
+		// }
+		// return OK;
+	// };
 	
-	/*
 	virtual error_t
 		Run(char const * & input, Environment & env)
 	{
@@ -327,18 +366,15 @@ ReadToken_new_alt:
 		// Don't bother writing the alternate if there was no solution.
 		TRY(last);
 		// Find where to store the alternate.
-		int
-			skip = 0;
 		while (i != e)
 		{
 			// I'll have to re-write this so that children know their sizes in
 			// advance.  Technically "memory usage" is "number of variables".
-			skip += (*i)->GetMemoryUsage();
+			(*i)->Skip(env);
 			++i;
 		}
 		// Store the value of the alternate used.
-		TRY(env.GetMemory()->Skip(skip));
-		if (m_storeAlt) TRY(env.GetMemory()->WriteNextCell(alt));
+		if (m_storeAlt) TRY(env.SetNextValue(alt));
 		return OK;
 		// Return the last error, whatever it was (may be useful, may not - will
 		// be if there's only one alternate (but we can optimise that case)).
@@ -346,7 +382,7 @@ ReadToken_new_alt:
 		// above will fail, because when there is only one version, there is no
 		// alternate write target.
 	};
-	*/
+	
 	virtual std::ostream &
 		Render(std::ostream & out) const
 	{

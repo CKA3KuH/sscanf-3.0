@@ -19,7 +19,7 @@ public:
 		m_memory(-1),
 		SpecifierGroup(that)
 	{
-		GetMemoryUsage();
+		Skip(env);
 		if (that.m_default)
 		{
 			m_default = new cell [m_memory];
@@ -52,7 +52,7 @@ ReadToken_new_quiet:
 		{
 			NEXT(input, '(', ERROR_NO_DEAFULT_START);
 			int
-				mem = GetMemoryUsage();
+				mem = Skip(Environment & env);
 			m_default = new cell[mem];
 			TRY(Run(input, gDefaultEnvironment(m_default)));
 			// Skip the closing bracket.
@@ -63,13 +63,13 @@ ReadToken_new_quiet:
 	};
 	
 	virtual int
-		GetMemoryUsage()
+		Skip(Environment & env)
 	{
 		if (m_memory != -1) return m_memory;
 		m_memory = 0;
 		for (auto i = Begin(), e = End(); i != e; ++i)
 		{
-			m_memory += (*i)->GetMemoryUsage();
+			m_memory += (*i)->Skip(Environment & env);
 		}
 		return m_memory;
 	};

@@ -42,13 +42,29 @@ public:
 	CLONE();
 	
 	// This needs to count all READS, but not WRITES.
-	virtual int
-		GetMemoryUsage()
+	virtual cell
+		Skip(Environment & env)
 	{
 		if (m_child)
 		{
-			if (m_count == -1) return 0;
-			return m_child->GetMemoryUsage() * m_count;
+			if (m_count == -1)
+			{
+				cell
+					c,
+					s;
+				// Get the count.
+				env.GetNextValue(&c);
+				// Get the skip value for one.
+				s = m_child->Skip(env);
+				// Skip the remainder.
+				env.Skip(s * (c - 1));
+				return -1;
+			}
+			else
+			{
+				env.Skip(m_count);
+				return m_count;
+			}
 		}
 		return 0;
 	};

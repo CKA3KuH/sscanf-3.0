@@ -67,6 +67,13 @@ public:
 	{
 	};
 	
+	virtual cell
+		Skip(Environment & env)
+	{
+		env.Skip(1);
+		return 1;
+	};
+	
 private:
 	cell
 		m_default;
@@ -257,7 +264,7 @@ private:
 	CTEST(Simple4g, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); that.SetOptional(); return !p->GetOptional(); })
 	CTEST(Simple4h, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.SetOptional(); that.Clone(&p); return p->GetOptional(); })
 	CTEST(Simple4i, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return dynamic_cast<SimpleSpecifier *>(p)->m_read == &Utils::ReadChar; })
-	CTEST(Simple4j, { SimpleSpecifier that('f', &Utils::ReadChar); return that.GetMemoryUsage() == 1; })
+	//CTEST(Simple4j, { SimpleSpecifier that('f', &Utils::ReadChar); return that.Skip(env) == 1; })
 	
 	// Valid renders.
 	CTEST(Simple5a, { SimpleSpecifier that('x', &Utils::ReadHex); ss s; return dynamic_cast<ss &>(s << that).str() == "x"; })

@@ -51,8 +51,8 @@ public:
 	char
 		GetSpecifier() const { return m_specifier; };
 	
-	virtual int
-		GetMemoryUsage() { return 1; };
+	virtual cell
+		Skip(Environment & env) { return 0; };
 	
 	virtual int
 		CountChildren() const { return 0; };

@@ -15,6 +15,14 @@ public:
 	{
 	};
 	
+	// cons
+		Environment(Environment & env)
+	:
+		m_memory(env.m_memory),
+		m_options(env.m_options)
+	{
+	};
+	
 	error_t
 		SkipDelimiters(char const * & input)
 	{
@@ -189,7 +197,7 @@ private:
 	};
 	
 	// cons
-		DefaultEnvironment(DefaultEnvironment const & that)
+		DefaultEnvironment(DefaultEnvironment & that)
 	:
 		Environment(that)
 	{

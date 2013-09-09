@@ -28,9 +28,6 @@ public:
 		return ERROR_RAN_TRIVIAL;
 	};
 	
-	virtual int
-		GetMemoryUsage() { return 0; };
-	
 	// cons
 		TrivialSpecifier(TrivialSpecifier const & that)
 	:
