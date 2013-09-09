@@ -12,13 +12,7 @@ public:
 	{
 	};
 	
-	virtual error_t
-		Clone(Specifier ** that)
-	{
-		// Flyweight pattern.
-		*that = this;
-		return OK;
-	};
+	CLONE();
 	
 	virtual error_t
 		ReadToken(char const * & input)
@@ -37,7 +31,6 @@ public:
 	virtual int
 		GetMemoryUsage() { return 0; };
 	
-private:
 	// cons
 		TrivialSpecifier(TrivialSpecifier const & that)
 	:
@@ -50,6 +43,7 @@ private:
 	{
 	};
 	
+private:
 	// This doesn't really have many failure modes - it is "trivial" after all!
 	CTEST(Trivial1,  { TrivialSpecifier that('|'); return that.ReadToken(S"|") == OK; })
 	CTEST(Trivial2a, { TrivialSpecifier that('|'); that.ReadToken(S"|"); ss s; that.Render(s); return s.str() == "|"; })
@@ -59,7 +53,7 @@ private:
 	CTEST(Trivial3c, { TrivialSpecifier that(')'); ss s; that.Render(s); return s.str() == ")"; })
 	CTEST(Trivial3d, { TrivialSpecifier that('?'); ss s; that.Render(s); return s.str() == "?"; })
 	CTEST(Trivial3e, { TrivialSpecifier that('>'); ss s; that.Render(s); return s.str() == ">"; })
-	CTEST(Trivial4,  { TrivialSpecifier that('|'); Specifier * two; return that.Clone(&two) == OK && &that == two; })
+	CTEST(Trivial4,  { TrivialSpecifier that('|'); Specifier * two; return that.Clone(&two) == OK && &that != two; })
 	CTEST(Trivial5a, { TrivialSpecifier that('#'); return !that.GetOptional(); })
 	CTEST(Trivial5b, { TrivialSpecifier that('~'); return !that.GetSkip(); })
 	CTEST(Trivial5c, { TrivialSpecifier that('~'); that.SetSkip(); return that.GetSkip(); })

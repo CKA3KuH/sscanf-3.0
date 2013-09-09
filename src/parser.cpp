@@ -11,40 +11,72 @@
 #include "specifiers/trivial_specifiers.h"
 #include "specifiers/simple_specifiers.h"
 #include "specifiers/other_specifiers.h"
+#include "specifiers/group_specifiers.h"
 
 Parser
 	gParser;
+
+#define DEL(dest) do { delete *dest; *dest = nullptr; } while (false);
 
 error_t
 	Parser::
 	Compile(
 		char const * & input,
 		Specifier ** dest)
-{/*
+{
 	*dest = nullptr;
 	try
 	{
 		// We ALWAYS start with an "alt" group (the special one written just for
 		// this purpose and that doesn't end with a close bracket).
-		*dest = new GlobalGroup();
+		*dest = new AltGroup(false);
+		error_t
+			e;
 		// TODO: These checks don't clean up properly.
-		TRY((*dest)->ReadToken(input));
+		e = (*dest)->ReadToken(input);
+		if (e != OK)
+		{
+			DEL(dest);
+			return e;
+		}
 		Utils::SkipWhitespace(input);
-		FAIL(*input == '\0', ERROR_EXPECTED_A_GOT_B, "<end of string>", *input);
+		if (*input != '\0')
+		{
+			DEL(dest);
+			FAIL(false, ERROR_EXPECTED_A_GOT_B, "<end of string>", *input);
+		}
 		// At this point, we could run an optimisation pass on the tree!  The
 		// only one I can think of at this point is to replace "Alt" groups with
 		// only one child by regular sequence groups.  Or merge hierarchical
 		// sequences.
 	}
-	catch (std::bad_alloc & e)
+	catch (std::bad_alloc const &)
 	{
 		// Clean up the allocated memory.
-		delete *dest;
+		DEL(dest);
 		// Catch any memory allocation errors.
 		FAIL(false, ERROR_MEMORY_ALLOCATION_FAIL);
-	}*/
+	}
+	catch (...)
+	{
+		DEL(dest);
+		FAIL(false, ERROR_UNKNOWN_ERROR);
+	}
 	return OK;
 }
+
+#undef DEL
+
+TEST(PC0, { Specifier * spec; return gParser.Compile(S"", &spec) == ERROR_NO_CHILDREN; })
+TEST(PC1, { Specifier * spec; return gParser.Compile(S"ii", &spec) == OK && spec->GetSpecifier() == '('; })
+TEST(PC5, { Specifier * spec; return gParser.Compile(S"iiq", &spec) == ERROR_UNKNOWN_SPECIFIER; })
+TEST(PC2, { Specifier * spec; return gParser.Compile(S"ii|dd", &spec) == OK && spec->GetSpecifier() == '('; })
+TEST(PC3, { Specifier * spec; return gParser.Compile(S"i|X(0xFF)", &spec) == OK && spec->GetSpecifier() == '(' && spec->CountChildren() == 2; })
+
+TEST(PC4a, { Specifier * spec; return gParser.Compile(S"iC('q')|(x|x)", &spec) == OK && spec->GetSpecifier() == '('; })
+TEST(PC4c, { Specifier * spec; return gParser.Compile(S"iC('q')-|(x|-x-)", &spec) == OK && spec->GetSpecifier() == '('; })
+TEST(PC4b, { Specifier * spec; gParser.Compile(S"i C ( 'q')   |(   x|x)", &spec); ss s; return
+	dynamic_cast<ss &>(s << *spec).str() == "ic|(x|x)"; })
 
 error_t
 	Parser::
@@ -54,11 +86,11 @@ error_t
 {
 	Utils::SkipWhitespace(input);
 	*dest = nullptr;
-	unsigned char
-		c = *input;
-	if (c > 0)
+	if (*input)
 	{
-		FAIL(c < 128, ERROR_UNKNOWN_SPECIFIER);
+		signed char
+			c = *input - '!';
+		FAIL(c >= 0 && c < sizeof (m_specifiers) / sizeof (Specifier *), ERROR_UNKNOWN_SPECIFIER);
 		// Get the specifier type from the list of known types, without ever
 		// needing to know the class of the object ("Prototype pattern").
 		FAIL(m_specifiers[c], ERROR_UNKNOWN_SPECIFIER);
@@ -67,6 +99,8 @@ error_t
 	}
 	return OK;
 }
+
+ITEST(Parser, Parser1)
 
 TEST(GN7,  { Specifier * s = nullptr; return gParser.GetNext(S"\xFF;", &s) == ERROR_UNKNOWN_SPECIFIER; })
 TEST(GN8,  { Specifier * s = nullptr; return gParser.GetNext(S"		", &s) == OK; })
@@ -110,8 +144,9 @@ error_t
 	Parser::
 	AddAs(Specifier * prototype, char specifier)
 {
-	FAIL(m_specifiers[specifier] == nullptr, ERROR_DUPLICATE_SPECIFIER);
-	m_specifiers[specifier] = prototype;
+	FAIL(specifier >= '!' && specifier <= '~', ERROR_INVALID_SPECIFIER);
+	FAIL(m_specifiers[specifier - '!'] == nullptr, ERROR_DUPLICATE_SPECIFIER);
+	m_specifiers[specifier - '!'] = prototype;
 	if ('a' <= specifier && specifier <= 'z')
 	{
 		// Add the optional variant.
@@ -178,9 +213,12 @@ error_t
 	
 	// Complex groups.
 	TRY(Add(new EnumSpecifier())); // 'e'.
-	TRY(Add(new QuietGroup()));    // '{'.
+	TRY(Add(new QuietGroup()));    // '{'.*/
 	TRY(Add(new AltGroup()));      // '('.
 	
+	// Others.
+	TRY(Add(new MinusSpecifier())); // '-'.
+	/*
 	// Others.
 	TRY(Add(new SkipSpecifier()));   // '-'.
 	//TRY(Add(new PlusSpecifier()));   // '+'.

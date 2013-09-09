@@ -6,6 +6,9 @@
 	#include "../utils.h"
 #endif
 
+typedef
+	error_t (* ReadFunction_t)(char const * &, cell &);
+
 class SimpleSpecifier : public Specifier
 {
 public:
@@ -26,13 +29,13 @@ public:
 		// Check if this is upper-case (optional).
 		if (*input++ != GetSpecifier())
 		{
-			SetOptional();
 			// Capital letter - read in the deafult.
 			// Skip the opening bracket.
 			NEXT(input, '(', ERROR_NO_DEAFULT_START);
 			TRY(Run(input, DefaultEnvironment::Get(&m_default)));
 			// Skip the closing bracket.
 			NEXT(input, ')', ERROR_NO_DEAFULT_END);
+			SetOptional();
 		}
 		return OK;
 	};
@@ -44,7 +47,13 @@ public:
 	{
 		cell
 			dest;
-		TRY((*m_read)(input, dest));
+		error_t
+			e = (*m_read)(input, dest);
+		if (e != OK)
+		{
+			if (!GetOptional()) return e;
+			dest = m_default;
+		}
 		return env.SetNextValue(dest);
 		//return env.SkipDelimiters();
 	};

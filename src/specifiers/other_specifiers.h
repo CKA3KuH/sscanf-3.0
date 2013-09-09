@@ -2,6 +2,7 @@
 
 #include "../specifiers.h"
 #include "../utils.h"
+#include "../parser.h"
 
 class LiteralSpecifier : public Specifier
 {
@@ -219,15 +220,14 @@ private:
 	CTEST(Opt4, { OptionSpecifier opt; return opt.ReadToken(S"?<") == ERROR_NO_PARAM_END; })
 };
 
-/*class MinusSpecifier : public Specifier
+class MinusSpecifier : public Specifier
 {
 public:
 	// cons
 		MinusSpecifier()
 	:
 		Specifier('-'), // Actually has 10 valid specifiers.
-		m_child(nullptr),
-		m_count(-1)
+		m_child(nullptr)
 	{
 		// Always "skip".
 		SetSkip();
@@ -237,8 +237,7 @@ public:
 		MinusSpecifier(MinusSpecifier const & that)
 	:
 		Specifier(that),
-		m_child(that.m_child),
-		m_count(that.m_count)
+		m_child(that.m_child)
 	{
 	};
 	
@@ -247,13 +246,14 @@ public:
 	{
 		++input;
 		// Get the child.
-		TRY(gParser->GetNext(input, &m_child));
+		TRY(gParser.GetNext(input, &m_child));
 		FAIL(m_child, ERROR_NO_CHILD);
 		// Lie about what we are, and pass all other ops through.  This allows
 		// other specifiers that only check the specifier type to not need to
 		// know anything about possible "minus" operators.
 		m_specifier = m_child->GetSpecifier();
 		m_child->SetSkip();
+		return OK;
 	};
 	
 	CLONE();
@@ -270,9 +270,9 @@ public:
 		Run(char const * & input, Environment & env)
 	{
 		// So that the environment doesn't try to skip two sets of delimiters.
-		env.ZeroRead();
+		//env.ZeroRead();
 		// Skips don't do anything but "skip".
-		return env.GetMemory()->Skip(GetMemoryUsage());
+		return env.Skip(GetMemoryUsage());
 	};
 	
 	virtual // dest
@@ -281,24 +281,16 @@ public:
 		delete m_child;
 	};
 	
-	static void
-		DeleteTrivial(Specifier * that)
-	{
-		if (that->GetSkip())
-		{
-			dynamic_cast<MinusSpecifier *>(that)->m_child = nullptr;
-			delete that;
-		}
-	};
+	virtual int
+		CountChildren() const { return m_child ? 1 : 0; };
 	
 private:
 	Specifier *
 		m_child;
 	
-	int
-		m_count;
-};*/
-
+	CTEST(Minus0, { MinusSpecifier ms; return ms.ReadToken(S"-i") == OK && ms.GetSpecifier() == 'i' && ms.GetSkip() == true; })
+	CTEST(Minus1, { MinusSpecifier ms; return ms.ReadToken(S"-H(42)") == OK && ms.GetSpecifier() == 'h' && ms.GetSkip() == true; })
+};
 
 class NumSpecifier : public Specifier
 {

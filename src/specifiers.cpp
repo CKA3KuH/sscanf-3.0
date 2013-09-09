@@ -5,6 +5,194 @@
 #include "specifiers/trivial_specifiers.h"
 #include "specifiers/simple_specifiers.h"
 #include "specifiers/other_specifiers.h"
+#include "specifiers/group_specifiers.h"
+#include "specifiers/numeric_specifier.h"
+
+#ifdef SSCANF_DEBUG
+	#include "../sdk/plugin.h"
+	
+	class TestMemory : public Memory
+	{
+	public:
+		// cons
+			TestMemory(cell * data, size_t len) : Memory(nullptr)
+		{
+			pos = 0;
+			m_data = (cell *)malloc(len * sizeof (cell));
+			memcpy(m_data, data, len * sizeof (cell));
+		};
+		
+		// dest
+			~TestMemory()
+		{
+			delete m_data;
+		};
+		
+		virtual error_t
+			GetNextPointer(cell ** const ret) { return OK; }
+		
+		virtual error_t
+			GetNextValue(cell * const ret) { return OK; }
+		
+		virtual error_t
+			GetNextString(char * ret, size_t len) { return OK; }
+		
+		virtual error_t
+			SetNextValue(cell const val, size_t idx = 0)
+		{
+			if (val != m_data[pos++]) return ERROR_UNKNOWN_ERROR;
+			return OK;
+		}
+		
+		virtual error_t
+			SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; }
+		
+		virtual error_t
+			Skip(size_t n) { return OK; }
+		
+		int
+			pos;
+		
+		cell *
+			m_data;
+	};
+#endif
+
+TEST(Numeric1,  { NumericSpecifier nm; return nm.ReadToken(S"12i") == OK && nm.CountChildren() == 12;  })
+TEST(Numeric2,  { NumericSpecifier nm; return nm.ReadToken(S"*i") == OK && nm.CountChildren() == -1;  })
+
+TEST(Numeric3,  { NumericSpecifier nm; return nm.ReadToken(S"55i") == OK && nm.GetMemoryUsage() == 55;  })
+TEST(Numeric4,  { NumericSpecifier nm; return nm.ReadToken(S"*i") == OK && nm.GetMemoryUsage() == 0;  })
+
+TEST(Numeric5, 
+	{
+		NumericSpecifier nm;
+		nm.ReadToken(S"3i");
+		cell data[3] = {4, 42, 11};
+		TestMemory
+			tm(data, 3);
+		Environment
+			env(&tm);
+		return
+			nm.Run(S"", env) == ERROR_NAN;
+	})
+
+TEST(Numeric6, 
+	{
+		NumericSpecifier nm;
+		nm.ReadToken(S"3i");
+		cell data[3] = {4, 42, 11};
+		TestMemory
+			tm(data, 3);
+		Environment
+			env(&tm);
+		return
+			nm.Run(S"11 42 11", env) == ERROR_UNKNOWN_ERROR;
+	})
+
+TEST(Numeric7, 
+	{
+		NumericSpecifier nm;
+		nm.ReadToken(S"3i");
+		cell data[3] = {4, 42, 11};
+		TestMemory
+			tm(data, 3);
+		Environment
+			env(&tm);
+		return
+			nm.Run(S"4 42 11", env) == OK;
+	})
+
+TEST(Numeric8, 
+	{
+		NumericSpecifier nm;
+		nm.ReadToken(S"6I(99)");
+		cell data[6] = {7, -23, 99, 99, 99, 99};
+		TestMemory
+			tm(data, 6);
+		Environment
+			env(&tm);
+		return
+			nm.Run(S"7 -23", env) == OK;
+	})
+
+TEST(Numeric9, 
+	{
+		NumericSpecifier nm;
+		nm.ReadToken(S"7I(99)");
+		cell data[7] = {99, 99, 99, 99, 99, 99, 99};
+		TestMemory
+			tm(data, 7);
+		Environment
+			env(&tm);
+		return
+			nm.Run(S"", env) == OK;
+	})
+
+TEST(DefaultSimple1, {
+	Specifier * spec; gParser.GetNext(S"I(22)", & spec);
+	cell data[1] = {22}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"", env) == OK;
+})
+
+TEST(DefaultSimple2, {
+	Specifier * spec; gParser.GetNext(S"D(11)", & spec);
+	cell data[1] = {44}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"44", env) == OK;
+})
+
+TEST(DefaultSimple3, {
+	Specifier * spec; gParser.GetNext(S"H(ADD)", & spec);
+	cell data[1] = {0xADD}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"", env) == OK;
+})
+
+TEST(DefaultSimple4, {
+	Specifier * spec; gParser.GetNext(S"X(11)", & spec);
+	cell data[1] = {0x44}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"0x44", env) == OK;
+})
+
+TEST(DefaultSimple5, {
+	Specifier * spec; gParser.GetNext(S"X(11)", & spec);
+	cell data[1] = {0xFE}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"FE", env) == OK;
+})
+
+TEST(DefaultSimple6, {
+	Specifier * spec; gParser.GetNext(S"C('@')", & spec);
+	cell data[1] = {'@'}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"", env) == OK;
+})
+
+TEST(DefaultSimple7, {
+	Specifier * spec; gParser.GetNext(S"C(' ')", & spec);
+	cell data[1] = {'_'}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"_", env) == OK;
+})
+
+TEST(DefaultSimple8, {
+	Specifier * spec; gParser.GetNext(S"C(q)", & spec);
+	cell data[1] = {':'}; TestMemory tm(data, 1); Environment env(&tm);
+	return spec->Run(S"':'", env) == OK;
+})
+
+ITEST(AltGroup, AltGroup1)
+ITEST(AltGroup, AltGroup2)
+ITEST(AltGroup, AltGroup4)
+ITEST(AltGroup, AltGroup5)
+ITEST(AltGroup, AltGroup6)
+
+ITEST(AltGroup, GlobGroup1)
+ITEST(AltGroup, GlobGroup2)
+ITEST(AltGroup, GlobGroup3)
+ITEST(AltGroup, GlobGroup6)
+ITEST(AltGroup, GlobGroup7)
+ITEST(AltGroup, GlobGroup4)
+ITEST(AltGroup, GlobGroup5)
+
+ITEST(MinusSpecifier, Minus0)
+ITEST(MinusSpecifier, Minus1)
 
 /*#include "specifiers/array_specifier.hpp"
 #include "specifiers/delim_specifier.hpp"

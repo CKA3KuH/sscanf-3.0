@@ -27,13 +27,14 @@ public:
 		if (*input == '*')
 		{
 			m_count = -1; // Determined later.
+			++input;
 		}
 		else
 		{
 			// Can't be invalid because of which specifiers were used.
 			Utils::ReadDecimal(input, m_count);
 		}
-		TRY(gParser->GetNext(input, &m_child));
+		TRY(gParser.GetNext(input, &m_child));
 		FAIL(m_child, ERROR_NO_CHILD);
 		return OK;
 	};
@@ -72,7 +73,7 @@ public:
 		for (int i = 0; i != end; ++i)
 		{
 			TRY(m_child->Run(input, env));
-			TRY(env.SkipDelimiters());
+			TRY(env.SkipDelimiters(input));
 		}
 		return OK;
 	};
@@ -83,11 +84,14 @@ public:
 		delete m_child;
 	};
 	
+	virtual int
+		CountChildren() const { return m_count; };
+	
 private:
 	Specifier *
 		m_child;
 	
-	int
+	cell
 		m_count;
 };
 

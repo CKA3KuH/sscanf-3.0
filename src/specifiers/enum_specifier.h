@@ -48,7 +48,6 @@ ReadToken_new_quiet:
 		}
 		while (child && child->GetSpecifier() != '>');
 		FAIL(child, ERROR_NO_GROUP_END);
-		MinusSpecifier::DeleteTrivial(child);
 		if (GetOptional())
 		{
 			NEXT(input, '(', ERROR_NO_DEAFULT_START);

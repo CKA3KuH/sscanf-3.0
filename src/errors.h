@@ -5,13 +5,14 @@
 enum E_SSCANF_ERROR
 {
 	OK,
-	ERROR_NO_TOKEN,
-	ERROR_CHILD_NOT_SPECIFIER,
+	ERROR_UNKNOWN_ERROR, // Generic catch-all.
+	ERROR_MEMORY_ALLOCATION_FAIL, // std::bad_alloc (untested).
 	ERROR_NAN, // Could not evaluate the string as a number.
 	ERROR_INVALID_ESCAPE, // Found '\\Q', where 'Q' is not valid.
 	ERROR_UNCLOSED_CHARACTER_LITERAL, // Found 'a, with no close '.
 	ERROR_NO_DEAFULT_START, // No ( on defaults.
 	ERROR_NO_DEAFULT_END, // No ) on defaults.
+	ERROR_NO_GROUP_END, // No ) on groupings.
 	ERROR_NO_ARRAY_START, // No [ on arrays.
 	ERROR_NO_ARRAY_END, // No ] on arrays.
 	ERROR_NO_PARAM_START, // No < on parameters.
@@ -24,7 +25,11 @@ enum E_SSCANF_ERROR
 	ERROR_NO_STRING_MATCH, // Can't match "'xyz'".
 	ERROR_NO_STRING_LITERAL, // Found '' as a string literal.
 	ERROR_UNKNOWN_SPECIFIER, // Found an unrecognised letter.
+	ERROR_INVALID_SPECIFIER, // Letter out of range.
 	ERROR_DUPLICATE_SPECIFIER, // Two things the same.
+	ERROR_PARSE_SEQUENTIAL_GROUP, // Tried to call "ReadToken" on "SequentialGroup",
+	ERROR_NO_CHILD, // "-" "Run" called with no child set up.
+	ERROR_NO_CHILDREN, // Alt branch with no children.
 };
 
 typedef
@@ -108,5 +113,5 @@ typedef
 // TODO better.
 #define FAIL(test, error, ...) do { if (!(test)) return (error); } while (false)
 #define TRY(n) do { error_t _error = (n); if (_error != OK) return _error; } while (false)
-#define NEXT(i, c, e) do { Utils::SkipWhitespace(i); if (*i++ != c) return (e); Utils::SkipWhitespace(i); } while (false)
+#define NEXT(i, c, e) do { Utils::SkipWhitespace(i); if (*i++ != (c)) return (e); Utils::SkipWhitespace(i); } while (false)
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "memory.h"
+#include "utils.h"
 #include <map>
 
 class Environment
@@ -12,6 +13,12 @@ public:
 		m_memory(m),
 		m_options()
 	{
+	};
+	
+	error_t
+		SkipDelimiters(char const * & input)
+	{
+		return Utils::SkipWhitespaceOK(input);
 	};
 	
 	// Mostly just simple pass-throughs to the memory subsystem.

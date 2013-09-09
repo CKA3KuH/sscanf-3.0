@@ -4,9 +4,6 @@
 #include "../sdk/plugin.h"
 #include "errors.h"
 
-typedef
-	error_t (* ReadFunction_t)(char const * &, cell &);
-
 class Utils
 {
 public:

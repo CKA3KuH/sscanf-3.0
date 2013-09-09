@@ -54,6 +54,9 @@ public:
 	virtual int
 		GetMemoryUsage() { return 1; };
 	
+	virtual int
+		CountChildren() const { return 0; };
+	
 	virtual // dest
 		~Specifier()
 	{
@@ -81,6 +84,9 @@ protected:
 	{
 	};
 	
+	char
+		m_specifier;
+	
 private:
 	// cons
 		Specifier()
@@ -90,9 +96,6 @@ private:
 		m_optional(false)
 	{
 	};
-	
-	char
-		m_specifier;
 	
 	bool
 		// Only here to skip memory (i.e. "-t").
