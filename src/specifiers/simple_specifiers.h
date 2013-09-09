@@ -96,9 +96,9 @@ private:
 	
 	// Valid formats.
 	CTEST(Simple1a, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i") == OK; })
-	CTEST(Simple1b, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"d") == ERROR_EXPECTED_A_GOT_B; })
-	CTEST(Simple1v, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"") == ERROR_EXPECTED_A_GOT_B; })
-	CTEST(Simple1w, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"(") == ERROR_EXPECTED_A_GOT_B; })
+	CTEST(Simple1b, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"d") == ERROR_EXPECTED_A_GOT_B_2; })
+	CTEST(Simple1v, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"") == ERROR_EXPECTED_A_GOT_B_2; })
+	CTEST(Simple1w, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"(") == ERROR_EXPECTED_A_GOT_B_2; })
 	CTEST(Simple1c, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I") == ERROR_NO_DEAFULT_START; })
 	
 	// These don't fail.
@@ -243,11 +243,11 @@ private:
 	CTEST(Simple1u, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(0x11)") == ERROR_NO_DEAFULT_END; })
 	
 	CTEST(Simple2a, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"d") == OK; })
-	CTEST(Simple2b, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"i") == ERROR_EXPECTED_A_GOT_B; })
+	CTEST(Simple2b, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"i") == ERROR_EXPECTED_A_GOT_B_2; })
 	CTEST(Simple2c, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D") == ERROR_NO_DEAFULT_START; })
 	
 	CTEST(Simple3a, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"c") == OK; })
-	CTEST(Simple3b, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"v") == ERROR_EXPECTED_A_GOT_B; })
+	CTEST(Simple3b, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"v") == ERROR_EXPECTED_A_GOT_B_2; })
 	CTEST(Simple3c, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C") == ERROR_NO_DEAFULT_START; })
 	CTEST(Simple3f, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C ") == ERROR_NO_DEAFULT_START; })
 	CTEST(Simple3g, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C  ") == ERROR_NO_DEAFULT_START; })

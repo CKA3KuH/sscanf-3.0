@@ -90,10 +90,10 @@ error_t
 	{
 		signed char
 			c = *input - '!';
-		FAIL(c >= 0 && c < sizeof (m_specifiers) / sizeof (Specifier *), ERROR_UNKNOWN_SPECIFIER);
+		FAIL(c >= 0 && c < sizeof (m_specifiers) / sizeof (Specifier *), ERROR_UNKNOWN_SPECIFIER, c + '!');
 		// Get the specifier type from the list of known types, without ever
 		// needing to know the class of the object ("Prototype pattern").
-		FAIL(m_specifiers[c], ERROR_UNKNOWN_SPECIFIER);
+		FAIL(m_specifiers[c], ERROR_UNKNOWN_SPECIFIER, c + '!');
 		TRY(m_specifiers[c]->Clone(dest));
 		return (*dest)->ReadToken(input);
 	}

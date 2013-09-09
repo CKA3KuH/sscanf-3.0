@@ -65,7 +65,7 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_INVALID_MEMORY "Cannot write to location."
 #define SHOW_ERROR_NO_STRING_MATCH "No string literal match found."
 #define SHOW_ERROR_NO_STRING_LITERAL "Empty string literal given."
-#define SHOW_ERROR_UNKNOWN_SPECIFIER "Unknown format specifier '?'."
+#define SHOW_ERROR_UNKNOWN_SPECIFIER "Unknown format specifier '%c'."
 #define SHOW_ERROR_INVALID_SPECIFIER "Invalid specifier."
 #define SHOW_ERROR_DUPLICATE_SPECIFIER "Duplicate specifier."
 #define SHOW_ERROR_PARSE_SEQUENTIAL_GROUP "Tried to call \"ReadToken\" on a Sequential Group."
@@ -152,10 +152,7 @@ typedef
 	#define ITEST(cls, name)
 #endif
 
-extern logprintf_t
-	logprintf;
-
-#ifdef SSCANF_QUIET
+#if defined SSCANF_QUIET && !defined SSCANF_DEBUG
 	#define FAIL(test, error, ...) \
 		do { \
 			if (!(test)) { \
@@ -163,6 +160,13 @@ extern logprintf_t
 			} \
 		} while (false)
 #else
+	#ifdef SSCANF_DEBUG
+		void logprintf(char * msg, ...);
+	#else
+		extern logprintf_t
+			logprintf;
+	#endif
+
 	#define FAIL(test, error, ...) \
 		do { \
 			if (!(test)) { \
