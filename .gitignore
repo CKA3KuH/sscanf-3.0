@@ -61,3 +61,11 @@ tests-af8a0b7f.ipch
 *.obj
 /Debug/tests.vcxprojResolveAssemblyReference.cache
 /src/defaults.h
+/Release/sscanf.Build.CppClean.log
+/Release/sscanf.dll.intermediate.manifest
+/Release/sscanf.exp
+/Release/sscanf.lib
+/Release/sscanf.pdb
+/Release/sscanf.write.1.tlog
+/Release/tests.unsuccessfulbuild
+/ipch/sscanf-dded99a2/sscanf-7906df0a.ipch

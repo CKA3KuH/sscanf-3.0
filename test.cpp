@@ -4,6 +4,9 @@
 #include "src/specifiers/group_specifiers.h"
 #include "src/specifiers/simple_specifiers.h"
 
+logprintf_t
+	logprintf = &printf;
+
 int
 	main()
 {

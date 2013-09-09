@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "utils.h"
 #include <map>
+#include <string>
 
 class Environment
 {

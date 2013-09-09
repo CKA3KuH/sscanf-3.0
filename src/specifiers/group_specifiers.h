@@ -27,6 +27,15 @@ public:
 	{
 	};
 	
+	// dest
+		~SpecifierGroup()
+	{
+		for (auto i = Begin(), e = End(); i != e; ++i)
+		{
+			delete (*i);
+		}
+	};
+	
 	void
 		Add(Specifier * child)
 	{

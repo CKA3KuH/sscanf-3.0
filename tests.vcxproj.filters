@@ -46,6 +46,9 @@
     <ClCompile Include="src\specifiers\group_specifiers.cpp">
       <Filter>src\specifiers</Filter>
     </ClCompile>
+    <ClCompile Include="src\memory.cpp">
+      <Filter>src\memories</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
@@ -108,6 +111,9 @@
     </ClInclude>
     <ClInclude Include="src\parser.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\memory.h">
+      <Filter>src\memories</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

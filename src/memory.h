@@ -36,14 +36,13 @@ protected:
 		m_amx;
 };
 
-/*
 class CellMemory : public Memory
 {
 public:
 	// cons
 		CellMemory(AMX * amx, cell * params)
 	:
-		m_amx(amx);
+		Memory(amx),
 		m_cur(2), // Skip "input", and "specifier".
 		m_count(params[0] / 4),
 		m_params(params)
@@ -51,76 +50,25 @@ public:
 	};
 	
 	error_t
-		GetNextPointer(cell ** const ret)
-	{
-		if (m_cur >= m_count) return ERROR_NO_STORAGE;
-		// 1-indexed array.
-		amx_GetAddr(m_amx, m_params[++m_cur], ret);
-		return OK;
-	};
+		GetNextPointer(cell ** const ret);
 	
 	error_t
-		GetNextValue(cell * const ret)
-	{
-		if (m_cur >= m_count) return ERROR_NO_STORAGE;
-		cell *
-			addr;
-		amx_GetAddr(m_amx, m_params[++m_cur], &addr);
-		*ret = *addr;
-		return OK;
-	};
+		GetNextValue(cell * const ret);
 	
 	error_t
-		GetNextString(char * const ret, size_t len)
-	{
-		if (m_cur >= m_count) return ERROR_NO_STORAGE;
-		// 1-indexed array.
-		cell *
-			addr;
-		amx_GetAddr(m_amx, m_params[++m_cur], &addr);
-		amx_GetString(ret, addr, false, len);
-		return OK;
-	};
+		GetNextString(char * ret, size_t len);
 	
 	error_t
-		SetNextValue(cell const val, size_t idx = 0)
-	{
-		if (m_cur > m_count) return ERROR_NO_STORAGE;
-		// Only increment if we are writing the first value in an array.
-		if (!idx)
-		{
-			if (m_cur++ == m_count) return ERROR_NO_STORAGE;
-		}
-		cell *
-			addr;
-		amx_GetAddr(m_amx, m_params[m_cur], &addr);
-		addr[idx] = val;
-		return OK;
-	};
+		SetNextValue(cell const val, size_t idx = 0);
 	
 	error_t
-		SetNextString(char * const val, size_t idx = 0, bool pack = false)
-	{
-		if (m_cur > m_count) return ERROR_NO_STORAGE;
-		if (!idx)
-		{
-			if (m_cur++ == m_count) return ERROR_NO_STORAGE;
-		}
-		// 1-indexed array.
-		cell *
-			addr;
-		amx_GetAddr(m_amx, m_params[m_cur], &addr);
-		amx_SetString(addr + idx, val, pack, false, strlen(val));
-		return OK;
-	};
+		SetNextString(char const * val, size_t idx = 0, bool pack = false);
 	
 	error_t
-		Skip(size_t n)
-	{
-		m_cur = m_cur + n;
-		if (m_cur >= m_count) return ERROR_NO_STORAGE;
-		return OK;
-	};
+		Skip(int n);
+	
+	int
+		Poll();
 	
 private:
 	size_t
@@ -131,6 +79,7 @@ private:
 		m_params;
 };
 
+/*
 class EnumMemory : public Memory
 {
 public:

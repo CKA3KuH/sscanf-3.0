@@ -260,7 +260,7 @@ error_t
 	ReadToken(char const * & input)
 {
 	// Check this has the correct specifier.
-	FAIL((*input | 0x20) == GetSpecifier(), ERROR_EXPECTED_A_GOT_B, GetSpecifier(), *input);
+	FAIL((*input | 0x20) == GetSpecifier(), ERROR_EXPECTED_A_GOT_B_2, GetSpecifier(), *input);
 	// Check if this is upper-case (optional).
 	if (*input++ != GetSpecifier())
 	{

@@ -299,7 +299,7 @@ error_t
 	TRY(Utils::ReadChar(input, n));
 	if (quotes)
 	{
-		FAIL(*input == '\'', ERROR_UNCLOSED_CHARACTER_LITERAL);
+		FAIL(*input == '\'', ERROR_UNCLOSED_CHARACTER_LIT);
 		++input;
 	}
 	return OK;
@@ -410,7 +410,7 @@ error_t
 	NextChar(char const * & input, char val)
 {
 	Utils::SkipWhitespace(input);
-	FAIL(*input == val, ERROR_EXPECTED_A_GOT_B, val, *input);
+	FAIL(*input == val, ERROR_EXPECTED_A_GOT_B_2, val, *input);
 	++input;
 	Utils::SkipWhitespace(input);
 	return OK;
@@ -425,7 +425,7 @@ error_t
 		cur = val;
 	while (*cur)
 	{
-		FAIL(*input == *cur, ERROR_EXPECTED_A_GOT_B, val, *input);
+		FAIL(*input == *cur, ERROR_EXPECTED_A_GOT_B_1, val, *input);
 		++cur;
 		++input;
 	}

@@ -94,6 +94,11 @@ ReadToken_new_alt:
 		m_storeAlt = !child->GetSkip();
 		delete child;
 	}
+	else
+	{
+		// Store the alternate branch taken if there are any alternatives.
+		m_storeAlt = CountChildren() > 1;
+	}
 	return OK;
 }
 
@@ -158,6 +163,7 @@ error_t
 			input = start;
 			break;
 		}
+		else if (i == e) return last;
 		else
 		{
 			env.Skip(initial - env.Poll()); // Rewind.
@@ -182,8 +188,6 @@ error_t
 		}
 		++alt;
 	}
-	// Don't bother writing the alternate if there was no solution.
-	TRY(last);
 	// Find where to store the alternate.
 	while (i != e)
 	{

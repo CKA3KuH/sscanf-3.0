@@ -1,34 +1,119 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="SDK\amxplugin.cpp" />
-    <ClCompile Include="SDK\amx\getch.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="SDK\amx\amx.h" />
-    <ClInclude Include="SDK\amx\getch.h" />
-    <ClInclude Include="SDK\plugin.h" />
-    <ClInclude Include="SDK\plugincommon.h" />
-    <ClInclude Include="SDK\amx\sclinux.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="YSF.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="src">
-      <UniqueIdentifier>{a1f0d59f-5264-4fc2-8934-47744307c68a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\memories">
-      <UniqueIdentifier>{a2008d47-1ec2-4248-8fab-1a1e2a8c986a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\specifiers">
-      <UniqueIdentifier>{226f6008-3964-45d7-9950-1f4e78b9df5f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="sdk">
-      <UniqueIdentifier>{c8ad1365-3073-49db-ab9d-292191d4e31a}</UniqueIdentifier>
+      <UniqueIdentifier>{ae0c729e-6ea6-4d6f-8529-c84462b3f629}</UniqueIdentifier>
     </Filter>
     <Filter Include="sdk\amx">
-      <UniqueIdentifier>{647634d3-19e1-4c90-8be9-08a05e11de0f}</UniqueIdentifier>
+      <UniqueIdentifier>{44aa3a49-fa24-4188-892a-9da0879ce178}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{8b733786-eb9b-416e-97be-9f67ea0c6a0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\memories">
+      <UniqueIdentifier>{41c46765-61b1-4519-ad17-a84697e8e50f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\specifiers">
+      <UniqueIdentifier>{fa6802e1-e162-44c5-b329-b6e0c8191d5a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sdk\amxplugin.cpp">
+      <Filter>sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk\amx\getch.c">
+      <Filter>sdk\amx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\environment.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\errors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\specifiers\group_specifiers.cpp">
+      <Filter>src\specifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\specifiers\other_specifiers.cpp">
+      <Filter>src\specifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="sscanf.cpp" />
+    <ClCompile Include="src\memory.cpp">
+      <Filter>src\memories</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sdk\plugin.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\plugincommon.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\amx\amx.h">
+      <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\amx\getch.h">
+      <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\amx\sclinux.h">
+      <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\environment.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\errors.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\array_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\delim_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\enum_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\group_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\numeric_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\other_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\player_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\simple_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\string_specifier.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\specifiers\trivial_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="sscanf.h" />
+    <ClInclude Include="src\memory.h">
+      <Filter>src\memories</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sscanf.def" />
   </ItemGroup>
 </Project>

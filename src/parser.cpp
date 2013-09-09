@@ -43,7 +43,7 @@ error_t
 		if (*input != '\0')
 		{
 			DEL(dest);
-			FAIL(false, ERROR_EXPECTED_A_GOT_B, "<end of string>", *input);
+			FAIL(false, ERROR_EXPECTED_A_GOT_B_1, "<end of string>", *input);
 		}
 		// At this point, we could run an optimisation pass on the tree!  The
 		// only one I can think of at this point is to replace "Alt" groups with

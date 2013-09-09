@@ -10,6 +10,45 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sdk\amxplugin.cpp" />
+    <ClCompile Include="sdk\amx\getch.c" />
+    <ClCompile Include="src\environment.cpp" />
+    <ClCompile Include="src\errors.cpp" />
+    <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\parser.cpp" />
+    <ClCompile Include="src\specifiers\group_specifiers.cpp" />
+    <ClCompile Include="src\specifiers\other_specifiers.cpp" />
+    <ClCompile Include="src\utils.cpp" />
+    <ClCompile Include="sscanf.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sdk\amx\amx.h" />
+    <ClInclude Include="sdk\amx\getch.h" />
+    <ClInclude Include="sdk\amx\sclinux.h" />
+    <ClInclude Include="sdk\plugin.h" />
+    <ClInclude Include="sdk\plugincommon.h" />
+    <ClInclude Include="src\environment.h" />
+    <ClInclude Include="src\errors.h" />
+    <ClInclude Include="src\memory.h" />
+    <ClInclude Include="src\parser.h" />
+    <ClInclude Include="src\specifiers.h" />
+    <ClInclude Include="src\specifiers\array_specifier.h" />
+    <ClInclude Include="src\specifiers\delim_specifier.h" />
+    <ClInclude Include="src\specifiers\enum_specifier.h" />
+    <ClInclude Include="src\specifiers\group_specifiers.h" />
+    <ClInclude Include="src\specifiers\numeric_specifier.h" />
+    <ClInclude Include="src\specifiers\other_specifiers.h" />
+    <ClInclude Include="src\specifiers\player_specifier.h" />
+    <ClInclude Include="src\specifiers\simple_specifiers.h" />
+    <ClInclude Include="src\specifiers\string_specifier.h" />
+    <ClInclude Include="src\specifiers\trivial_specifiers.h" />
+    <ClInclude Include="src\utils.h" />
+    <ClInclude Include="sscanf.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sscanf.def" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C26720F7-2E1A-4AE0-A611-0956EC9CEA8C}</ProjectGuid>
     <RootNamespace>HelloWorld</RootNamespace>
@@ -79,7 +118,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SSCANF_EXPORTS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SSCANF_EXPORTS;SSCANF_QUIET;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Strict</FloatingPointModel>
@@ -108,20 +147,6 @@
       <IgnoreSpecificDefaultLibraries>user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="SDK\amx\amx.h" />
-    <ClInclude Include="SDK\amx\getch.h" />
-    <ClInclude Include="SDK\plugin.h" />
-    <ClInclude Include="SDK\plugincommon.h" />
-    <ClInclude Include="SDK\amx\sclinux.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="SDK\amxplugin.cpp" />
-    <ClCompile Include="SDK\amx\getch.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="YSF.def" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
