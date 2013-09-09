@@ -46,7 +46,10 @@ public:
 		SetNextString(char const * val, size_t idx = 0, bool pack = false) { return m_memory->SetNextString(val, idx, pack); };
 	
 	error_t
-		Skip(size_t n) { return m_memory->Skip(n); };
+		Skip(int n) { return m_memory->Skip(n); };
+	
+	virtual int
+		Poll() { return m_memory->Poll(); };
 	
 	void
 		SetOption(char const * name, int const value)
@@ -147,7 +150,14 @@ private:
 		};
 		
 		virtual error_t
-			Skip(size_t n)
+			Skip(int n)
+		{
+			FAIL(false, ERROR_INVALID_MEMORY);
+			return OK;
+		};
+		
+		virtual int
+			Poll()
 		{
 			FAIL(false, ERROR_INVALID_MEMORY);
 			return OK;

@@ -26,7 +26,10 @@ public:
 		SetNextString(char const * val, size_t idx = 0, bool pack = false) = 0;
 	
 	virtual error_t
-		Skip(size_t n) = 0;
+		Skip(int n) = 0;
+	
+	virtual int
+		Poll() = 0;
 	
 protected:
 	AMX *

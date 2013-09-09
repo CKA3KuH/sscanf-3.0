@@ -80,6 +80,7 @@
     <ClCompile Include="src\errors.cpp" />
     <ClCompile Include="src\parser.cpp" />
     <ClCompile Include="src\specifiers.cpp" />
+    <ClCompile Include="src\specifiers\group_specifiers.cpp" />
     <ClCompile Include="src\specifiers\other_specifiers.cpp" />
     <ClCompile Include="src\utils.cpp" />
     <ClCompile Include="test.cpp" />

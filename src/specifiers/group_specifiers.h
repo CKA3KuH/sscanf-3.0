@@ -171,61 +171,13 @@ public:
 	CLONE();
 	
 	virtual cell
-		Skip(Environment & env)
-	{
-		// "-1" means "unknown" or "variable".
-		if (m_memory == -1)
-		{
-			cell
-				ret = 0,
-				cur = 0;
-			for (auto i = Begin(), e = End(); i != e; ++i)
-			{
-				cur = (*i)->Skip(env);
-				if (cur == -1) ret = -1;
-				else if (ret != -1) ret += cur;
-			}
-			return (m_memory = ret);
-		}
-		else
-		{
-			env.Skip(m_memory);
-			return m_memory;
-		}
-	};
+		Skip(Environment & env);
 	
 	virtual error_t
-		Run(char const * & input, Environment & env)
-	{
-		error_t
-			fail = OK;
-		for (auto i = Begin(), e = End(); i != e; ++i)
-		{
-			if (fail)
-			{
-				// Skip the remaining associated memory.
-				(*i)->Skip(env);
-			}
-			else
-			{
-				fail = (*i)->Run(input, env);
-				if (fail) (*i)->Skip(env);
-				else fail = env.SkipDelimiters(input);
-			}
-		}
-		return fail;
-	};
+		Run(char const * & input, Environment & env);
 	
 	virtual std::ostream &
-		Render(std::ostream & out) const
-	{
-		//out << "(";
-		for (auto i = Begin(), e = End(); i != e; ++i)
-		{
-			(*i)->Render(out);
-		}
-		return out; // << ")";
-	};
+		Render(std::ostream & out) const;
 	
 private:
 	int
@@ -238,6 +190,7 @@ public:
 	// cons
 		AltGroup(bool local = true)
 	:
+		m_sequential(true),
 		m_local(local),
 		m_storeAlt(true),
 		m_memory(-1),
@@ -248,6 +201,7 @@ public:
 	// cons
 		AltGroup(AltGroup const & that)
 	:
+		m_sequential(that.m_sequential),
 		m_local(that.m_local),
 		m_storeAlt(that.m_storeAlt),
 		m_memory(-1),
@@ -260,146 +214,20 @@ public:
 	
 	// Local.
 	virtual error_t
-		ReadToken(char const * & input)
-	{
-		if (m_local) ++input;
-		Specifier *
-			child;
-		SequentialGroup *
-			alt;
-		// Avoids repetition of code.
-		goto ReadToken_new_alt;
-		do
-		{
-			if (child->GetSpecifier() == '|')
-			{
-				FAIL(alt->Begin() != alt->End(), ERROR_NO_CHILDREN);
-ReadToken_new_alt:
-				alt = new SequentialGroup();
-				Add(alt);
-			}
-			else
-			{
-				alt->Add(child);
-			}
-			TRY(gParser.GetNext(input, &child));
-			if (m_local && child->GetSpecifier() == ')') break;
-		}
-		while (child);
-		FAIL(alt->Begin() != alt->End(), ERROR_NO_CHILDREN);
-		if (m_local)
-		{
-			FAIL(child, ERROR_NO_GROUP_END);
-		}
-		return OK;
-	};
-		
+		ReadToken(char const * & input);
+	
 	virtual cell
-		Skip(Environment & env)
-	{
-		// "-1" means "unknown" or "variable".
-		if (m_memory == -1)
-		{
-			cell
-				ret = 0,
-				cur = 0;
-			for (auto i = Begin(), e = End(); i != e; ++i)
-			{
-				cur = (*i)->Skip(env);
-				if (cur == -1) ret = -1;
-				else if (ret != -1) ret += cur;
-			}
-			if (m_storeAlt)
-			{
-				if (ret != -1) ++ret;
-				env.Skip(1);
-			}
-			return (m_memory = ret);
-		}
-		else
-		{
-			env.Skip(m_memory);
-			return m_memory;
-		}
-	};
-	
-	// virtual error_t
-		// Run(char const * & input, Environment & env)
-	// {
-		// for (auto i = Begin(), e = End(); i != e; ++i)
-		// {
-			// TRY((*i)->Run(input, env));
-			// TRY(env.SkipDelimiters(input));
-		// }
-		// return OK;
-	// };
-	
+		Skip(Environment & env);
+
 	virtual error_t
-		Run(char const * & input, Environment & env)
-	{
-		error_t
-			last = OK;
-		cell
-			alt = 0;
-		auto
-			i = Begin(),
-			e = End();
-		// Parse this alternate.
-		while (i != e)
-		{
-			char const *
-				start = input;
-			// Make a copy of the current state of the delimiters and pass THAT
-			// to children so that it resets for every alternate branch.
-			Environment
-				local(env);
-			last = (*i)->Run(start, local);
-			++i;
-			if (last == OK)
-			{
-				// Found a group that works.
-				input = start;
-				break;
-			}
-			++alt;
-		}
-		// Don't bother writing the alternate if there was no solution.
-		TRY(last);
-		// Find where to store the alternate.
-		while (i != e)
-		{
-			// I'll have to re-write this so that children know their sizes in
-			// advance.  Technically "memory usage" is "number of variables".
-			(*i)->Skip(env);
-			++i;
-		}
-		// Store the value of the alternate used.
-		if (m_storeAlt) TRY(env.SetNextValue(alt));
-		return OK;
-		// Return the last error, whatever it was (may be useful, may not - will
-		// be if there's only one alternate (but we can optimise that case)).
-		// In fact we will HAVE to optimise that case or the "WriteNextCell"
-		// above will fail, because when there is only one version, there is no
-		// alternate write target.
-	};
+		Run(char const * & input, Environment & env);
 	
 	virtual std::ostream &
-		Render(std::ostream & out) const
-	{
-		if (m_local) out << "(";
-		for (auto i = Begin(), e = End(); ; )
-		{
-			(*i)->Render(out);
-			++i;
-			if (i == e) break;
-			out << "|";
-		}
-		if (m_local) out << ")";
-		return out;
-	};
+		Render(std::ostream & out) const;
 	
 private:
 	bool
+		m_sequential,
 		m_storeAlt,
 		m_local;
 	
@@ -423,3 +251,4 @@ private:
 	CTEST(GlobGroup4,  { AltGroup gg(false); return gg.ReadToken(S"ii|D(5)|cc|  H(11)n") == OK && *CUR == '\0'; })
 	CTEST(GlobGroup5,  { AltGroup gg(false); gg.ReadToken(S"ii|xh");ss s; return dynamic_cast<ss &>(s << gg).str() == "ii|xh"; })
 };
+

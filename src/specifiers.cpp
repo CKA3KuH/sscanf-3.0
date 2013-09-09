@@ -48,7 +48,10 @@
 			SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; }
 		
 		virtual error_t
-			Skip(size_t n) { pos += n; return OK; }
+			Skip(int n) { pos += n; return OK; }
+		
+		virtual int
+			Poll() { return pos; };
 		
 		int
 			pos;
@@ -428,10 +431,6 @@ ITEST(SimpleSpecifier, SimpleH29)
 ITEST(SimpleSpecifier, SimpleH30)
 ITEST(SimpleSpecifier, SimpleH31)*/
 
-
-
-
-
 TEST(TrueAlts1, {
 	Specifier * spec; gParser.Compile(S"i|c", &spec);
 	cell data[3] = { 42, '#', 0 }; TestMemory tm(data, 3); Environment env(&tm);
@@ -463,8 +462,12 @@ TEST(TrueAlts5, {
 	return spec->Run(S"70 g", env) == OK;
 });
 
+// Test data rewinding.
 
-
-
-
+TEST(TrueAlts6, {
+	// Alts with matching prefixes.
+	Specifier * spec; gParser.Compile(S"5i|5x", &spec);
+	cell data[11] = { 11, 22, 33, 0, 0, 0x11, 0x22, 0x33, 0xFF, 0xAA, 1 }; TestMemory tm(data, 11); Environment env(&tm);
+	return spec->Run(S"11 22 33 FF AA", env) == OK;
+});
 

@@ -7,7 +7,7 @@
 #include "specifiers/enum_specifier.hpp" // Relies on group_specifiers.
 #include "specifiers/player_specifier.hpp"
 #include "specifiers/string_specifier.hpp"*/
-//#include "specifiers/numeric_specifier.h"
+#include "specifiers/numeric_specifier.h"
 #include "specifiers/trivial_specifiers.h"
 #include "specifiers/simple_specifiers.h"
 #include "specifiers/other_specifiers.h"
@@ -183,7 +183,7 @@ error_t
 	TRY(Add(new TrivialSpecifier('>'))); // End subtype.
 	
 	// Add all 10 numeric specifiers.
-	/*temp = new NumericSpecifier();
+	temp = new NumericSpecifier();
 	TRY(AddAs(temp, '0'));
 	TRY(AddAs(temp, '1'));
 	TRY(AddAs(temp, '2'));
@@ -194,7 +194,7 @@ error_t
 	TRY(AddAs(temp, '7'));
 	TRY(AddAs(temp, '8'));
 	TRY(AddAs(temp, '9'));
-	TRY(AddAs(temp, '*')); // Special case - unknown count.*/
+	TRY(AddAs(temp, '*')); // Special case - unknown count.
 	
 	// Add string literals.
 	temp = new LiteralSpecifier();
