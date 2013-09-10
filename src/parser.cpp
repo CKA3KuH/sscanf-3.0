@@ -16,7 +16,7 @@
 Parser
 	gParser;
 
-#define DEL(dest) do { delete *dest; *dest = nullptr; } while (false);
+#define DEL(dest) do { delete dest; dest = nullptr; } while (false);
 
 error_t
 	Parser::
@@ -29,26 +29,35 @@ error_t
 	{
 		// We ALWAYS start with an "alt" group (the special one written just for
 		// this purpose and that doesn't end with a close bracket).
-		*dest = new AltGroup(false);
+		AltGroup *
+			ret = new AltGroup(false);
 		error_t
 			e;
 		// TODO: These checks don't clean up properly.
-		e = (*dest)->ReadToken(input);
+		e = ret->ReadToken(input);
 		if (e != OK)
 		{
-			DEL(dest);
+			DEL(ret);
 			return e;
 		}
 		Utils::SkipWhitespace(input);
 		if (*input != '\0')
 		{
-			DEL(dest);
+			DEL(ret);
 			FAIL(false, ERROR_EXPECTED_A_GOT_B_1, "<end of string>", *input);
 		}
 		// At this point, we could run an optimisation pass on the tree!  The
 		// only one I can think of at this point is to replace "Alt" groups with
 		// only one child by regular sequence groups.  Or merge hierarchical
 		// sequences.
+		if (ret->CountChildren() == 1)
+		{
+			// Return just a sequence.
+			*dest = *ret->Begin();
+			ret->m_children.clear();
+			delete ret;
+		}
+		else *dest = ret;
 	}
 	catch (std::bad_alloc const &)
 	{
@@ -68,7 +77,7 @@ error_t
 #undef DEL
 
 TEST(PC0, { Specifier * spec; return gParser.Compile(S"", &spec) == ERROR_NO_CHILDREN; })
-TEST(PC1, { Specifier * spec; return gParser.Compile(S"ii", &spec) == OK && spec->GetSpecifier() == '('; })
+TEST(PC1, { Specifier * spec; return gParser.Compile(S"ii", &spec) == OK && spec->GetSpecifier() == '\0'; })
 TEST(PC5, { Specifier * spec; return gParser.Compile(S"iiq", &spec) == ERROR_UNKNOWN_SPECIFIER; })
 TEST(PC2, { Specifier * spec; return gParser.Compile(S"ii|dd", &spec) == OK && spec->GetSpecifier() == '('; })
 TEST(PC3, { Specifier * spec; return gParser.Compile(S"i|X(0xFF)", &spec) == OK && spec->GetSpecifier() == '(' && spec->CountChildren() == 2; })

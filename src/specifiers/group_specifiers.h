@@ -72,6 +72,8 @@ public:
 private:
 	std::list<Specifier *>
 		m_children;
+	
+	friend class Parser;
 };
 
 /*

@@ -27,7 +27,12 @@ public:
 	error_t
 		SkipDelimiters(char const * & input)
 	{
-		return Utils::SkipWhitespaceOK(input);
+		if ('\0' <= *input && *input <= ' ')
+		{
+			Utils::SkipWhitespace(input);
+			return OK;
+		}
+		return ERROR_INVALID_DELIMITER;
 	};
 	
 	// Mostly just simple pass-throughs to the memory subsystem.

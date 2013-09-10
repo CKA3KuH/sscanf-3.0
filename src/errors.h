@@ -37,7 +37,8 @@ enum E_SSCANF_ERROR
 	ERROR_PARSE_SEQUENTIAL_GROUP, // Tried to call "ReadToken" on "SequentialGroup",
 	ERROR_NO_CHILD, // "-" "Run" called with no child set up.
 	ERROR_NO_CHILDREN, // Alt branch with no children.
-	ERROR_OUT_OF_VARIABLES
+	ERROR_OUT_OF_VARIABLES,
+	ERROR_INVALID_DELIMITER,
 };
 
 #define SHOW_OK ""
@@ -72,6 +73,7 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_NO_CHILD "Attempted to \"Run\" a specifier with no child."
 #define SHOW_ERROR_NO_CHILDREN "Empty alt branch."
 #define SHOW_ERROR_OUT_OF_VARIABLES "Insufficient destination variables given."
+#define SHOW_ERROR_INVALID_DELIMITER "Could not find a valid delimiter."
 
 typedef
 	enum E_SSCANF_ERROR

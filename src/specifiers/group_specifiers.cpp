@@ -70,8 +70,8 @@ error_t
 	{
 		if (child->GetSpecifier() == '|')
 		{
-			// Takes the value of the last "|" in the alt.
-			m_sequential = !child->GetSkip();
+			// Takes the value of any "|" in the alt.
+			m_sequential = m_sequential && !child->GetSkip();
 			delete child;
 			FAIL(alt->Begin() != alt->End(), ERROR_NO_CHILDREN);
 ReadToken_new_alt:
@@ -156,6 +156,8 @@ error_t
 		int
 			initial = env.Poll();
 		last = (*i)->Run(start, local);
+		Specifier *
+			prev = *i;
 		++i;
 		if (last == OK)
 		{
@@ -167,7 +169,7 @@ error_t
 		else
 		{
 			env.Skip(initial - env.Poll()); // Rewind.
-			if (m_sequential) (*i)->Skip(env); // Skip everything.
+			if (m_sequential) prev->Skip(env); // Skip everything.
 			// If the data is not stored sequentially, then it must be
 			// stored in parallel, i.e. all alts go in the same slots.  In
 			// that case, after we have rewound to the start of the current
@@ -189,10 +191,13 @@ error_t
 		++alt;
 	}
 	// Find where to store the alternate.
-	while (i != e)
+	if (m_sequential)
 	{
-		(*i)->Skip(env);
-		++i;
+		while (i != e)
+		{
+			(*i)->Skip(env);
+			++i;
+		}
 	}
 	// Store the value of the alternate used.
 	if (m_storeAlt) TRY(env.SetNextValue(alt));
