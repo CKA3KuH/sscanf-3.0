@@ -43,8 +43,9 @@ public:
 	};
 	
 	virtual bool
-		AtDelimiter(char const * & input) const
+		AtDelimiter(char const * & input, bool incWhite) const
 	{
+		if (incWhite) return *input <= ' ';
 		// ONLY NULL for now.
 		return *input == '\0';
 	};

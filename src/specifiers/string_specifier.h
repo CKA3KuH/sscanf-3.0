@@ -23,12 +23,18 @@ public:
 	// cons
 		StringSpecifier(StringSpecifier const & that)
 	:
-		Specifier('s'),
+		Specifier(that),
 		m_ssize(that.m_ssize),
 		m_length(that.m_length),
 		m_default(that.m_default),
 		m_last(that.m_last)
 	{
+	};
+	
+	virtual // dest
+		~StringSpecifier()
+	{
+		delete m_default;
 	};
 	
 	virtual error_t
@@ -59,98 +65,7 @@ public:
 	CLONE();
 	
 	virtual error_t
-		Run(char const * & input, Environment & env)
-	{
-		cell
-			dump;
-		size_t
-			size = 0;
-		if (m_ssize < 0)
-		{
-			// Get it from "env".
-			TRY(env.GetNextValue(&dump));
-			FAIL(dump > 0, ERROR_INVALID_ARRAY_SIZE);
-			size = dump;
-		}
-		else if (m_ssize > 0) size = m_ssize;
-		else FAIL(env.GetMemory()->GetZeroLengthValid(), ERROR_INVALID_ARRAY_SIZE);
-		if (size)
-		{
-			// Reserve one character for the "NULL" terminator always.
-			--size;
-			size_t
-				idx = 0;
-			if (*input == '\0')
-			{
-				FAIL(GetOptional(), ERROR_NO_STRING_LITERAL);
-				// This would be less complex if it wasn't so backwards
-				// compatible.  The old version REQUIRED sizes even on quiet
-				// strings.  This new version would prefer none to be given.
-				if (size >= m_length)
-				{
-					// Greater than, or exactly enough, space available.
-					for ( ; idx <= m_length; ++idx) TRY(env.SetNextValue(m_default[idx], idx));
-					TRY(env.Skip(0, size - m_length));
-				}
-				else
-				{
-					// Not enough space.
-					for ( ; idx < size; ++idx) TRY(env.SetNextValue(m_default[idx], idx));
-					TRY(env.SetNextValue('\0', size));
-					logprintf("sscanf warning: String buffer overflow. at %s:%d.", __FILE__, __LINE__);
-				}
-				return OK;
-			}
-			if (m_last)
-			{
-				size_t
-					lnws = 0; // Last Not White Space.
-				while (idx < size && !env.AtDelimiter(input))
-				{
-					// Don't use "dump" as "\ " is valid whitespace.
-					if (*input > ' ') lnws = idx + 1;
-					TRY(Utils::ReadChar(input, dump));
-					TRY(env.SetNextValue(dump, idx++));
-				}
-				// No valid string actually read!
-				FAIL(lnws != 0, ERROR_NO_STRING_LITERAL);
-				// Pad the remainder of any array memory.  End this string at
-				// the last space found, not the VERY end.
-				TRY(env.SetNextValue('\0', lnws));
-				// Currently only "enum" uses this.  But it tells the memory
-				// system how big the array SHOULD be, if that's ever useful.
-				if (lnws != idx) --idx;
-				TRY(env.Skip(0, size - idx));
-				if (env.AtDelimiter(input)) return OK;
-			}
-			else
-			{
-				while (idx < size && *input > ' ')
-				{
-					TRY(Utils::ReadChar(input, dump));
-					TRY(env.SetNextValue(dump, idx++));
-				}
-				// Both "idx" and "size" are OBO at this point, so cancel out.
-				TRY(env.SetNextValue('\0', idx));
-				TRY(env.Skip(0, size - idx));
-				if (*input <= ' ') return OK;
-			}
-			// This is not a fatal error - the remainder is being dumped.
-			logprintf("sscanf warning: String buffer overflow. at %s:%d.", __FILE__, __LINE__);
-		}
-		else if (*input == '\0')
-		{
-			// Don't even bother saving the non-existent data to nowhere.
-			FAIL(GetOptional(), ERROR_NO_STRING_LITERAL);
-			return OK;
-		}
-		// Loop to an explicit delimiter (NULL counts).  Use "ReadChar" so that
-		// we can still do "\ " to include spaces when we shouldn't otherwise.
-		if (m_last) while (!env.AtDelimiter(input)) TRY(Utils::ReadChar(input, dump));
-		else while (*input > ' ') TRY(Utils::ReadChar(input, dump));
-		// Discard the result.
-		return OK;
-	};
+		Run(char const * & input, Environment & env);
 	
 	virtual cell
 		Skip(Environment & env)

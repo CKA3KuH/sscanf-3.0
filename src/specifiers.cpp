@@ -329,26 +329,3 @@ TEST(TrueAlts6, {
 	return spec->Run(S"11 22 33 FF AA", env) == OK;
 });
 
-
-ITEST(StringSpecifier, StringSRun00)
-ITEST(StringSpecifier, StringSRun01)
-ITEST(StringSpecifier, StringSRun02)
-ITEST(StringSpecifier, StringSRun03)
-ITEST(StringSpecifier, StringSRun04)
-ITEST(StringSpecifier, StringSRun05)
-ITEST(StringSpecifier, StringSRun06)
-ITEST(StringSpecifier, StringSRun07)
-
-ITEST(StringSpecifier, StringSRun08)
-ITEST(StringSpecifier, StringSRun09)
-ITEST(StringSpecifier, StringSRun10)
-ITEST(StringSpecifier, StringSRun11)
-ITEST(StringSpecifier, StringSRun12)
-ITEST(StringSpecifier, StringSRun13)
-ITEST(StringSpecifier, StringSRun14)
-ITEST(StringSpecifier, StringSRun15)
-ITEST(StringSpecifier, StringSRun16)
-ITEST(StringSpecifier, StringSRun17)
-ITEST(StringSpecifier, StringSRun18)
-ITEST(StringSpecifier, StringSRun19)
-

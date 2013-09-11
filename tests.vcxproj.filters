@@ -55,6 +55,9 @@
     <ClCompile Include="src\specifiers\simple_specifiers.cpp">
       <Filter>src\specifiers</Filter>
     </ClCompile>
+    <ClCompile Include="src\specifiers\string_specifier.cpp">
+      <Filter>src\specifiers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
