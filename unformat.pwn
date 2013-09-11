@@ -90,6 +90,64 @@ main()
 	print(" - Group 2:");
 	print(" ");
 	ASSERT(unformat("999 88", "b-|dd|x", var0, var1, var2) == OK && var0 == 999 && var1 == 88 && var2 == 1);
+	
+	print(" ");
+	print(" - Group 3:");
+	print(" ");
+	
+	ASSERT(unformat("5", "i<0-9>", var0) == OK && var0 == 5);
+	ASSERT(unformat("50", "i<0-9>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat(" ", "I<0-9>(5)", var0) == OK && var0 == 5);
+	// This DID crash, but then I found out why.  The odd error is because the
+	// "(" after the "i<0-9>" starts a group, and the first item in that group
+	// is "5)", i.e. 5 close group specifiers.  This, of course, will never run,
+	// but it will also not compile because that means that the "5" consumes the
+	// trailing ")", so there isn't one to end the group.
+	ASSERT(unformat("", "i<0-9>(5)", var0) == ERROR_NO_GROUP_END);
+	// This line gives an error quite late on.
+	//RUN("2", "i<0-9>(5))", var0); // == ERROR_RAN_TRIVIAL.
+	ASSERT(unformat("", "I<0-9>(5)", var0) == OK && var0 == 5);
+	ASSERT(unformat(" ", "I<0-9>(50)", var0) == OK && var0 == 50);
+	ASSERT(unformat(" ", "H<0-9>(50)", var0) == OK && var0 == 0x50);
+	ASSERT(unformat(" ", "X<0-9>(FF)", var0) == OK && var0 == 0xFF);
+	ASSERT(unformat(" ", "D<-4--1>(50)", var0) == OK && var0 == 50);
+	ASSERT(unformat(" ", "O<56-66>(43)", var0) == OK && var0 == 35);
+	
+	ASSERT(unformat(" ", "B<0110-1111>(1000)", var0) == OK && var0 == 0b1000);
+	ASSERT(unformat("20", "I<0-9>(50)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("10", "H<0-F>(50)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("F", "X<0-9>(FF)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("0", "D<-4--1>(50)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("2", "O<56-66>(43)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("10", "B<0110-1111>(1000)", var0) == ERROR_OUT_OF_RANGE);
+	
+	ASSERT(unformat("87", "I<-100 - 100>(50)", var0) == OK && var0 == 87);
+	ASSERT(unformat("0x400", "H<FF - FFF>(50)", var0) == OK && var0 == 0x400);
+	ASSERT(unformat("0", "X<0 - 0>(FF)", var0) == OK && var0 == 0);
+	ASSERT(unformat("-2", "D<-4--1>(50)", var0) == OK && var0 == -2);
+	ASSERT(unformat("56", "O<56-66>(43)", var0) == OK && var0 == 46);
+	ASSERT(unformat("66", "O<56-66>(43)", var0) == OK && var0 == 54);
+	ASSERT(unformat("55", "O<56-66>(43)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("67", "O<56-66>(43)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("0111", "B<0110-1111>(1000)", var0) == OK && var0 == 0b0111);
+	
+	ASSERT(unformat("20", "i<0-9>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("10", "h<0-F>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("F", "x<0-9>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("0", "d<-4--1>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("2", "o<56-66>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("10", "b<0110-1111>", var0) == ERROR_OUT_OF_RANGE);
+	
+	ASSERT(unformat("87", "i<-100 - 100>", var0) == OK && var0 == 87);
+	ASSERT(unformat("0x400", "h<FF - FFF>", var0) == OK && var0 == 0x400);
+	ASSERT(unformat("0", "x<0 - 0>", var0) == OK && var0 == 0);
+	ASSERT(unformat("-2", "d<-4--1>", var0) == OK && var0 == -2);
+	ASSERT(unformat("56", "o<56-66>", var0) == OK && var0 == 46);
+	ASSERT(unformat("66", "o<56-66>", var0) == OK && var0 == 54);
+	ASSERT(unformat("55", "o<56-66>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("67", "o<56-66>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("0111", "b<0110-1111>", var0) == OK && var0 == 0b0111);
+
 
 	
 	
