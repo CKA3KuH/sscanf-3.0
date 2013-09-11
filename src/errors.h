@@ -200,7 +200,7 @@ typedef
 	#define FAIL(test, error, ...) \
 		do { \
 			if (!(test)) { \
-				logprintf(SHOW_##error " (%d) at %s:%d.", __VA_ARGS__, (int)error, __FILE__, __LINE__); \
+				logprintf("sscanf error: " SHOW_##error " (%d) at %s:%d.", __VA_ARGS__, (int)error, __FILE__, __LINE__); \
 				return (error); \
 			} \
 		} while (false)

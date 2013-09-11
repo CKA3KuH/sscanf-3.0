@@ -31,8 +31,8 @@ public:
 		}
 	};
 	
-	error_t
-		SkipDelimiters(char const * & input)
+	virtual error_t
+		SkipDelimiters(char const * & input) const
 	{
 		if ('\0' <= *input && *input <= ' ')
 		{
@@ -40,6 +40,13 @@ public:
 			return OK;
 		}
 		return ERROR_INVALID_DELIMITER;
+	};
+	
+	virtual bool
+		AtDelimiter(char const * & input) const
+	{
+		// ONLY NULL for now.
+		return *input == '\0';
 	};
 	
 	// Mostly just simple pass-throughs to the memory subsystem.
@@ -59,7 +66,7 @@ public:
 		SetNextString(char const * val, size_t idx = 0, bool pack = false) { return m_memory->SetNextString(val, idx, pack); };
 	
 	error_t
-		Skip(int n) { return m_memory->Skip(n); };
+		Skip(int n, int part = 0) { return m_memory->Skip(n, part); };
 	
 	virtual int
 		Poll() { return m_memory->Poll(); };
@@ -117,7 +124,7 @@ private:
 			GetNextPointer(cell ** const ret)
 		{
 			FAIL(m_save, ERROR_INVALID_MEMORY);
-			*ret = m_save;
+			*ret = ++m_save;
 			return OK;
 		};
 		
@@ -170,16 +177,16 @@ private:
 		};
 		
 		virtual error_t
-			Skip(int n)
+			Skip(int n, int part = 0)
 		{
-			FAIL(false, ERROR_INVALID_MEMORY);
+			//FAIL(false, ERROR_INVALID_MEMORY);
 			return OK;
 		};
 		
 		virtual int
 			Poll()
 		{
-			FAIL(false, ERROR_INVALID_MEMORY);
+			//FAIL(false, ERROR_INVALID_MEMORY);
 			return OK;
 		};
 		

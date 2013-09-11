@@ -26,10 +26,17 @@ public:
 		SetNextString(char const * val, size_t idx = 0, bool pack = false) = 0;
 	
 	virtual error_t
-		Skip(int n) = 0;
+		Skip(int n, int part = 0) = 0;
 	
 	virtual int
 		Poll() = 0;
+	
+	virtual bool
+		GetZeroLengthValid() const
+	{
+		// Only true in quiet memory.
+		return false;
+	};
 	
 protected:
 	AMX *
@@ -65,7 +72,7 @@ public:
 		SetNextString(char const * val, size_t idx = 0, bool pack = false);
 	
 	error_t
-		Skip(int n);
+		Skip(int n, int part = 0);
 	
 	int
 		Poll();

@@ -342,6 +342,15 @@ error_t
 			++input;
 			switch (*input)
 			{
+				// sscanf enclosing brackets.
+				case '(': n = '('; break;
+				case ')': n = ')'; break;
+				case '[': n = '['; break;
+				case ']': n = ']'; break;
+				case '<': n = '<'; break;
+				case '>': n = '>'; break;
+				// Normal escapes.
+				case 'r':  n = '\r'; break;
 				case 'n':  n = '\n'; break;
 				case '\\': n = '\\'; break;
 				case '\'': n = '\''; break;
@@ -350,7 +359,6 @@ error_t
 				case 'a':  n = '\a'; break;
 				case 'b':  n = '\b'; break;
 				case 'v':  n = '\v'; break;
-				case 'r':  n = '\r'; break;
 				case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
 				{
 					// Can't fail, already validated.
@@ -434,12 +442,21 @@ error_t
 		ep = input;
 	cell
 		ch;
+	int
+		depth = 1;
 	while (*input)
 	{
-		if (*input == end) break;
+		if (*input == end)
+		{
+			if (--depth == 0) break;
+			ep = ++input;
+		}
 		else if ((unsigned char)*input > ' ')
 		{
-			TRY(Utils::ReadChar(input, ch));
+			// Allow nested start/end pairs.  Note that if "start" and "end" are
+			// the same, then the earlier branch will have been hit already.
+			if (*input == start) ++depth, ++input;
+			else TRY(Utils::ReadChar(input, ch));
 			ep = input;
 		}
 		else
@@ -462,11 +479,14 @@ TEST(GetBound3,  { char const * c; return Utils::GetBounded(S"   \"hello  \"", c
 TEST(GetBound4,  { char const * c; return Utils::GetBounded(S"   \"   hello  \"", c, '"', '"') == OK && std::string(c) == "hello"; })
 TEST(GetBound5,  { char const * c; return Utils::GetBounded(S"   \"hello\"", c, '"', '"') == OK && std::string(c) == "hello"; })
 TEST(GetBound6,  { char const * c; return Utils::GetBounded(S"   (hello	)", c, '(', ')') == OK && std::string(c) == "hello"; })
+TEST(GetBound13, { char const * c; return Utils::GetBounded(S"   (hel()lo	)", c, '(', ')') == OK && std::string(c) == "hel()lo"; })
+TEST(GetBound14, { char const * c; return Utils::GetBounded(S"   (he<>llo	)", c, '(', ')') == OK && std::string(c) == "he<>llo"; })
 TEST(GetBound7,  { char const * c; return Utils::GetBounded(S"   <	hello	>", c, '<', '>') == OK && std::string(c) == "hello"; })
 TEST(GetBound8,  { char const * c; return Utils::GetBounded(S"   [hello]", c, '[', ']') == OK && std::string(c) == "hello"; })
 TEST(GetBound9,  { char const * c; size_t len; return Utils::GetBounded(S"   [hello ]", c, '[', ']', &len) == OK && len == 5; })
 TEST(GetBound10, { char const * c; size_t len; return Utils::GetBounded(S"   [ hello g]", c, '[', ']', &len) == OK && len == 7; })
 TEST(GetBound11, { char const * c; size_t len; return Utils::GetBounded(S"   !h ello   543#", c, '!', '#', &len) == OK && len == 12; })
+TEST(GetBound15, { char const * c; size_t len; return Utils::GetBounded(S"   \"!h ello   5\\\"3#\"", c, '"', '"', &len) == OK && len == 14 && std::string(c) == "!h ello   5\"3#"; })
 
 // These are mostly tested by the function above.
 error_t
@@ -513,6 +533,48 @@ error_t
 	}
 	return error;
 };
+
+error_t
+	Utils::
+	GetLength(char const * & input, int * s)
+{
+	char const *
+		len;
+	TRY(Utils::GetSizes(input, len));
+	if (*len == '*')
+	{
+		// Look up the length.
+		s = -1;
+		return OK;
+	}
+	if (*len == '\0')
+	{
+		// No length given ([]).  For now just accept that, let the code
+		// determine whether that is valid at some other point in the future.
+		s = 0;
+		return OK;
+	}
+	cell
+		ret;
+	TRY(Utils::ReadDecimal(len, ret));
+	FAIL(*len == '\0', ERROR_NAN);
+	FAIL(ret > 0, ERROR_INVALID_ARRAY_SIZE);
+	*s = ret;
+	return OK;
+};
+
+TEST(GetLength0,  { char const * c; int s; return Utils::GetLength(S"[]", &s) == OK && s == 0; })
+TEST(GetLength1,  { char const * c; int s; return Utils::GetLength(S"[0]", &s) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(GetLength2,  { char const * c; int s; return Utils::GetLength(S"[ -14 ]", &s) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(GetLength3,  { char const * c; int s; return Utils::GetLength(S"[ ]", &s) == OK && s == 0; })
+TEST(GetLength4,  { char const * c; int s; return Utils::GetLength(S"[44]", &s) == OK && s == 44; })
+TEST(GetLength5,  { char const * c; int s; return Utils::GetLength(S"[ * ]", &s) == OK && s == -1; })
+TEST(GetLength6,  { char const * c; int s; return Utils::GetLength(S"[ * ]", &s) == OK && s == -1; })
+TEST(GetLength7,  { char const * c; int s; return Utils::GetLength(S"[ 78 ", &s) == ERROR_NO_ARRAY_END; })
+TEST(GetLength8,  { char const * c; int s; return Utils::GetLength(S" 15 ]", &s) == ERROR_NO_ARRAY_START; })
+TEST(GetLength9,  { char const * c; int s; return Utils::GetLength(S" [ 1000 ] ", &s) == OK && s == 1000; })
+TEST(GetLength10, { char const * c; int s; return Utils::GetLength(S" [ 0x44 ] ", &s) == ERROR_NAN; })
+TEST(GetLength11, { char const * c; int s; return Utils::GetLength(S" [ HI ] ", &s) == ERROR_NAN; })
 
 error_t
 	Utils::

@@ -67,40 +67,41 @@ public:
 		else FAIL(env.GetMemory()->GetZeroLengthValid(), ERROR_INVALID_ARRAY_SIZE);
 		char const *
 			start = input;
+		cell
+			dump;
 		if (size)
 		{
 			// Reserve one character for the "NULL" terminator always.
-			cell *
-				dest;
-			TRY(env.GetNextPointer(&dest));
+			--size;
 			size_t
 				idx = 0;
 			if (m_last)
 			{
-				while (++idx < size && !env.AtDelimiter(input))
+				while (idx < size && !env.AtDelimiter(input))
 				{
-					TRY(Utils::ReadChar(input, *dest++));
+					TRY(Utils::ReadChar(input, dump));
+					TRY(env.SetNextValue(dump, idx++));
 				}
-				*dest = '\0';
-				TRY(env.Skip(0, size));
+				// Pad the remainder of any array memory.
+				TRY(env.SetNextValue('\0', idx));
+				TRY(env.Skip(0, size - idx));
 				if (env.AtDelimiter(input)) return OK;
 			}
 			else
 			{
-				while (++idx < size && *input > ' ')
+				while (idx < size && *input > ' ')
 				{
-					TRY(Utils::ReadChar(input, *dest++));
+					TRY(Utils::ReadChar(input, dump));
+					TRY(env.SetNextValue(dump, idx++));
 				}
-				*dest = '\0';
-				// Inform the memory system that we manually wrote an array.
-				TRY(env.Skip(0, size));
+				// Both "idx" and "size" are OBO at this point, so cancel out.
+				TRY(env.SetNextValue('\0', idx));
+				TRY(env.Skip(0, size - idx));
 				if (*input <= ' ') return OK;
 			}
 			// This is not a fatal error - the remainder is being dumped.
 			logprintf("sscanf warning: String buffer overflow. at %s:%d.", __FILE__, __LINE__);
 		}
-		cell
-			dump;
 		// Loop to an explicit delimiter (NULL counts).  Use "ReadChar" so that
 		// we can still do "\ " to include spaces when we shouldn't otherwise.
 		if (m_last) while (!env.AtDelimiter(input)) TRY(Utils::ReadChar(input, dump));

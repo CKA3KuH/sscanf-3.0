@@ -72,7 +72,7 @@ error_t
 
 error_t
 	CellMemory::
-	Skip(int n)
+	Skip(int n, int part)
 {
 	m_cur = m_cur + n;
 	FAIL(m_cur < m_count, ERROR_OUT_OF_VARIABLES);

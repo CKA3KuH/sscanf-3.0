@@ -53,5 +53,8 @@ public:
 	
 	static error_t
 		CopyString(cell * dest, char const * src, size_t len, bool pad = false);
+	
+	static error_t
+		GetLength(char const * & input, int * s);
 };
 
