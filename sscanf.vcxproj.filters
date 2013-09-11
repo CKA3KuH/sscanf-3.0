@@ -46,6 +46,15 @@
     <ClCompile Include="src\memory.cpp">
       <Filter>src\memories</Filter>
     </ClCompile>
+    <ClCompile Include="src\specifiers\simple_specifiers.cpp">
+      <Filter>src\specifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\options.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\specifiers.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sdk\plugin.h">
@@ -111,6 +120,9 @@
     <ClInclude Include="sscanf.h" />
     <ClInclude Include="src\memory.h">
       <Filter>src\memories</Filter>
+    </ClInclude>
+    <ClInclude Include="src\options.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

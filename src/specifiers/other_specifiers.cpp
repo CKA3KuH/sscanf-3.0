@@ -7,28 +7,14 @@ error_t
 	LiteralSpecifier::
 	ReadToken(char const * & input)
 {
-	// Will either be ' or ".  The former is the preferred syntax as it
-	// doesn't require escaping in PAWN literal strings, but " is equally as
-	// acceptable if you want to put in the extra effort.
-	char
-		start = *input++;
-	// This MUST be done because the reader ALWAYS skips leading spaces, so
-	// there's no way to detect them because the have already been passed
-	// over by the time this class' "Run" method is called.  I could back-
-	// track, but that could in theory go in to memory located before the
-	// start of the string and give a buffer underflow (or worse, crash).
-	// Shame C strings aren't doubly NULL terminated (maybe mine will be)...
-	// Whitespace should be EXPLICITLY escaped.
-	char
-		delims[2] = { start, '\0' };
-	TRY(Utils::GetStringLength(input, delims, &m_length));
-	FAIL(m_length, ERROR_NO_STRING_LITERAL);
+	char const *
+		str;
+	// Get the extent of the input string.
+	TRY(Utils::GetString(input, str, *input, &m_length));
 	// This might throw, but we catch that generically later.
 	m_literal = new cell [m_length + 1];
 	// Currently has no failure modes when called after "GetStringLength".
-	Utils::GetString(m_literal, input, m_length);
-	// Skip the end character and whitespace.
-	NEXT(input, start, ERROR_NO_STRING_END);
+	Utils::CopyString(m_literal, str, m_length + 1);
 	return OK;
 }
 
@@ -67,43 +53,28 @@ error_t
 {
 	// Skip the "?".
 	++input;
-	// Skip the "<".
-	NEXT(input, '<', ERROR_NO_PARAM_START);
-	size_t
-		lenName;
-	if (Utils::GetStringLength(input, ">=", &lenName) == ERROR_NO_STRING_END) return ERROR_NO_PARAM_END;
-	// Check if there is a value for the option.
-	m_option = new char [lenName + 1];
-	cell *
-		dest;
-	try
+	char const *
+		opts;
+	TRY(Utils::GetParams(input, opts));
+	m_value = 0;
+	for (char const * val = opts; *val; ++val)
 	{
-		dest = new cell [lenName + 1];
+		if (*val == '=')
+		{
+			// Has a value.
+			*const_cast<char *>(val) = '\0';
+			++val;
+			Utils::SkipWhitespace(val);
+			Utils::ReadDecimal(val, m_value);
+			break;
+		}
+		// Strip spaces.
+		else if ('\0' < *val && *val <= ' ')
+		{
+			*const_cast<char *>(val) = '\0';
+		}
 	}
-	catch (...)
-	{
-		delete [] m_option;
-		throw;
-	}
-	// Copy the data.
-	Utils::GetString(dest, input, lenName);
-	Utils::SkipWhitespace(input);
-	m_option[lenName] = '\0';
-	while (lenName--)
-	{
-		m_option[lenName] = (char)dest[lenName];
-	}
-	delete [] dest;
-	// Finish (skip the ">").
-	if (*input == '=')
-	{
-		// Get the length of the value.
-		++input;
-		Utils::SkipWhitespace(input);
-		Utils::ReadDecimal(input, m_value);
-	}
-	NEXT(input, '>', ERROR_NO_PARAM_END);
-	// Option neatly stored for later!
+	m_option = LookupOption(opts);
 	return OK;
 }
 
@@ -267,10 +238,10 @@ error_t
 		SetOptional();
 		// Capital letter - read in the deafult.
 		// Skip the opening bracket.
-		NEXT(input, '(', ERROR_NO_DEAFULT_START);
+		NEXT(input, '(', ERROR_NO_DEFAULT_START);
 		TRY(Run(input, DefaultEnvironment::Get(&m_default)));
 		// Skip the closing bracket.
-		NEXT(input, ')', ERROR_NO_DEAFULT_END);
+		NEXT(input, ')', ERROR_NO_DEFAULT_END);
 	}
 	return OK;
 }

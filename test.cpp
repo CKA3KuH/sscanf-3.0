@@ -9,6 +9,7 @@
 
 void logprintf(char * msg, ...)
 {
+	// Wrapper to make this function work in the test mode.
 	va_list
 		args;
 	va_start(args, msg);
@@ -21,5 +22,5 @@ int
 	main()
 {
 	return 0;
-};
+}
 

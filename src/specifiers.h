@@ -51,6 +51,18 @@ public:
 	char
 		GetSpecifier() const { return m_specifier; };
 	
+	virtual error_t
+		GetDefault(char const * & input, cell * target)
+	{
+		char const *
+			start;
+		TRY(Utils::GetDefaults(input, start));
+		TRY(Run(start, DefaultEnvironment::Get(target)));
+		FAIL(*start == '\0', ERROR_INVALID_DEFAULT);
+		SetOptional();
+		return OK;
+	};
+	
 	virtual cell
 		Skip(Environment & env) { return 0; };
 	
@@ -113,4 +125,10 @@ inline error_t
 	*dest = new T(*that);
 	return OK;
 };
+
+int
+	CountHyphens(char const * str);
+
+error_t
+	GetRanges(Specifier * that, char const * pars, int hyphens, cell * lower, cell * higher);
 

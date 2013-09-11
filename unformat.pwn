@@ -57,7 +57,7 @@ main()
 	ASSERT(var0 == 42 && var1 == 35 && var2 == 0x44);
 	RUN("5 @ q", "ccc", var0, var1, var2);
 	ASSERT(var0 == '5' && var1 == '@' && var2 == 'q');
-	ASSERT(unformat("44", "I\x28;5", var0) == ERROR_NO_DEAFULT_END);
+	ASSERT(unformat("44", "I\x28;5", var0) == ERROR_NO_DEFAULT_END);
 	unformat("FF FF", "hn");
 	
 	ASSERT(unformat("99", "i", var0) == OK && var0 == 99);

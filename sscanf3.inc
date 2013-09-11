@@ -10,8 +10,8 @@ enum E_SSCANF_ERROR
 	ERROR_NAN, // Could not evaluate the string as a number.
 	ERROR_INVALID_ESCAPE, // Found '\\Q', where 'Q' is not valid.
 	ERROR_UNCLOSED_CHARACTER_LIT, // Found 'a, with no close '.
-	ERROR_NO_DEAFULT_START, // No ( on defaults.
-	ERROR_NO_DEAFULT_END, // No ) on defaults.
+	ERROR_NO_DEFAULT_START, // No ( on defaults.
+	ERROR_NO_DEFAULT_END, // No ) on defaults.
 	ERROR_NO_GROUP_END, // No ) on groupings.
 	ERROR_NO_ARRAY_START, // No [ on arrays.
 	ERROR_NO_ARRAY_END, // No ] on arrays.
@@ -49,8 +49,8 @@ stock UNFORMAT_GetError(E_SSCANF_ERROR:error)
 				"ERROR_NAN", // Could not evaluate the string as a number.
 				"ERROR_INVALID_ESCAPE", // Found '\\Q'", where 'Q' is not valid.
 				"ERROR_UNCLOSED_CHARACTER_LIT", // Found 'a", with no close '.
-				"ERROR_NO_DEAFULT_START", // No ( on defaults.
-				"ERROR_NO_DEAFULT_END", // No ) on defaults.
+				"ERROR_NO_DEFAULT_START", // No ( on defaults.
+				"ERROR_NO_DEFAULT_END", // No ) on defaults.
 				"ERROR_NO_GROUP_END", // No ) on groupings.
 				"ERROR_NO_ARRAY_START", // No [ on arrays.
 				"ERROR_NO_ARRAY_END", // No ] on arrays.

@@ -326,6 +326,7 @@ TEST(Char4d, { cell n; return Utils::ReadCharEx(S"\\'", n) == OK && n == '\''; }
 TEST(Char4e, { cell n; return Utils::ReadCharEx(S"'\\''", n) == OK && n == '\''; })
 TEST(Char4f, { cell n; return Utils::ReadCharEx(S"\\'j'", n) == OK && n == '\''; })
 
+/*
 error_t
 	Utils::
 	GetArraySize(char const * & input, int * size, bool empty)
@@ -403,87 +404,7 @@ TEST(Arr10c, { int size; return Utils::GetArraySize(S"[* ]", &size) == OK && siz
 TEST(Arr10d, { int size; return Utils::GetArraySize(S"[ * ]", &size, true) == OK && size == -1; })
 TEST(Arr10e, { int size; return Utils::GetArraySize(S" [*]", &size) == OK && size == -1; })
 TEST(Arr10f, { int size; return Utils::GetArraySize(S" [ * ]", &size, true) == OK && size == -1; })
-
-// Was used by the "NEXT" macro, but now isn't.
-error_t
-	Utils::
-	NextChar(char const * & input, char val)
-{
-	Utils::SkipWhitespace(input);
-	FAIL(*input == val, ERROR_EXPECTED_A_GOT_B_2, val, *input);
-	++input;
-	Utils::SkipWhitespace(input);
-	return OK;
-}
-
-error_t
-	Utils::
-	NextChars(char const * & input, char const * const val)
-{
-	Utils::SkipWhitespace(input);
-	char const *
-		cur = val;
-	while (*cur)
-	{
-		FAIL(*input == *cur, ERROR_EXPECTED_A_GOT_B_1, val, *input);
-		++cur;
-		++input;
-	}
-	Utils::SkipWhitespace(input);
-	return OK;
-}
-
-/*bool
-	Matches(char const * input, char const * val, char const * & output)
-{
-	while (*val)
-	{
-		if (*input != *val) return false;
-		++val;
-		++input;
-	}
-	// Will generally be from the same source.
-	output = input;
-	return true;
-};
-
-error_t
-	Utils::
-	Get(
-		ReadFunction_t read,
-		char const * & input,
-		cell & dest,
-		char const * const * delimiters)
-{
-	Utils::SkipWhitespace(input);
-	TRY((*read)(input, dest));
-	Utils::SkipWhitespace(input);
-	if (*input == '\0') return OK;
-	while (*delimiters)
-	{
-		if (Matches(input, *delimiters, input))
-		{
-			return OK;
-		}
-		++delimiters;
-	}
-	return ERROR_NO_DELIMITER;
-};
-
-error_t
-	Utils::Enclosed(
-		ReadFunction_t read,
-		char const * & input,
-		cell & dest,
-		char const start, char const end)
-{
-	char *
-		delimiters[] = {"?", nullptr};
-	delimiters[0][0] = end;
-	return
-		Utils::NextChar(input, start) ||
-		Utils::Get(read, input, dest, end);
-};*/
+*/
 
 void
 	Utils::
@@ -492,14 +413,7 @@ void
 	while ('\0' < (unsigned char)*input && (unsigned char)*input <= ' ') ++input;
 }
 
-error_t
-	Utils::
-	SkipWhitespaceOK(char const * & input)
-{
-	while ('\0' < (unsigned char)*input && (unsigned char)*input <= ' ') ++input;
-	return OK;
-}
-
+/*
 bool
 	IsIn(char c, char * ls)
 {
@@ -582,4 +496,143 @@ TEST(GetString1c, { cell dest[28]; return Utils::GetString(dest, S"  a\\\\\\\' \
 TEST(GetString1d, { cell dest[28]; return Utils::GetString(dest, S"  a\\\\\\\' \\x1235D;'", 5) == OK &&
 	dest[3] == ' ' &&
 	dest[4] == 0x1235D; })
+*/
+
+error_t
+	Utils::
+	GetBounded(char const * & input, char const * & output, char start, char end, size_t * len)
+{
+	NEXT(input, start, ERROR_EXPECTED_A_GOT_B_1);
+	output = input;
+	char const *
+		ep = input;
+	cell
+		ch;
+	while (*input)
+	{
+		if (*input == end) break;
+		else if ((unsigned char)*input > ' ')
+		{
+			TRY(Utils::ReadChar(input, ch));
+			ep = input;
+		}
+		else
+		{
+			++input;
+		}
+	}
+	if (*input != end) return ERROR_EXPECTED_A_GOT_B_2;
+	*const_cast<char *>(ep) = '\0';
+	if (len) *len = ep - output;
+	++input;
+	Utils::SkipWhitespace(input);
+	return OK;
+}
+
+TEST(GetBound0,  { char const * c; return Utils::GetBounded(S"   hello\"", c, '"', '"') == ERROR_EXPECTED_A_GOT_B_1; })
+TEST(GetBound1,  { char const * c; return Utils::GetBounded(S"   \"hello", c, '"', '"') == ERROR_EXPECTED_A_GOT_B_2; })
+TEST(GetBound2,  { char const * c; return Utils::GetBounded(S"   \"hello  \"", c, '"', '"') == OK; })
+TEST(GetBound3,  { char const * c; return Utils::GetBounded(S"   \"hello  \"", c, '"', '"') == OK && std::string(c) == "hello"; })
+TEST(GetBound4,  { char const * c; return Utils::GetBounded(S"   \"   hello  \"", c, '"', '"') == OK && std::string(c) == "hello"; })
+TEST(GetBound5,  { char const * c; return Utils::GetBounded(S"   \"hello\"", c, '"', '"') == OK && std::string(c) == "hello"; })
+TEST(GetBound6,  { char const * c; return Utils::GetBounded(S"   (hello	)", c, '(', ')') == OK && std::string(c) == "hello"; })
+TEST(GetBound7,  { char const * c; return Utils::GetBounded(S"   <	hello	>", c, '<', '>') == OK && std::string(c) == "hello"; })
+TEST(GetBound8,  { char const * c; return Utils::GetBounded(S"   [hello]", c, '[', ']') == OK && std::string(c) == "hello"; })
+TEST(GetBound9,  { char const * c; size_t len; return Utils::GetBounded(S"   [hello ]", c, '[', ']', &len) == OK && len == 5; })
+TEST(GetBound10, { char const * c; size_t len; return Utils::GetBounded(S"   [ hello g]", c, '[', ']', &len) == OK && len == 7; })
+TEST(GetBound11, { char const * c; size_t len; return Utils::GetBounded(S"   !h ello   543#", c, '!', '#', &len) == OK && len == 12; })
+
+error_t
+	Utils::
+	GetDefaults(char const * & input, char const * & output, size_t * len)
+{
+	error_t
+		error = Utils::GetBounded(input, output, '(', ')', len);
+	switch (error)
+	{
+		case OK: return OK;
+		case ERROR_EXPECTED_A_GOT_B_1: FAIL(false, ERROR_NO_DEFAULT_START);
+		case ERROR_EXPECTED_A_GOT_B_2: FAIL(false, ERROR_NO_DEFAULT_END);
+	}
+	return error;
+};
+
+error_t
+	Utils::
+	GetParams(char const * & input, char const * & output, size_t * len)
+{
+	error_t
+		error = Utils::GetBounded(input, output, '<', '>', len);
+	switch (error)
+	{
+		case OK: return OK;
+		case ERROR_EXPECTED_A_GOT_B_1: FAIL(false, ERROR_NO_PARAM_START);
+		case ERROR_EXPECTED_A_GOT_B_2: FAIL(false, ERROR_NO_PARAM_END);
+	}
+	return error;
+};
+
+error_t
+	Utils::
+	GetSizes(char const * & input, char const * & output, size_t * len)
+{
+	error_t
+		error = Utils::GetBounded(input, output, '[', ']', len);
+	switch (error)
+	{
+		case OK: return OK;
+		case ERROR_EXPECTED_A_GOT_B_1: FAIL(false, ERROR_NO_ARRAY_START);
+		case ERROR_EXPECTED_A_GOT_B_2: FAIL(false, ERROR_NO_ARRAY_END);
+	}
+	return error;
+};
+
+error_t
+	Utils::
+	GetString(char const * & input, char const * & output, char const t, size_t * len)
+{
+	error_t
+		error = Utils::GetBounded(input, output, t, t, len);
+	switch (error)
+	{
+		case OK: return OK;
+		case ERROR_EXPECTED_A_GOT_B_1: FAIL(false, ERROR_EXPECTED_A_GOT_B_2, t, *input);
+		case ERROR_EXPECTED_A_GOT_B_2: FAIL(false, ERROR_NO_STRING_END);
+	}
+	return error;
+};
+
+error_t
+	Utils::
+	CopyString(cell * dest, char const * src, size_t len, bool pad)
+{
+	FAIL(len, ERROR_MEMORY_ALLOCATION_FAIL);
+	while (--len && *src)
+	{
+		TRY(Utils::ReadChar(src, *dest));
+		++dest;
+	}
+	// Always has one character reserved for "NULL".
+	*dest++ = '\0';
+	if (pad)
+	{
+		while (len--) *dest++ = '\0';
+	}
+	return OK;
+};
+
+#ifdef SSCANF_DEBUG
+
+bool TestCompare(char const * one, cell const * two)
+{
+	while (*two) if (*one++ != *two++) return false;
+	return *one == '\0';
+}
+
+#endif
+
+TEST(CopyStr0,  { cell dest[42]; return Utils::CopyString(dest, S"Hello", 5, false) == OK && TestCompare("Hell", dest); })
+TEST(CopyStr1,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"Hello", 7, false) == OK && TestCompare("Hello", dest) && dest[6] == 42; })
+TEST(CopyStr2,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"world", 7, true) == OK && TestCompare("world", dest) && dest[6] == 0; })
+
 

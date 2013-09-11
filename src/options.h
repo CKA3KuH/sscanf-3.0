@@ -1,36 +1,15 @@
 #pragma once
 
-class Options
+enum E_SSCANF_OPTIONS
 {
-public:
-	// cons
-		Options()
-	:
-		m_options()
-	{
-	};
-	
-	// cons
-		Options(Options const & that)
-	:
-		m_options(that.m_options)
-	{
-	};
-	
-	void
-		Set(char const * name, int const value)
-	{
-		m_options[std::string(name)] = value;
-	};
-	
-	int
-		Get(char const * name)
-	{
-		return m_options[std::string(name)];
-	};
-	
-private:
-	std::map<std::string, int>
-		m_options;
+	OPTION_NONE,
+	_OPTIONS_COUNT,
 };
+
+typedef
+	enum E_SSCANF_OPTIONS
+	option_t;
+
+option_t
+	LookupOption(char const * name);
 

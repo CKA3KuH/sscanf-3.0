@@ -16,8 +16,8 @@ enum E_SSCANF_ERROR
 	ERROR_NAN, // Could not evaluate the string as a number.
 	ERROR_INVALID_ESCAPE, // Found '\\Q', where 'Q' is not valid.
 	ERROR_UNCLOSED_CHARACTER_LIT, // Found 'a, with no close '.
-	ERROR_NO_DEAFULT_START, // No ( on defaults.
-	ERROR_NO_DEAFULT_END, // No ) on defaults.
+	ERROR_NO_DEFAULT_START, // No ( on defaults.
+	ERROR_NO_DEFAULT_END, // No ) on defaults.
 	ERROR_NO_GROUP_END, // No ) on groupings.
 	ERROR_NO_ARRAY_START, // No [ on arrays.
 	ERROR_NO_ARRAY_END, // No ] on arrays.
@@ -39,6 +39,9 @@ enum E_SSCANF_ERROR
 	ERROR_NO_CHILDREN, // Alt branch with no children.
 	ERROR_OUT_OF_VARIABLES,
 	ERROR_INVALID_DELIMITER,
+	ERROR_INVALID_DEFAULT,
+	ERROR_INVALID_RANGE,
+	ERROR_OUT_OF_RANGE,
 };
 
 #define SHOW_OK ""
@@ -51,8 +54,8 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_NAN "Input is not a number."
 #define SHOW_ERROR_INVALID_ESCAPE "Invalid escape sequence."
 #define SHOW_ERROR_UNCLOSED_CHARACTER_LIT "Unclosed character literal."
-#define SHOW_ERROR_NO_DEAFULT_START "No default value found."
-#define SHOW_ERROR_NO_DEAFULT_END "Unclosed default value."
+#define SHOW_ERROR_NO_DEFAULT_START "No default value found."
+#define SHOW_ERROR_NO_DEFAULT_END "Unclosed default value."
 #define SHOW_ERROR_NO_GROUP_END "Unclosed group."
 #define SHOW_ERROR_NO_ARRAY_START "No array size found."
 #define SHOW_ERROR_NO_ARRAY_END "Unclosed array size."
@@ -74,6 +77,9 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_NO_CHILDREN "Empty alt branch."
 #define SHOW_ERROR_OUT_OF_VARIABLES "Insufficient destination variables given."
 #define SHOW_ERROR_INVALID_DELIMITER "Could not find a valid delimiter."
+#define SHOW_ERROR_INVALID_DEFAULT "Default value invalid."
+#define SHOW_ERROR_INVALID_RANGE "Invalid range."
+#define SHOW_ERROR_OUT_OF_RANGE "Value out of range."
 
 typedef
 	enum E_SSCANF_ERROR
@@ -121,13 +127,35 @@ typedef
 	class SscanfConverter
 	{
 	public:
+		// cons
+			// SscanfConverter()
+		// :
+			// m_var(nullptr)
+		// {
+		// };
+		
+		// // dest
+			// ~SscanfConverter()
+		// {
+			// //delete [] m_var;
+			// //m_var = nullptr;
+		// };
+		
 		// Operator to convert a literal string to a reference to a constant 
 		// string pointer.  There is no automatic conversion, and we can't
 		// define a cast operator for that, so we use a prefix like "L" ("S").
 		char const * &
-			operator=(const char * str)
+			operator=(char const * str)
 		{
-			m_var = str;
+			size_t
+				len = strlen(str);
+			//delete [] m_var;
+			//m_var = nullptr;
+			char *
+				st2 = new char [len + 1];
+			strcpy(st2, str);
+			st2[len] = '\0';
+			m_var = st2;
 			return m_var;
 		};
 		

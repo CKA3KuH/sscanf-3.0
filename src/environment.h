@@ -2,6 +2,7 @@
 
 #include "memory.h"
 #include "utils.h"
+#include "options.h"
 #include <map>
 #include <string>
 
@@ -11,17 +12,23 @@ public:
 	// cons
 		Environment(Memory * m) //, Delimiter * d, Options * o)
 	:
-		m_memory(m),
-		m_options()
+		m_memory(m)
 	{
+		for (int i = (int)OPTION_NONE; i != (int)_OPTIONS_COUNT; ++i)
+		{
+			m_options[(option_t)i] = 0;
+		}
 	};
 	
 	// cons
 		Environment(Environment & env)
 	:
-		m_memory(env.m_memory),
-		m_options(env.m_options)
+		m_memory(env.m_memory)
 	{
+		for (int i = (int)OPTION_NONE; i != (int)_OPTIONS_COUNT; ++i)
+		{
+			m_options[(option_t)i] = env.m_options[(option_t)i];
+		}
 	};
 	
 	error_t
@@ -58,15 +65,22 @@ public:
 		Poll() { return m_memory->Poll(); };
 	
 	void
-		SetOption(char const * name, int const value)
+		SetOption(option_t option, int const value)
 	{
-		m_options[std::string(name)] = value;
+		if (OPTION_NONE < option && option < _OPTIONS_COUNT)
+		{
+			m_options[option] = value;
+		}
 	};
 	
 	int
-		GetOption(char const * name)
+		GetOption(option_t option)
 	{
-		return m_options[std::string(name)];
+		if (OPTION_NONE < option && option < _OPTIONS_COUNT)
+		{
+			return m_options[option];
+		}
+		return -1;
 	};
 	
 	// Not used by this environment.  They should throw an error, but we control
@@ -87,8 +101,8 @@ private:
 	Memory *
 		m_memory;
 	
-	std::map<std::string, int>
-		m_options;
+	int
+		m_options[_OPTIONS_COUNT];
 };
 
 // The "default" environment is the code used to read in default values from the

@@ -17,6 +17,23 @@ logprintf_t
 extern void *
 	pAMXFunctions;
 
+#define IS_NULL(addr) ((addr)[0] == '\0' || ((addr)[0] == '\1' && (addr)[1] == '\0'))
+
+// Based on amx_StrParam but using 0 length strings.  This can't be inline as
+// it uses alloca - it could be written to use malloc instead, but that would
+// require memory free code all over the place!
+#define STR_PARAM(amx,param,result)                                             \
+	do {                                                                        \
+		cell * amx_cstr_; int amx_length_;                                      \
+		amx_GetAddr((amx), (param), &amx_cstr_);                                \
+		if (IS_NULL(amx_cstr_)) (result) = "";                                  \
+		else {                                                                  \
+			amx_StrLen(amx_cstr_, &amx_length_);                                \
+			if (((result) = (char *)alloca((amx_length_ + 1) * sizeof (*(result)))))         \
+				amx_GetString((result), amx_cstr_, sizeof (*(result)) > 1, amx_length_ + 1); \
+			else FAIL(false, ERROR_MEMORY_ALLOCATION_FAIL); } }                 \
+	while (false)
+
 static cell AMX_NATIVE_CALL
 	n_unformat(AMX * amx, cell * params)
 {
@@ -60,11 +77,10 @@ static cell AMX_NATIVE_CALL
 	// Get the string to split up.
 	char *
 		input;
-	amx_StrParam(amx, params[1], input);
+	//logprintf("GET ");
+	STR_PARAM(amx, params[1], input);
 	cptr = input;
-	// Check for CallRemoteFunction style null strings and correct.
-	if (!input) input = "";
-	else if (input[0] == '\1' && input[1] == '\0') input[0] = '\0';
+	//logprintf("input = \"%s\"", input);
 	// Do the main code with the default delimiters to begin with.  This is the
 	// only line in this function not concerned with marshalling data from PAWN
 	// and in to C++, i.e. this is the main core of the operation now that we

@@ -68,6 +68,7 @@ error_t
 	goto ReadToken_new_alt;
 	do
 	{
+		if (m_local && child->GetSpecifier() == ')') break;
 		if (child->GetSpecifier() == '|')
 		{
 			// Takes the value of any "|" in the alt.
@@ -83,7 +84,6 @@ ReadToken_new_alt:
 			alt->Add(child);
 		}
 		TRY(gParser.GetNext(input, &child));
-		if (m_local && child->GetSpecifier() == ')') break;
 	}
 	while (child);
 	FAIL(alt->Begin() != alt->End(), ERROR_NO_CHILDREN);

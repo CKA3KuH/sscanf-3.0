@@ -50,13 +50,13 @@ ReadToken_new_quiet:
 		FAIL(child, ERROR_NO_GROUP_END);
 		if (GetOptional())
 		{
-			NEXT(input, '(', ERROR_NO_DEAFULT_START);
+			NEXT(input, '(', ERROR_NO_DEFAULT_START);
 			int
 				mem = Skip(Environment & env);
 			m_default = new cell[mem];
 			TRY(Run(input, gDefaultEnvironment(m_default)));
 			// Skip the closing bracket.
-			NEXT(input, ')', ERROR_NO_DEAFULT_END);
+			NEXT(input, ')', ERROR_NO_DEFAULT_END);
 			// Whatever.
 		}
 		return OK;

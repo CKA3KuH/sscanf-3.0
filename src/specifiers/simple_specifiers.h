@@ -17,53 +17,28 @@ public:
 	:
 		Specifier(c),
 		m_default(0),
-		m_read(f)
+		m_read(f),
+		m_lower(0x80000000),
+		m_upper(0x7FFFFFFF)
 	{
 	};
 	
 	virtual error_t
-		ReadToken(char const * & input)
-	{
-		// Check this has the correct specifier.
-		FAIL((*input | 0x20) == GetSpecifier(), ERROR_EXPECTED_A_GOT_B_2, GetSpecifier(), *input);
-		// Check if this is upper-case (optional).
-		if (*input++ != GetSpecifier())
-		{
-			// Capital letter - read in the deafult.
-			// Skip the opening bracket.
-			NEXT(input, '(', ERROR_NO_DEAFULT_START);
-			TRY(Run(input, DefaultEnvironment::Get(&m_default)));
-			// Skip the closing bracket.
-			NEXT(input, ')', ERROR_NO_DEAFULT_END);
-			SetOptional();
-		}
-		return OK;
-	};
+		ReadToken(char const * & input);
 	
 	CLONE();
 	
 	virtual error_t
-		Run(char const * & input, Environment & env)
-	{
-		cell
-			dest;
-		error_t
-			e = (*m_read)(input, dest);
-		if (e != OK)
-		{
-			if (!GetOptional()) return e;
-			dest = m_default;
-		}
-		return env.SetNextValue(dest);
-		//return env.SkipDelimiters();
-	};
+		Run(char const * & input, Environment & env);
 	
 	// cons
 		SimpleSpecifier(SimpleSpecifier const & that)
 	:
 		Specifier(that),
 		m_default(that.m_default),
-		m_read(that.m_read)
+		m_read(that.m_read),
+		m_lower(that.m_lower),
+		m_upper(that.m_upper)
 	{
 	};
 	
@@ -76,10 +51,23 @@ public:
 	
 private:
 	cell
+		m_lower,
+		m_upper,
 		m_default;
 	
 	ReadFunction_t
 		m_read;
+	
+	CTEST(SimpleP00, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<-5 - -1>") == OK; })
+	CTEST(SimpleP01, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<   - -1>") == OK; })
+	CTEST(SimpleP02, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<-5 -   >") == OK; })
+	CTEST(SimpleP03, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i< 5 - -1>") == ERROR_INVALID_RANGE; })
+	CTEST(SimpleP04, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<-5 -  1>") == OK; })
+	CTEST(SimpleP05, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i< 6 - 2 >") == ERROR_INVALID_RANGE; })
+	CTEST(SimpleP06, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i< 2 -6  >") == OK; })
+	CTEST(SimpleP07, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<5 1>") == ERROR_INVALID_RANGE; })
+	CTEST(SimpleP08, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<>") == ERROR_INVALID_RANGE; })
+	CTEST(SimpleP09, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i<---->") == ERROR_INVALID_RANGE; })
 	
 	CTEST(Simple9a, { cell dest; SimpleSpecifier that('i', &Utils::ReadDecimal); return that.Run(S"44", DefaultEnvironment::Get(&dest)) == OK && dest == 44; })
 	CTEST(Simple9b, { cell dest; SimpleSpecifier that('d', &Utils::ReadDecimal); return that.Run(S"00001", DefaultEnvironment::Get(&dest)) == OK && dest == 1; })
@@ -99,7 +87,7 @@ private:
 	CTEST(Simple1b, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"d") == ERROR_EXPECTED_A_GOT_B_2; })
 	CTEST(Simple1v, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"") == ERROR_EXPECTED_A_GOT_B_2; })
 	CTEST(Simple1w, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"(") == ERROR_EXPECTED_A_GOT_B_2; })
-	CTEST(Simple1c, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I") == ERROR_NO_DEAFULT_START; })
+	CTEST(Simple1c, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I") == ERROR_NO_DEFAULT_START; })
 	
 	// These don't fail.
 	CTEST(SimpleH04, { SimpleSpecifier that('h', &Utils::ReadHex); return that.ReadToken(S"H(55 )") == OK && *CUR == '\0'; })
@@ -230,27 +218,27 @@ private:
 	CTEST(Simple1h, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(  55)  ") == OK && *CUR == '\0'; })
 	CTEST(Simple1i, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I( )") != OK; })
 	CTEST(Simple1j, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I ( )  ") != OK; })
-	CTEST(Simple1k, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(3") == ERROR_NO_DEAFULT_END; })
-	CTEST(Simple1l, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I( 4") == ERROR_NO_DEAFULT_END; })
-	CTEST(Simple1m, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I   (  5") == ERROR_NO_DEAFULT_END; })
-	CTEST(Simple1n, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(    7") == ERROR_NO_DEAFULT_END; })
-	CTEST(Simple1o, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(") == ERROR_NAN; })
+	CTEST(Simple1k, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(3") == ERROR_NO_DEFAULT_END; })
+	CTEST(Simple1l, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I( 4") == ERROR_NO_DEFAULT_END; })
+	CTEST(Simple1m, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I   (  5") == ERROR_NO_DEFAULT_END; })
+	CTEST(Simple1n, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(    7") == ERROR_NO_DEFAULT_END; })
+	CTEST(Simple1o, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(") == ERROR_NO_DEFAULT_END; })
 	CTEST(Simple1p, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(E)") == ERROR_NAN; })
 	CTEST(Simple1q, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(    -6)") == OK && that.m_default == -6; })
 	CTEST(Simple1r, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(78)") == OK && that.m_default == 78; })
 	CTEST(Simple1s, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(1234)") == OK && that.m_default == 1234; })
 	CTEST(Simple1t, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(595)") == OK && that.m_default == 595; })
-	CTEST(Simple1u, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(0x11)") == ERROR_NO_DEAFULT_END; })
+	CTEST(Simple1u, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(0x11)") == ERROR_INVALID_DEFAULT; })
 	
 	CTEST(Simple2a, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"d") == OK; })
 	CTEST(Simple2b, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"i") == ERROR_EXPECTED_A_GOT_B_2; })
-	CTEST(Simple2c, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D") == ERROR_NO_DEAFULT_START; })
+	CTEST(Simple2c, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D") == ERROR_NO_DEFAULT_START; })
 	
 	CTEST(Simple3a, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"c") == OK; })
 	CTEST(Simple3b, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"v") == ERROR_EXPECTED_A_GOT_B_2; })
-	CTEST(Simple3c, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C") == ERROR_NO_DEAFULT_START; })
-	CTEST(Simple3f, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C ") == ERROR_NO_DEAFULT_START; })
-	CTEST(Simple3g, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C  ") == ERROR_NO_DEAFULT_START; })
+	CTEST(Simple3c, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C") == ERROR_NO_DEFAULT_START; })
+	CTEST(Simple3f, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C ") == ERROR_NO_DEFAULT_START; })
+	CTEST(Simple3g, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C  ") == ERROR_NO_DEFAULT_START; })
 	
 	// Valid copies.
 	// Note that some of these leak memory - don't use in production...  "p" is
@@ -264,7 +252,7 @@ private:
 	CTEST(Simple4g, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); that.SetOptional(); return !p->GetOptional(); })
 	CTEST(Simple4h, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.SetOptional(); that.Clone(&p); return p->GetOptional(); })
 	CTEST(Simple4i, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return dynamic_cast<SimpleSpecifier *>(p)->m_read == &Utils::ReadChar; })
-	//CTEST(Simple4j, { SimpleSpecifier that('f', &Utils::ReadChar); return that.Skip(env) == 1; })
+	// CTEST(Simple4j, { SimpleSpecifier that('f', &Utils::ReadChar); return that.Skip(env) == 1; })
 	
 	// Valid renders.
 	CTEST(Simple5a, { SimpleSpecifier that('x', &Utils::ReadHex); ss s; return dynamic_cast<ss &>(s << that).str() == "x"; })

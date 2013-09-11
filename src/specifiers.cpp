@@ -2,13 +2,80 @@
 #include "utils.h"
 #include "specifiers.h"
 
-#include "specifiers/trivial_specifiers.h"
-#include "specifiers/simple_specifiers.h"
-#include "specifiers/other_specifiers.h"
-#include "specifiers/group_specifiers.h"
-#include "specifiers/numeric_specifier.h"
+int
+	CountHyphens(char const * str)
+{
+	int
+		ret = 0;
+	while (*str) if (*str++ == '-') ++ret;
+	return ret;
+}
+
+error_t
+	GetRanges(Specifier * that, char const * pars, int hyphens, cell * lower, cell * higher)
+{
+	// This doesn't actually guarantee that the two values (lower and higher)
+	// are comparable, only that they are readable.  If this was Haskell the
+	// function would have constraint (Read a) but not (Ord a), despite the
+	// inherently ordered nature of ranges.  This is because the function works
+	// just as well for string ranges as numeric ranges.
+	switch (hyphens)
+	{
+		case 1:
+		{
+			// Maybe missing.
+			if (*pars == '-')
+			{
+				++pars;
+				Utils::SkipWhitespace(pars);
+				TRY(that->Run(pars, DefaultEnvironment::Get(higher)));
+			}
+			else
+			{
+				TRY(that->Run(pars, DefaultEnvironment::Get(lower)));
+				NEXT(pars, '-', ERROR_INVALID_RANGE);
+				if (*pars) TRY(that->Run(pars, DefaultEnvironment::Get(higher)));
+			}
+			break;
+		}
+		case 2:
+		{
+			// This is VASTLY simplified by the fact that if the first value is
+			// present, then the second can't be negative.
+			FAIL(*pars == '-', ERROR_INVALID_RANGE);
+			char const *
+				p = pars + 1;
+			Utils::SkipWhitespace(p);
+			// Negative upper bound.
+			if (*p == '-') TRY(that->Run(p, DefaultEnvironment::Get(higher)));
+			else
+			{
+				// Negative lower bound.
+				TRY(that->Run(pars, DefaultEnvironment::Get(lower)));
+				NEXT(pars, '-', ERROR_INVALID_RANGE);
+				if (*pars) TRY(that->Run(pars, DefaultEnvironment::Get(higher)));
+			}
+			break;
+		}
+		case 3:
+		{
+			// Easy.
+			TRY(that->Run(pars, DefaultEnvironment::Get(lower)));
+			NEXT(pars, '-', ERROR_INVALID_RANGE);
+			TRY(that->Run(pars, DefaultEnvironment::Get(higher)));
+			break;
+		}
+	}
+	return OK;
+}
 
 #ifdef SSCANF_DEBUG
+	#include "specifiers/trivial_specifiers.h"
+	#include "specifiers/simple_specifiers.h"
+	#include "specifiers/other_specifiers.h"
+	#include "specifiers/group_specifiers.h"
+	#include "specifiers/numeric_specifier.h"
+	
 	#include "../sdk/plugin.h"
 	
 	class TestMemory : public Memory
@@ -243,193 +310,6 @@ ITEST(TrivialSpecifier, Trivial7b)
 ITEST(TrivialSpecifier, Trivial7c)
 
 ITEST(TrivialSpecifier, Trivial81)
-
-ITEST(SimpleSpecifier, Simple1a)
-ITEST(SimpleSpecifier, Simple1b)
-ITEST(SimpleSpecifier, Simple1c)
-ITEST(SimpleSpecifier, Simple1d)
-ITEST(SimpleSpecifier, Simple1e)
-ITEST(SimpleSpecifier, Simple1f)
-ITEST(SimpleSpecifier, Simple1g)
-ITEST(SimpleSpecifier, Simple1h)
-ITEST(SimpleSpecifier, Simple1i)
-ITEST(SimpleSpecifier, Simple1j)
-ITEST(SimpleSpecifier, Simple1k)
-ITEST(SimpleSpecifier, Simple1l)
-ITEST(SimpleSpecifier, Simple1m)
-ITEST(SimpleSpecifier, Simple1n)
-ITEST(SimpleSpecifier, Simple1o)
-ITEST(SimpleSpecifier, Simple1p)
-ITEST(SimpleSpecifier, Simple1q)
-ITEST(SimpleSpecifier, Simple1r)
-ITEST(SimpleSpecifier, Simple1s)
-ITEST(SimpleSpecifier, Simple1t)
-ITEST(SimpleSpecifier, Simple1u)
-ITEST(SimpleSpecifier, Simple1v)
-ITEST(SimpleSpecifier, Simple1w)
-
-ITEST(SimpleSpecifier, Simple2a)
-ITEST(SimpleSpecifier, Simple2b)
-ITEST(SimpleSpecifier, Simple2c)
-
-ITEST(SimpleSpecifier, Simple3a)
-ITEST(SimpleSpecifier, Simple3b)
-ITEST(SimpleSpecifier, Simple3c)
-ITEST(SimpleSpecifier, Simple3f)
-ITEST(SimpleSpecifier, Simple3g)
-
-ITEST(SimpleSpecifier, Simple4a)
-ITEST(SimpleSpecifier, Simple4b)
-ITEST(SimpleSpecifier, Simple4c)
-ITEST(SimpleSpecifier, Simple4d)
-ITEST(SimpleSpecifier, Simple4e)
-ITEST(SimpleSpecifier, Simple4f)
-ITEST(SimpleSpecifier, Simple4g)
-ITEST(SimpleSpecifier, Simple4h)
-ITEST(SimpleSpecifier, Simple4i)
-//ITEST(SimpleSpecifier, Simple4j)
-
-ITEST(SimpleSpecifier, Simple5a)
-
-ITEST(SimpleSpecifier, Simple9a)
-ITEST(SimpleSpecifier, Simple9b)
-ITEST(SimpleSpecifier, Simple9c)
-ITEST(SimpleSpecifier, Simple9h)
-ITEST(SimpleSpecifier, Simple9d)
-ITEST(SimpleSpecifier, Simple9e)
-ITEST(SimpleSpecifier, Simple9i)
-ITEST(SimpleSpecifier, Simple9l)
-ITEST(SimpleSpecifier, Simple9f)
-ITEST(SimpleSpecifier, Simple9j)
-ITEST(SimpleSpecifier, Simple9g)
-ITEST(SimpleSpecifier, Simple9k)
-
-ITEST(SimpleSpecifier, Simple6a)
-ITEST(SimpleSpecifier, Simple6b)
-
-ITEST(OptionSpecifier, Opt1)
-ITEST(OptionSpecifier, Opt2)
-ITEST(OptionSpecifier, Opt3)
-ITEST(OptionSpecifier, Opt4)
-
-ITEST(SimpleSpecifier, SimpleH00)
-ITEST(SimpleSpecifier, SimpleH01)
-ITEST(SimpleSpecifier, SimpleH02)
-ITEST(SimpleSpecifier, SimpleH03)
-ITEST(SimpleSpecifier, SimpleH04)
-ITEST(SimpleSpecifier, SimpleH05)
-ITEST(SimpleSpecifier, SimpleH06)
-ITEST(SimpleSpecifier, SimpleH07)
-ITEST(SimpleSpecifier, SimpleH08)
-ITEST(SimpleSpecifier, SimpleH09)
-ITEST(SimpleSpecifier, SimpleH10)
-ITEST(SimpleSpecifier, SimpleH11)
-ITEST(SimpleSpecifier, SimpleH12)
-ITEST(SimpleSpecifier, SimpleH13)
-ITEST(SimpleSpecifier, SimpleH14)
-ITEST(SimpleSpecifier, SimpleH15)
-
-ITEST(SimpleSpecifier, SimpleI00)
-ITEST(SimpleSpecifier, SimpleI01)
-ITEST(SimpleSpecifier, SimpleI02)
-ITEST(SimpleSpecifier, SimpleI03)
-ITEST(SimpleSpecifier, SimpleI04)
-ITEST(SimpleSpecifier, SimpleI05)
-ITEST(SimpleSpecifier, SimpleI06)
-ITEST(SimpleSpecifier, SimpleI07)
-ITEST(SimpleSpecifier, SimpleI08)
-ITEST(SimpleSpecifier, SimpleI09)
-ITEST(SimpleSpecifier, SimpleI10)
-ITEST(SimpleSpecifier, SimpleI11)
-ITEST(SimpleSpecifier, SimpleI12)
-ITEST(SimpleSpecifier, SimpleI13)
-ITEST(SimpleSpecifier, SimpleI14)
-ITEST(SimpleSpecifier, SimpleI15)
-
-ITEST(SimpleSpecifier, SimpleO00)
-ITEST(SimpleSpecifier, SimpleO01)
-ITEST(SimpleSpecifier, SimpleO02)
-ITEST(SimpleSpecifier, SimpleO03)
-ITEST(SimpleSpecifier, SimpleO04)
-ITEST(SimpleSpecifier, SimpleO05)
-ITEST(SimpleSpecifier, SimpleO06)
-ITEST(SimpleSpecifier, SimpleO07)
-ITEST(SimpleSpecifier, SimpleO08)
-ITEST(SimpleSpecifier, SimpleO09)
-ITEST(SimpleSpecifier, SimpleO10)
-ITEST(SimpleSpecifier, SimpleO11)
-ITEST(SimpleSpecifier, SimpleO12)
-ITEST(SimpleSpecifier, SimpleO13)
-ITEST(SimpleSpecifier, SimpleO14)
-ITEST(SimpleSpecifier, SimpleO15)
-
-ITEST(SimpleSpecifier, SimpleB00)
-ITEST(SimpleSpecifier, SimpleB01)
-ITEST(SimpleSpecifier, SimpleB02)
-ITEST(SimpleSpecifier, SimpleB03)
-ITEST(SimpleSpecifier, SimpleB04)
-ITEST(SimpleSpecifier, SimpleB05)
-ITEST(SimpleSpecifier, SimpleB06)
-ITEST(SimpleSpecifier, SimpleB07)
-ITEST(SimpleSpecifier, SimpleB08)
-ITEST(SimpleSpecifier, SimpleB09)
-ITEST(SimpleSpecifier, SimpleB10)
-ITEST(SimpleSpecifier, SimpleB11)
-ITEST(SimpleSpecifier, SimpleB12)
-ITEST(SimpleSpecifier, SimpleB13)
-ITEST(SimpleSpecifier, SimpleB14)
-ITEST(SimpleSpecifier, SimpleB15)
-
-ITEST(SimpleSpecifier, SimpleC00)
-ITEST(SimpleSpecifier, SimpleC01)
-ITEST(SimpleSpecifier, SimpleC02)
-ITEST(SimpleSpecifier, SimpleC03)
-ITEST(SimpleSpecifier, SimpleC04)
-ITEST(SimpleSpecifier, SimpleC05)
-ITEST(SimpleSpecifier, SimpleC06)
-ITEST(SimpleSpecifier, SimpleC07)
-ITEST(SimpleSpecifier, SimpleC08)
-ITEST(SimpleSpecifier, SimpleC09)
-ITEST(SimpleSpecifier, SimpleC10)
-ITEST(SimpleSpecifier, SimpleC11)
-ITEST(SimpleSpecifier, SimpleC12)
-ITEST(SimpleSpecifier, SimpleC13)
-ITEST(SimpleSpecifier, SimpleC14)
-ITEST(SimpleSpecifier, SimpleC15)
-
-ITEST(SimpleSpecifier, Simplec00)
-ITEST(SimpleSpecifier, Simplec01)
-ITEST(SimpleSpecifier, Simplec02)
-ITEST(SimpleSpecifier, Simplec03)
-ITEST(SimpleSpecifier, Simplec04)
-ITEST(SimpleSpecifier, Simplec05)
-ITEST(SimpleSpecifier, Simplec06)
-ITEST(SimpleSpecifier, Simplec07)
-ITEST(SimpleSpecifier, Simplec08)
-ITEST(SimpleSpecifier, Simplec09)
-ITEST(SimpleSpecifier, Simplec10)
-ITEST(SimpleSpecifier, Simplec11)
-ITEST(SimpleSpecifier, Simplec12)
-ITEST(SimpleSpecifier, Simplec13)
-ITEST(SimpleSpecifier, Simplec14)
-ITEST(SimpleSpecifier, Simplec15)
-
-/*ITEST(SimpleSpecifier, SimpleH16)
-ITEST(SimpleSpecifier, SimpleH17)
-ITEST(SimpleSpecifier, SimpleH18)
-ITEST(SimpleSpecifier, SimpleH19)
-ITEST(SimpleSpecifier, SimpleH20)
-ITEST(SimpleSpecifier, SimpleH21)
-ITEST(SimpleSpecifier, SimpleH22)
-ITEST(SimpleSpecifier, SimpleH23)
-ITEST(SimpleSpecifier, SimpleH24)
-ITEST(SimpleSpecifier, SimpleH25)
-ITEST(SimpleSpecifier, SimpleH26)
-ITEST(SimpleSpecifier, SimpleH27)
-ITEST(SimpleSpecifier, SimpleH28)
-ITEST(SimpleSpecifier, SimpleH29)
-ITEST(SimpleSpecifier, SimpleH30)
-ITEST(SimpleSpecifier, SimpleH31)*/
 
 TEST(TrueAlts1, {
 	Specifier * spec; gParser.Compile(S"i|c", &spec);

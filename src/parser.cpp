@@ -136,7 +136,7 @@ TEST(GN6,  { Specifier * s = nullptr; char const * p = "   o   x   c   "; return
 
 TEST(GN11, { Specifier * s = nullptr; return gParser.GetNext(S"I(45)", &s) == OK && s && s->GetSpecifier() == 'i'; })
 
-TEST(GN12, { Specifier * s = nullptr; char const * p = "   B  (  0b001101  )   d  H(FF) "; return
+TEST(GN12, { Specifier * s = nullptr; char const * p = S"   B  (  0b001101  )   d  H(FF) "; return
 	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'b' &&
 	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'd' &&
 	gParser.GetNext(p, &s) == OK && s && s->GetSpecifier() == 'h' &&
