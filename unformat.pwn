@@ -107,9 +107,9 @@ main()
 	// This line gives an error quite late on.
 	//RUN("2", "i<0-9>(5))", var0); // == ERROR_RAN_TRIVIAL.
 	ASSERT(unformat("", "I<0-9>(5)", var0) == OK && var0 == 5);
-	ASSERT(unformat(" ", "I<0-9>(50)", var0) == OK && var0 == 50);
-	ASSERT(unformat(" ", "H<0-9>(50)", var0) == OK && var0 == 0x50);
-	ASSERT(unformat(" ", "X<0-9>(FF)", var0) == OK && var0 == 0xFF);
+	ASSERT(unformat(" ", "I< 0 - 9 >(50)", var0) == OK && var0 == 50);
+	ASSERT(unformat(" ", "H<0 - 9>(50)", var0) == OK && var0 == 0x50);
+	ASSERT(unformat(" ", "  X  <  0  -  9  >  (  FF  )  ", var0) == OK && var0 == 0xFF);
 	ASSERT(unformat(" ", "D<-4--1>(50)", var0) == OK && var0 == 50);
 	ASSERT(unformat(" ", "O<56-66>(43)", var0) == OK && var0 == 35);
 	
@@ -125,28 +125,39 @@ main()
 	ASSERT(unformat("0x400", "H<FF - FFF>(50)", var0) == OK && var0 == 0x400);
 	ASSERT(unformat("0", "X<0 - 0>(FF)", var0) == OK && var0 == 0);
 	ASSERT(unformat("-2", "D<-4--1>(50)", var0) == OK && var0 == -2);
-	ASSERT(unformat("56", "O<56-66>(43)", var0) == OK && var0 == 46);
-	ASSERT(unformat("66", "O<56-66>(43)", var0) == OK && var0 == 54);
-	ASSERT(unformat("55", "O<56-66>(43)", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("67", "O<56-66>(43)", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("56", "O<56-66> (43)", var0) == OK && var0 == 46);
+	ASSERT(unformat("66", "O<56-66>( 43)", var0) == OK && var0 == 54);
+	ASSERT(unformat("55", "O<56-66>(43 )", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("67", "O<56-66>(43) ", var0) == ERROR_OUT_OF_RANGE);
 	ASSERT(unformat("0111", "B<0110-1111>(1000)", var0) == OK && var0 == 0b0111);
 	
-	ASSERT(unformat("20", "i<0-9>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("10", "h<0-F>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("F", "x<0-9>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("0", "d<-4--1>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("2", "o<56-66>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("10", "b<0110-1111>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("20", "i<0 -  9>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("10", "h<  0-F>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("F", "x<0-9>   ", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("0", "  d<-4  -  -1>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("2", "  o   <56-66>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("10", "b < 0110 - 1111 > ", var0) == ERROR_OUT_OF_RANGE);
 	
 	ASSERT(unformat("87", "i<-100 - 100>", var0) == OK && var0 == 87);
 	ASSERT(unformat("0x400", "h<FF - FFF>", var0) == OK && var0 == 0x400);
 	ASSERT(unformat("0", "x<0 - 0>", var0) == OK && var0 == 0);
-	ASSERT(unformat("-2", "d<-4--1>", var0) == OK && var0 == -2);
-	ASSERT(unformat("56", "o<56-66>", var0) == OK && var0 == 46);
-	ASSERT(unformat("66", "o<56-66>", var0) == OK && var0 == 54);
-	ASSERT(unformat("55", "o<56-66>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("67", "o<56-66>", var0) == ERROR_OUT_OF_RANGE);
-	ASSERT(unformat("0111", "b<0110-1111>", var0) == OK && var0 == 0b0111);
+	ASSERT(unformat("-2", "d <-4-  -1>", var0) == OK && var0 == -2);
+	ASSERT(unformat("56", "o< 56-66>", var0) == OK && var0 == 46);
+	ASSERT(unformat("66", "o<56 -66>", var0) == OK && var0 == 54);
+	ASSERT(unformat("55", "o<56- 66>", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("67", "o<56-66 >", var0) == ERROR_OUT_OF_RANGE);
+	ASSERT(unformat("0111", "b<0110-1111> ", var0) == OK && var0 == 0b0111);
+
+	print(" ");
+	print(" - Group 3:");
+	print(" ");
+
+	ASSERT(unformat("10 20", "o<0-20>i", var0, var1) == OK && var0 == 8 && var1 == 20);
+	ASSERT(unformat("10 20", "o<0-20>i<0-20>", var0, var1) == OK && var0 == 8 && var1 == 20);
+	// "n" DOES NOT have <> ranges apparently... (well, obviously, it's a
+	// different class).  NOW IT DOES!!!
+	ASSERT(unformat("0b111", "n<0b0110-0b1111> ", var0) == OK && var0 == 0b0111);
+	//RUN("0b111", "n<0b0110-0b1111> ", var0);
 
 
 	

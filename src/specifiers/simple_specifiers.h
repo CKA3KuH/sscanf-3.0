@@ -292,5 +292,15 @@ private:
 			that.Run(s, env) == OK &&
 			d[0] == '-' && d[1] == '\\';
 	})
+	
+	CTEST(NumXr, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"1234", DefaultEnvironment::Get(&dest)) == OK && dest == 1234; })
+	CTEST(NumXm, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"01234", DefaultEnvironment::Get(&dest)) == OK && dest == 668; })
+	CTEST(NumXn, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"0b9876", DefaultEnvironment::Get(&dest)) == OK && dest == 0xB9876; })
+	CTEST(NumXo, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"0x01234", DefaultEnvironment::Get(&dest)) == OK && dest == 0x1234; })
+	CTEST(NumXp, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"0b1110", DefaultEnvironment::Get(&dest)) == OK && dest == 14; })
+	CTEST(NumXq, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"0b0", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
+	CTEST(NumXs, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"-56", DefaultEnvironment::Get(&dest)) == OK && dest == -56; })
+	CTEST(NumXt, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"G", DefaultEnvironment::Get(&dest)) == ERROR_NAN; })
+	CTEST(NumXu, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"-a", DefaultEnvironment::Get(&dest)) == ERROR_NAN; })
 };
 

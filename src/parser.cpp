@@ -183,7 +183,8 @@ error_t
 	TRY(Add(new SimpleSpecifier('o', &Utils::ReadOctal  )));
 	TRY(Add(new SimpleSpecifier('x', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('c', &Utils::ReadCharEx )));
-	TRY(Add(new NumSpecifier())); // 'n'.
+	// I don't know why I EVER made this a different class...
+	TRY(Add(new SimpleSpecifier('n', &Utils::ReadNum    )));
 	
 	// Detect group closes.
 	TRY(Add(new TrivialSpecifier('|'))); // Alternate.

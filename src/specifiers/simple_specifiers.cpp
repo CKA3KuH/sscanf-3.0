@@ -265,3 +265,14 @@ ITEST(SimpleSpecifier, SimpleH29)
 ITEST(SimpleSpecifier, SimpleH30)
 ITEST(SimpleSpecifier, SimpleH31)*/
 
+
+ITEST(SimpleSpecifier, NumXm)
+ITEST(SimpleSpecifier, NumXn)
+ITEST(SimpleSpecifier, NumXo)
+ITEST(SimpleSpecifier, NumXp)
+ITEST(SimpleSpecifier, NumXq)
+ITEST(SimpleSpecifier, NumXr)
+ITEST(SimpleSpecifier, NumXs)
+ITEST(SimpleSpecifier, NumXt)
+ITEST(SimpleSpecifier, NumXu)
+
