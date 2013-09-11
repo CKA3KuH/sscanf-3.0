@@ -5,8 +5,8 @@
 #include "specifiers/delim_specifier.hpp"
 #include "specifiers/group_specifiers.hpp"
 #include "specifiers/enum_specifier.hpp" // Relies on group_specifiers.
-#include "specifiers/player_specifier.hpp"
-#include "specifiers/string_specifier.hpp"*/
+#include "specifiers/player_specifier.hpp"*/
+#include "specifiers/string_specifier.h"
 #include "specifiers/numeric_specifier.h"
 #include "specifiers/trivial_specifiers.h"
 #include "specifiers/simple_specifiers.h"

@@ -164,3 +164,117 @@ private:
 };
 */
 
+
+#ifdef SSCANF_DEBUG
+	// This version doesn't store data, it just compares the writes to expected
+	// values.
+	class TestMemory : public Memory
+	{
+	public:
+		// cons
+			TestMemory(cell * data, size_t len)
+		:
+			Memory(nullptr),
+			m_len(len),
+			m_pos(0),
+			m_data(nullptr)
+		{
+			m_data = (cell *)malloc(len * sizeof (cell));
+			memcpy(m_data, data, len * sizeof (cell));
+		};
+		
+		// dest
+			~TestMemory()
+		{
+			delete m_data;
+		};
+		
+		virtual error_t
+			GetNextPointer(cell ** const ret) { return OK; }
+		
+		virtual error_t
+			GetNextValue(cell * const ret) { return OK; }
+		
+		virtual error_t
+			GetNextString(char * ret, size_t len) { return OK; }
+		
+		virtual error_t
+			SetNextValue(cell const val, size_t idx = 0)
+		{
+			if (m_pos >= m_len) return ERROR_UNKNOWN_ERROR;
+			if (val != m_data[m_pos++]) return ERROR_UNKNOWN_ERROR;
+			return OK;
+		}
+		
+		virtual error_t
+			SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; }
+		
+		virtual error_t
+			Skip(int n, int part = 0) { m_pos += n + part; return OK; }
+		
+		virtual int
+			Poll() { return m_pos; };
+		
+		int
+			m_len,
+			m_pos;
+		
+		cell *
+			m_data;
+	};
+	
+	// This version does store data in a pre-provided memory location.
+	class TempMemory : public Memory
+	{
+	public:
+		// cons
+			TempMemory(cell * data, size_t len)
+		:
+			Memory(nullptr),
+			m_len(len),
+			m_pos(-1),
+			m_data(data)
+		{
+		};
+		
+		// dest
+			~TempMemory()
+		{
+		};
+		
+		virtual error_t
+			GetNextPointer(cell ** const ret) { return OK; }
+		
+		virtual error_t
+			GetNextValue(cell * const ret) { *ret = m_data[++m_pos]; return OK; }
+		
+		virtual error_t
+			GetNextString(char * ret, size_t len) { return OK; }
+		
+		virtual error_t
+			SetNextValue(cell const val, size_t idx = 0)
+		{
+			if (!idx) ++m_pos;
+			if (m_pos + idx >= (size_t)m_len) return ERROR_UNKNOWN_ERROR;
+			m_data[m_pos + idx] = val;
+			return OK;
+		}
+		
+		virtual error_t
+			SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; }
+		
+		virtual error_t
+			Skip(int n, int part = 0) { m_pos += n + part; return OK; }
+		
+		virtual int
+			Poll() { return m_pos; };
+		
+		int
+			m_len,
+			m_pos;
+		
+		cell *
+			m_data;
+	};
+#endif
+

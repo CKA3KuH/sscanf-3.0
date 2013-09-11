@@ -243,7 +243,7 @@ private:
 	// Valid copies.
 	// Note that some of these leak memory - don't use in production...  "p" is
 	// frequently allocated, and never freed.
-	CTEST(Simple4a, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return p != &that; })
+/*	CTEST(Simple4a, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return p != &that; })
 	CTEST(Simple4b, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return p->GetSpecifier() == 'f'; })
 	CTEST(Simple4c, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return !p->GetSkip(); })
 	CTEST(Simple4d, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); that.SetSkip(); return !p->GetSkip(); })
@@ -251,7 +251,7 @@ private:
 	CTEST(Simple4f, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return !p->GetOptional(); })
 	CTEST(Simple4g, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); that.SetOptional(); return !p->GetOptional(); })
 	CTEST(Simple4h, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.SetOptional(); that.Clone(&p); return p->GetOptional(); })
-	CTEST(Simple4i, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return dynamic_cast<SimpleSpecifier *>(p)->m_read == &Utils::ReadChar; })
+	CTEST(Simple4i, { SimpleSpecifier that('f', &Utils::ReadChar); Specifier * p; that.Clone(&p); return dynamic_cast<SimpleSpecifier *>(p)->m_read == &Utils::ReadChar; })*/
 	// CTEST(Simple4j, { SimpleSpecifier that('f', &Utils::ReadChar); return that.Skip(env) == 1; })
 	
 	// Valid renders.

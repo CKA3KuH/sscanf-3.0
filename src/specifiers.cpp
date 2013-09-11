@@ -75,57 +75,9 @@ error_t
 	#include "specifiers/other_specifiers.h"
 	#include "specifiers/group_specifiers.h"
 	#include "specifiers/numeric_specifier.h"
+	#include "specifiers/string_specifier.h"
 	
 	#include "../sdk/plugin.h"
-	
-	class TestMemory : public Memory
-	{
-	public:
-		// cons
-			TestMemory(cell * data, size_t len) : Memory(nullptr)
-		{
-			pos = 0;
-			m_data = (cell *)malloc(len * sizeof (cell));
-			memcpy(m_data, data, len * sizeof (cell));
-		};
-		
-		// dest
-			~TestMemory()
-		{
-			delete m_data;
-		};
-		
-		virtual error_t
-			GetNextPointer(cell ** const ret) { return OK; }
-		
-		virtual error_t
-			GetNextValue(cell * const ret) { return OK; }
-		
-		virtual error_t
-			GetNextString(char * ret, size_t len) { return OK; }
-		
-		virtual error_t
-			SetNextValue(cell const val, size_t idx = 0)
-		{
-			if (val != m_data[pos++]) return ERROR_UNKNOWN_ERROR;
-			return OK;
-		}
-		
-		virtual error_t
-			SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; }
-		
-		virtual error_t
-			Skip(int n) { pos += n; return OK; }
-		
-		virtual int
-			Poll() { return pos; };
-		
-		int
-			pos;
-		
-		cell *
-			m_data;
-	};
 #endif
 
 TEST(Numeric1,  { NumericSpecifier nm; return nm.ReadToken(S"12i") == OK && nm.CountChildren() == 12;  })
@@ -264,6 +216,33 @@ ITEST(AltGroup, GlobGroup5)
 ITEST(MinusSpecifier, Minus0)
 ITEST(MinusSpecifier, Minus1)
 
+ITEST(StringSpecifier, StringSpec0)
+ITEST(StringSpecifier, StringSpec1)
+ITEST(StringSpecifier, StringSpec2)
+ITEST(StringSpecifier, StringSpec3)
+ITEST(StringSpecifier, StringSpec4)
+ITEST(StringSpecifier, StringSpec5)
+ITEST(StringSpecifier, StringSpec6)
+ITEST(StringSpecifier, StringSpec7)
+ITEST(StringSpecifier, StringSpec8)
+ITEST(StringSpecifier, StringSpec9)
+ITEST(StringSpecifier, StringSpec10)
+ITEST(StringSpecifier, StringSpec11)
+ITEST(StringSpecifier, StringSpec12)
+ITEST(StringSpecifier, StringSpec13)
+ITEST(StringSpecifier, StringSpec14)
+ITEST(StringSpecifier, StringSpec15)
+ITEST(StringSpecifier, StringSpec16)
+ITEST(StringSpecifier, StringSpec17)
+ITEST(StringSpecifier, StringSpec18)
+ITEST(StringSpecifier, StringSpec19)
+ITEST(StringSpecifier, StringSpec20)
+ITEST(StringSpecifier, StringSpec21)
+ITEST(StringSpecifier, StringSpec22)
+ITEST(StringSpecifier, StringSpec23)
+ITEST(StringSpecifier, StringSpec24)
+ITEST(StringSpecifier, StringSpec25)
+
 /*#include "specifiers/array_specifier.hpp"
 #include "specifiers/delim_specifier.hpp"
 #include "specifiers/group_specifiers.hpp"
@@ -274,7 +253,6 @@ ITEST(MinusSpecifier, Minus1)
 #include "specifiers/simple_specifiers.hpp"
 #include "specifiers/string_specifier.hpp"
 #include "specifiers/trivial_specifiers.hpp"*/
-
 
 ITEST(LiteralSpecifier, LitSpec0a)
 ITEST(LiteralSpecifier, LitSpec0b)
@@ -350,4 +328,27 @@ TEST(TrueAlts6, {
 	cell data[11] = { 11, 22, 33, 0, 0, 0x11, 0x22, 0x33, 0xFF, 0xAA, 1 }; TestMemory tm(data, 11); Environment env(&tm);
 	return spec->Run(S"11 22 33 FF AA", env) == OK;
 });
+
+
+ITEST(StringSpecifier, StringSRun00)
+ITEST(StringSpecifier, StringSRun01)
+ITEST(StringSpecifier, StringSRun02)
+ITEST(StringSpecifier, StringSRun03)
+ITEST(StringSpecifier, StringSRun04)
+ITEST(StringSpecifier, StringSRun05)
+ITEST(StringSpecifier, StringSRun06)
+ITEST(StringSpecifier, StringSRun07)
+
+ITEST(StringSpecifier, StringSRun08)
+ITEST(StringSpecifier, StringSRun09)
+ITEST(StringSpecifier, StringSRun10)
+ITEST(StringSpecifier, StringSRun11)
+ITEST(StringSpecifier, StringSRun12)
+ITEST(StringSpecifier, StringSRun13)
+ITEST(StringSpecifier, StringSRun14)
+ITEST(StringSpecifier, StringSRun15)
+ITEST(StringSpecifier, StringSRun16)
+ITEST(StringSpecifier, StringSRun17)
+ITEST(StringSpecifier, StringSRun18)
+ITEST(StringSpecifier, StringSRun19)
 

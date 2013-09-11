@@ -101,7 +101,7 @@ ITEST(SimpleSpecifier, Simple3c)
 ITEST(SimpleSpecifier, Simple3f)
 ITEST(SimpleSpecifier, Simple3g)
 
-ITEST(SimpleSpecifier, Simple4a)
+/*ITEST(SimpleSpecifier, Simple4a)
 ITEST(SimpleSpecifier, Simple4b)
 ITEST(SimpleSpecifier, Simple4c)
 ITEST(SimpleSpecifier, Simple4d)
@@ -109,7 +109,7 @@ ITEST(SimpleSpecifier, Simple4e)
 ITEST(SimpleSpecifier, Simple4f)
 ITEST(SimpleSpecifier, Simple4g)
 ITEST(SimpleSpecifier, Simple4h)
-ITEST(SimpleSpecifier, Simple4i)
+ITEST(SimpleSpecifier, Simple4i)*/
 // ITEST(SimpleSpecifier, Simple4j)
 
 ITEST(SimpleSpecifier, Simple5a)

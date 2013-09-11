@@ -339,43 +339,55 @@ error_t
 	{
 		case '\0': return ERROR_NAN;
 		case '\\':
+		{
+			signed char
+				ch;
 			++input;
-			switch (*input)
+			if ((ch = (signed char)*input) < 1) return ERROR_INVALID_ESCAPE;
+			if (ch == '0')
 			{
-				// sscanf enclosing brackets.
-				case '(': n = '('; break;
-				case ')': n = ')'; break;
-				case '[': n = '['; break;
-				case ']': n = ']'; break;
-				case '<': n = '<'; break;
-				case '>': n = '>'; break;
-				// Normal escapes.
-				case 'r':  n = '\r'; break;
-				case 'n':  n = '\n'; break;
-				case '\\': n = '\\'; break;
-				case '\'': n = '\''; break;
-				case 't':  n = '\t'; break;
-				case '"':  n = '\"'; break;
-				case 'a':  n = '\a'; break;
-				case 'b':  n = '\b'; break;
-				case 'v':  n = '\v'; break;
-				case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
-				{
-					// Can't fail, already validated.
-					Utils::ReadOctal(input, n);
-					if (*input == ';') ++input;
-					return OK;
-				}
-				case 'x': case 'X':
-				{
-					++input;
-					TRY(Utils::ReadHex(input, n));
-					if (*input == ';') ++input;
-					return OK;
-				}
-				default: return ERROR_INVALID_ESCAPE;
+				// Leading zero.
+				Utils::ReadOctal(input, n);
+				if (*input == ';') ++input;
+				return OK;
 			}
-			break;
+			else if ('1' <= ch && ch <= '9')
+			{
+				// Can't fail, already validated.  This uses the DECIMAL digits
+				// of PAWN, not the OCTAL digits of C.
+				Utils::ReadDecimal(input, n);
+				if (*input == ';') ++input;
+				return OK;
+			}
+			else if (('A' <= ch && ch <= 'Z' && (ch |= 0x20)) || ('a' <= ch && ch <= 'z'))
+			{
+				switch (ch)
+				{
+					case 'a':  n = '\a'; break; // Alarm.
+					case 'b':  n = '\b'; break; // Backspace.
+					case 'e':  n = '\033;'; break; // Escape.
+					case 'f':  n = '\f'; break; // Form feed.
+					case 'n':  n = '\n'; break; // New line.
+					case 'r':  n = '\r'; break; // Carriage Return.
+					case 't':  n = '\t'; break; // Tab.
+					case 'v':  n = '\v'; break; // Vertical tab.
+					case 'x': case 'u':
+					{
+						++input;
+						TRY(Utils::ReadHex(input, n));
+						if (*input == ';') ++input;
+						return OK;
+					}
+					default: return ERROR_INVALID_ESCAPE;
+				}
+			}
+			else
+			{
+				// Just accept all others - there are too many characters that
+				// MAY be escaped if users have different custom delimiters.
+				n = ch;
+			}
+		}
 	}
 	++input;
 	return OK;
@@ -407,12 +419,12 @@ TEST(Char1,  { cell n; return Utils::ReadChar(S"x", n) == OK && n == 'x'; })
 TEST(Char2a, { cell n; return Utils::ReadChar(S"\\\\", n) == OK && n == '\\'; })
 TEST(Char2b, { cell n; return Utils::ReadChar(S"\\n", n) == OK && n == '\n'; })
 TEST(Char2c, { cell n; return Utils::ReadChar(S"\\0", n) == OK && n == 0; })
-TEST(Char2d, { cell n; return Utils::ReadChar(S"\\55", n) == OK && n == 055; })
-TEST(Char2e, { cell n; return Utils::ReadChar(S"\\55;", n) == OK && n == 055; })
+TEST(Char2d, { cell n; return Utils::ReadChar(S"\\055", n) == OK && n == 055; })
+TEST(Char2e, { cell n; return Utils::ReadChar(S"\\055;", n) == OK && n == 055; })
 TEST(Char2f, { cell n; return Utils::ReadChar(S"\\'", n) == OK && n == '\''; })
 TEST(Char2g, { cell n; return Utils::ReadChar(S"\\", n) == ERROR_INVALID_ESCAPE; })
 TEST(Char2h, { cell n; return Utils::ReadChar(S"\\y", n) == ERROR_INVALID_ESCAPE; })
-TEST(Char2i, { cell n; return Utils::ReadChar(S"\\9", n) == ERROR_INVALID_ESCAPE; })
+TEST(Char2i, { cell n; return Utils::ReadChar(S"\\9", n) == OK && n == 9; })
 TEST(Char2j, { cell n; return Utils::ReadChar(S"\\x;", n) == ERROR_NAN; })
 TEST(Char2k, { cell n; return Utils::ReadChar(S"\\xH;", n) == ERROR_NAN; })
 TEST(Char3,  { cell n; return Utils::ReadChar(S"'g'", n) == OK && n == '\''; })
@@ -444,12 +456,16 @@ error_t
 		ch;
 	int
 		depth = 1;
+	size_t
+		posLen = 0,
+		truLen = 0;
 	while (*input)
 	{
 		if (*input == end)
 		{
 			if (--depth == 0) break;
 			ep = ++input;
+			truLen = ++posLen;
 		}
 		else if ((unsigned char)*input > ' ')
 		{
@@ -458,15 +474,17 @@ error_t
 			if (*input == start) ++depth, ++input;
 			else TRY(Utils::ReadChar(input, ch));
 			ep = input;
+			truLen = ++posLen;
 		}
 		else
 		{
 			++input;
+			++posLen;
 		}
 	}
 	if (*input != end) return ERROR_EXPECTED_A_GOT_B_2;
 	*const_cast<char *>(ep) = '\0';
-	if (len) *len = ep - output;
+	if (len) *len = truLen;
 	++input;
 	Utils::SkipWhitespace(input);
 	return OK;
@@ -486,7 +504,7 @@ TEST(GetBound8,  { char const * c; return Utils::GetBounded(S"   [hello]", c, '[
 TEST(GetBound9,  { char const * c; size_t len; return Utils::GetBounded(S"   [hello ]", c, '[', ']', &len) == OK && len == 5; })
 TEST(GetBound10, { char const * c; size_t len; return Utils::GetBounded(S"   [ hello g]", c, '[', ']', &len) == OK && len == 7; })
 TEST(GetBound11, { char const * c; size_t len; return Utils::GetBounded(S"   !h ello   543#", c, '!', '#', &len) == OK && len == 12; })
-TEST(GetBound15, { char const * c; size_t len; return Utils::GetBounded(S"   \"!h ello   5\\\"3#\"", c, '"', '"', &len) == OK && len == 14 && std::string(c) == "!h ello   5\"3#"; })
+TEST(GetBound15, { char const * c; size_t len; return Utils::GetBounded(S"   \"!h ello   5\\\"3#\"", c, '"', '"', &len) == OK && len == 14 && std::string(c) == "!h ello   5\\\"3#"; })
 
 // These are mostly tested by the function above.
 error_t
@@ -544,14 +562,14 @@ error_t
 	if (*len == '*')
 	{
 		// Look up the length.
-		s = -1;
+		*s = -1;
 		return OK;
 	}
 	if (*len == '\0')
 	{
 		// No length given ([]).  For now just accept that, let the code
 		// determine whether that is valid at some other point in the future.
-		s = 0;
+		*s = 0;
 		return OK;
 	}
 	cell
@@ -563,18 +581,18 @@ error_t
 	return OK;
 };
 
-TEST(GetLength0,  { char const * c; int s; return Utils::GetLength(S"[]", &s) == OK && s == 0; })
-TEST(GetLength1,  { char const * c; int s; return Utils::GetLength(S"[0]", &s) == ERROR_INVALID_ARRAY_SIZE; })
-TEST(GetLength2,  { char const * c; int s; return Utils::GetLength(S"[ -14 ]", &s) == ERROR_INVALID_ARRAY_SIZE; })
-TEST(GetLength3,  { char const * c; int s; return Utils::GetLength(S"[ ]", &s) == OK && s == 0; })
-TEST(GetLength4,  { char const * c; int s; return Utils::GetLength(S"[44]", &s) == OK && s == 44; })
-TEST(GetLength5,  { char const * c; int s; return Utils::GetLength(S"[ * ]", &s) == OK && s == -1; })
-TEST(GetLength6,  { char const * c; int s; return Utils::GetLength(S"[ * ]", &s) == OK && s == -1; })
-TEST(GetLength7,  { char const * c; int s; return Utils::GetLength(S"[ 78 ", &s) == ERROR_NO_ARRAY_END; })
-TEST(GetLength8,  { char const * c; int s; return Utils::GetLength(S" 15 ]", &s) == ERROR_NO_ARRAY_START; })
-TEST(GetLength9,  { char const * c; int s; return Utils::GetLength(S" [ 1000 ] ", &s) == OK && s == 1000; })
-TEST(GetLength10, { char const * c; int s; return Utils::GetLength(S" [ 0x44 ] ", &s) == ERROR_NAN; })
-TEST(GetLength11, { char const * c; int s; return Utils::GetLength(S" [ HI ] ", &s) == ERROR_NAN; })
+TEST(GetLength0,  { int s; return Utils::GetLength(S"[]", &s) == OK && s == 0; })
+TEST(GetLength1,  { int s; return Utils::GetLength(S"[0]", &s) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(GetLength2,  { int s; return Utils::GetLength(S"[ -14 ]", &s) == ERROR_INVALID_ARRAY_SIZE; })
+TEST(GetLength3,  { int s; return Utils::GetLength(S"[ ]", &s) == OK && s == 0; })
+TEST(GetLength4,  { int s; return Utils::GetLength(S"[44]", &s) == OK && s == 44; })
+TEST(GetLength5,  { int s; return Utils::GetLength(S"[ * ]", &s) == OK && s == -1; })
+TEST(GetLength6,  { int s; return Utils::GetLength(S"[ * ]", &s) == OK && s == -1; })
+TEST(GetLength7,  { int s; return Utils::GetLength(S"[ 78 ", &s) == ERROR_NO_ARRAY_END; })
+TEST(GetLength8,  { int s; return Utils::GetLength(S" 15 ]", &s) == ERROR_NO_ARRAY_START; })
+TEST(GetLength9,  { int s; return Utils::GetLength(S" [ 1000 ] ", &s) == OK && s == 1000; })
+TEST(GetLength10, { int s; return Utils::GetLength(S" [ 0x44 ] ", &s) == ERROR_NAN; })
+TEST(GetLength11, { int s; return Utils::GetLength(S" [ HI ] ", &s) == ERROR_NAN; })
 
 error_t
 	Utils::
@@ -614,9 +632,23 @@ error_t
 
 bool TestCompare(char const * one, cell const * two)
 {
-	while (*two) if (*one++ != *two++) return false;
+	while (*two)
+	{
+		if (*one != *two) return false;
+		++one, ++two;
+	}
 	return *one == '\0';
 }
+
+// Need to test the test functions!  No point using it for verification if it
+// doesn't work!
+TEST(TestCompare0,  { cell d[] = {'g', 'D', 'q', '5', '\0'}; return TestCompare("gDq5", d) == true; });
+TEST(TestCompare1,  { cell d[] = {'g', 'D', 'q', '5', '\0'}; return TestCompare("gdq5", d) == false; });
+TEST(TestCompare2,  { cell d[] = {'g', 'D', 'q', '5', '\0'}; return TestCompare("gDq", d) == false; });
+TEST(TestCompare3,  { cell d[] = {'g', 'D', 'q', '5', '\0'}; return TestCompare("gDq57", d) == false; });
+TEST(TestCompare4,  { cell d[] = {'g', 'D', 'q', '5', '\0'}; return TestCompare("", d) == false; });
+TEST(TestCompare5,  { cell d[] = {'\0'}; return TestCompare("", d) == true; });
+TEST(TestCompare6,  { cell d[] = {'\0'}; return TestCompare(" ", d) == false; });
 
 TEST(CopyStr0,  { cell dest[42]; return Utils::CopyString(dest, S"Hello", 5, false) == OK && TestCompare("Hell", dest); })
 TEST(CopyStr1,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"Hello", 7, false) == OK && TestCompare("Hello", dest) && dest[6] == 42; })
