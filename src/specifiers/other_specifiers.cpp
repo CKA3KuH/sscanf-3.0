@@ -1,8 +1,5 @@
 #include "other_specifiers.h"
 
-cell
-	GetHexCharacter(char const c);
-
 error_t
 	LiteralSpecifier::
 	ReadToken(char const * & input)

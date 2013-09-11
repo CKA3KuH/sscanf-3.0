@@ -207,5 +207,5 @@ typedef
 #endif
 
 #define TRY(n) do { error_t _error = (n); if (_error != OK) return _error; } while (false)
-#define NEXT(i, c, e) do { Utils::SkipWhitespace(i); if (*i++ != (c)) return (e); Utils::SkipWhitespace(i); } while (false)
+#define NEXT(i, c, e) do { Utils::SkipWhitespace(i); FAIL(*i++ == (c), e); Utils::SkipWhitespace(i); } while (false)
 

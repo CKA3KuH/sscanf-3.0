@@ -377,7 +377,7 @@ error_t
 	Utils::
 	ReadCharEx(char const * & input, cell & n)
 {
-	// Detect enclosing quotes.
+	// Detect optional enclosing quotes.
 	bool
 		quotes = false;
 	if (*input == '\'')
@@ -426,7 +426,9 @@ error_t
 	Utils::
 	GetBounded(char const * & input, char const * & output, char start, char end, size_t * len)
 {
-	NEXT(input, start, ERROR_EXPECTED_A_GOT_B_1);
+	Utils::SkipWhitespace(input);
+	if (*input++ != start) return ERROR_EXPECTED_A_GOT_B_1;
+	Utils::SkipWhitespace(input);
 	output = input;
 	char const *
 		ep = input;
@@ -466,6 +468,7 @@ TEST(GetBound9,  { char const * c; size_t len; return Utils::GetBounded(S"   [he
 TEST(GetBound10, { char const * c; size_t len; return Utils::GetBounded(S"   [ hello g]", c, '[', ']', &len) == OK && len == 7; })
 TEST(GetBound11, { char const * c; size_t len; return Utils::GetBounded(S"   !h ello   543#", c, '!', '#', &len) == OK && len == 12; })
 
+// These are mostly tested by the function above.
 error_t
 	Utils::
 	GetDefaults(char const * & input, char const * & output, size_t * len)
@@ -553,10 +556,9 @@ bool TestCompare(char const * one, cell const * two)
 	return *one == '\0';
 }
 
-#endif
-
 TEST(CopyStr0,  { cell dest[42]; return Utils::CopyString(dest, S"Hello", 5, false) == OK && TestCompare("Hell", dest); })
 TEST(CopyStr1,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"Hello", 7, false) == OK && TestCompare("Hello", dest) && dest[6] == 42; })
 TEST(CopyStr2,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"world", 7, true) == OK && TestCompare("world", dest) && dest[6] == 0; })
 
+#endif
 
