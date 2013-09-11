@@ -40,6 +40,7 @@ public:
 			TRY(Utils::GetDefaults(input, str, &m_length));
 			m_default = new cell [m_length + 1];
 			Utils::CopyString(m_default, str, m_length + 1);
+			SetOptional();
 		}
 		TRY(Utils::GetLength(input, &m_ssize));
 		// If the last specifier is a string, it is handled specially.  Note
@@ -65,8 +66,6 @@ public:
 		}
 		else if (m_ssize > 0) size = m_ssize;
 		else FAIL(env.GetMemory()->GetZeroLengthValid(), ERROR_INVALID_ARRAY_SIZE);
-		char const *
-			start = input;
 		cell
 			dump;
 		if (size)
@@ -75,6 +74,27 @@ public:
 			--size;
 			size_t
 				idx = 0;
+			if (*input == '\0')
+			{
+				FAIL(GetOptional(), ERROR_NO_STRING_LITERAL);
+				// This would be less complex if it wasn't so backwards
+				// compatible.  The old version REQUIRED sizes even on quiet
+				// strings.  This new version would prefer none to be given.
+				if (size >= m_length)
+				{
+					// Greater than, or exactly enough, space available.
+					for ( ; idx <= m_length; ++idx) TRY(env.SetNextValue(m_default[idx], idx));
+					TRY(env.Skip(0, size - m_length));
+				}
+				else
+				{
+					// Not enough space.
+					for ( ; idx < size; ++idx) TRY(env.SetNextValue(m_default[idx], idx));
+					TRY(env.SetNextValue('\0', size));
+					logprintf("sscanf warning: String buffer overflow. at %s:%d.", __FILE__, __LINE__);
+				}
+				return OK;
+			}
 			if (m_last)
 			{
 				while (idx < size && !env.AtDelimiter(input))
@@ -84,6 +104,8 @@ public:
 				}
 				// Pad the remainder of any array memory.
 				TRY(env.SetNextValue('\0', idx));
+				// Currently only "enum" uses this.  But it tells the memory
+				// system how big the array SHOULD be, if that's ever useful.
 				TRY(env.Skip(0, size - idx));
 				if (env.AtDelimiter(input)) return OK;
 			}
@@ -101,6 +123,15 @@ public:
 			}
 			// This is not a fatal error - the remainder is being dumped.
 			logprintf("sscanf warning: String buffer overflow. at %s:%d.", __FILE__, __LINE__);
+		}
+		else
+		{
+			if (*input == '\0')
+			{
+				// Don't even bother saving the non-existent data to nowhere.
+				FAIL(GetOptional(), ERROR_NO_STRING_LITERAL);
+				return OK;
+			}
 		}
 		// Loop to an explicit delimiter (NULL counts).  Use "ReadChar" so that
 		// we can still do "\ " to include spaces when we shouldn't otherwise.
