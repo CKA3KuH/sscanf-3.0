@@ -7,7 +7,7 @@
 // This class is pretty much the main work-horse of the whole plugin!
 class Utils
 {
-public:
+PUBLIC:
 	static error_t
 		ReadOctal(char const * & input, cell & n);
 	

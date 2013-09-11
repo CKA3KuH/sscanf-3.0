@@ -3,10 +3,10 @@
 
 class PackedSpecifier : StringSpecifier
 {
-private:
+PRIVATE:
 	class PackedMemory : public Memory
 	{
-		public:
+		PUBLIC:
 			// cons
 				PackedMemory(Memory * m)
 			:
@@ -59,7 +59,7 @@ private:
 			virtual bool
 				GetZeroLengthValid() const  { return m_parent->GetZeroLengthValid(); };
 			
-		private:
+		PRIVATE:
 			size_t
 				m_pidx,
 				m_write;
@@ -71,7 +71,7 @@ private:
 				m_parent;
 	};
 	
-public:
+PUBLIC:
 	// cons
 		PackedSpecifier()
 	:

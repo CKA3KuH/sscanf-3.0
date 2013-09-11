@@ -11,7 +11,7 @@ typedef
 
 class Parser
 {
-public:
+PUBLIC:
 	// cons
 		Parser()
 	{
@@ -42,11 +42,9 @@ public:
 	error_t
 		AddAll();
 	
-private:
+PRIVATE:
 	Specifier *
 		m_specifiers['~' - '!' + 1];
-	
-	CTEST(Parser1, { Parser p; return '~' - '!' < sizeof (p.m_specifiers) / sizeof (Specifier *); })
 };
 
 extern Parser

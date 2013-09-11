@@ -13,7 +13,7 @@
 
 class Specifier
 {
-public:
+PUBLIC:
 	// cons
 		Specifier(char s)
 	:
@@ -86,7 +86,7 @@ public:
 		return s.Render(out);
 	};
 	
-protected:
+PROTECTED:
 	// cons
 		Specifier(Specifier const & that)
 	:
@@ -99,7 +99,7 @@ protected:
 	char
 		m_specifier;
 	
-private:
+PRIVATE:
 	// cons
 		Specifier()
 	:

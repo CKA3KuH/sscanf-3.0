@@ -16,6 +16,9 @@
     <Filter Include="sdk\amx">
       <UniqueIdentifier>{d2c9b1b7-575e-4f8f-83cf-25210f14bf69}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\tests">
+      <UniqueIdentifier>{552cb4f5-5ecf-4a35-be3c-eb879b652328}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\utils.cpp">
@@ -57,6 +60,30 @@
     </ClCompile>
     <ClCompile Include="src\specifiers\string_specifier.cpp">
       <Filter>src\specifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_group_specifiers.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_other_specifiers.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_parser.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_simple_specifiers.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_specifiers.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_string_specifier.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_trivial_specifiers.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\test_utils.cpp">
+      <Filter>src\tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 
 class NumericSpecifier : public Specifier
 {
-public:
+PUBLIC:
 	// cons
 		NumericSpecifier()
 	:
@@ -103,7 +103,7 @@ public:
 	virtual int
 		CountChildren() const { return m_count; };
 	
-private:
+PRIVATE:
 	Specifier *
 		m_child;
 	

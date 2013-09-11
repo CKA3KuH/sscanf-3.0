@@ -10,7 +10,7 @@
 // This is the class representing some collection of multiple other specifiers.
 class SpecifierGroup : public Specifier
 {
-public:
+PUBLIC:
 	// cons
 		SpecifierGroup(char c)
 	:
@@ -69,7 +69,7 @@ public:
 	virtual int
 		CountChildren() const { return m_children.size(); };
 	
-private:
+PRIVATE:
 	std::list<Specifier *>
 		m_children;
 	
@@ -79,7 +79,7 @@ private:
 /*
 class QuietGroup : public SpecifierGroup
 {
-public:
+PUBLIC:
 	// cons
 		QuietGroup()
 	:
@@ -155,7 +155,7 @@ ReadToken_new_quiet:
 // This is just a set of specifiers, to be run one after the other - simple as!
 class SequentialGroup : public SpecifierGroup
 {
-public:
+PUBLIC:
 	// cons
 		SequentialGroup()
 	:
@@ -190,14 +190,14 @@ public:
 	virtual std::ostream &
 		Render(std::ostream & out) const;
 	
-private:
+PRIVATE:
 	int
 		m_memory;
 };
 
 class AltGroup : public SpecifierGroup
 {
-public:
+PUBLIC:
 	// cons
 		AltGroup(bool local = true)
 	:
@@ -236,7 +236,7 @@ public:
 	virtual std::ostream &
 		Render(std::ostream & out) const;
 	
-private:
+PRIVATE:
 	bool
 		m_sequential,
 		m_storeAlt,
@@ -244,22 +244,5 @@ private:
 	
 	int
 		m_memory;
-	
-	CTEST(AltGroup1,  { AltGroup gg; return gg.ReadToken(S"(ii|dd)") == OK && *CUR == '\0'; })
-	CTEST(AltGroup2,  { AltGroup gg; gg.ReadToken(S"(ii|xh)");ss s; return dynamic_cast<ss &>(s << gg).str() == "(ii|xh)"; })
-	CTEST(AltGroup4,  { AltGroup gg; if (gg.ReadToken(S"(ii|dd|cc|xx)") != OK) return false;
-		int i = 0; for (auto b = gg.Begin(), e = gg.End(); b != e; ++b) ++i; return i == 4 && gg.CountChildren() == 4; })
-	CTEST(AltGroup5,  { AltGroup gg; if (gg.ReadToken(S"(ii|dd|cc|xx|dd|dd|dd)") != OK) return false;
-		int i = 0; for (auto b = gg.Begin(), e = gg.End(); b != e; ++b) { ++i; if ((*b)->CountChildren() != 2) return false; } return i == 7 && gg.CountChildren() == 7; })
-	CTEST(AltGroup6,  { AltGroup gg; if (gg.ReadToken(S"(ii)") != OK) return false;
-		int i = 0; for (auto b = gg.Begin(), e = gg.End(); b != e; ++b) ++i; return i == 1 && gg.CountChildren() == 1; })
-	
-	CTEST(GlobGroup1,  { AltGroup gg(false); return gg.ReadToken(S"ii|dd") == OK && *CUR == '\0'; })
-	CTEST(GlobGroup2,  { AltGroup gg(false); return gg.ReadToken(S"ii|") == ERROR_NO_CHILDREN; })
-	CTEST(GlobGroup3,  { AltGroup gg(false); return gg.ReadToken(S"|dd") == ERROR_NO_CHILDREN; })
-	CTEST(GlobGroup6,  { AltGroup gg(false); return gg.ReadToken(S"I(5)") == OK; })
-	CTEST(GlobGroup7,  { AltGroup gg(false); return gg.ReadToken(S"I(q)") == ERROR_NAN; })
-	CTEST(GlobGroup4,  { AltGroup gg(false); return gg.ReadToken(S"ii|D(5)|cc|  H(11)n") == OK && *CUR == '\0'; })
-	CTEST(GlobGroup5,  { AltGroup gg(false); gg.ReadToken(S"ii|xh");ss s; return dynamic_cast<ss &>(s << gg).str() == "ii|xh"; })
 };
 

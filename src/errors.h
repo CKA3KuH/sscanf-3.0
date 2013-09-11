@@ -86,100 +86,26 @@ typedef
 	error_t;
 
 #ifdef SSCANF_DEBUG
-	#include <stdio.h>
-	#include <sstream>
+	#define PRIVATE   public
+	#define PUBLIC    public
+	#define PROTECTED public
 	
-	typedef
-		std::basic_stringstream<char>
-		ss;
-	
-	class SscanfTest
-	{
-	protected:
-		// cons
-			SscanfTest(char * name);
-	};
+	#include "../test.h"
 	
 	#define TEST(name, ...)                         \
 		class Test##name : public SscanfTest {      \
-		public: Test##name() :                      \
+		PUBLIC: Test##name() :                      \
 			SscanfTest(#name) {                     \
 				auto f = [] () -> bool __VA_ARGS__; \
 				if (!f()) printf(#name " - FAILED!\n\n"); \
 			};                                      \
 		}; Test##name gTest##name;
-	
-	// This declares a test for a class.
-	#define CTEST(name, ...)                        \
-		public: friend class Test##name;            \
-		class Test##name : public SscanfTest {      \
-		public: Test##name() :                      \
-			SscanfTest(#name) {                     \
-				auto f = [] () -> bool __VA_ARGS__; \
-				if (!f()) printf(#name " - FAILED!\n\n"); \
-			};                                      \
-		}; static Test##name mTest##name;
-	
-	// This defines the memory for a class test.
-	#define ITEST(cls, name)                        \
-		cls::Test##name cls::mTest##name;
-	
-	class SscanfConverter
-	{
-	public:
-		// cons
-			// SscanfConverter()
-		// :
-			// m_var(nullptr)
-		// {
-		// };
-		
-		// // dest
-			// ~SscanfConverter()
-		// {
-			// //delete [] m_var;
-			// //m_var = nullptr;
-		// };
-		
-		// Operator to convert a literal string to a reference to a constant 
-		// string pointer.  There is no automatic conversion, and we can't
-		// define a cast operator for that, so we use a prefix like "L" ("S").
-		char const * &
-			operator=(char const * str)
-		{
-			size_t
-				len = strlen(str);
-			//delete [] m_var;
-			//m_var = nullptr;
-			char *
-				st2 = new char [len + 1];
-			strcpy(st2, str);
-			st2[len] = '\0';
-			m_var = st2;
-			return m_var;
-		};
-		
-		char const *
-			GetCurPos() const
-		{
-			return m_var;
-		};
-		
-	private:
-		char const *
-			m_var;
-	};
-	
-	extern SscanfConverter TESTER;
-	
-	#define CUR TESTER.GetCurPos()
-	
-	#define S TESTER=
-	
 #else
+	#define PRIVATE   private
+	#define PUBLIC    public
+	#define PROTECTED protected
+	
 	#define TEST(name, ...)
-	#define CTEST(name, ...)
-	#define ITEST(cls, name)
 #endif
 
 #if defined SSCANF_QUIET && !defined SSCANF_DEBUG

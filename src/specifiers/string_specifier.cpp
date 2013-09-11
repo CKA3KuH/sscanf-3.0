@@ -60,6 +60,8 @@ error_t
 	{
 		char const *
 			start = input;
+		// Count how many characters there are to be copied, trimming trailing
+		// spaces.
 		size_t
 			posLen = 0;
 		do
@@ -89,25 +91,26 @@ error_t
 	return OK;
 }
 
-ITEST(StringSpecifier, StringSRun00)
-ITEST(StringSpecifier, StringSRun01)
-ITEST(StringSpecifier, StringSRun02)
-ITEST(StringSpecifier, StringSRun03)
-ITEST(StringSpecifier, StringSRun04)
-ITEST(StringSpecifier, StringSRun05)
-ITEST(StringSpecifier, StringSRun06)
-ITEST(StringSpecifier, StringSRun07)
 
-ITEST(StringSpecifier, StringSRun08)
-ITEST(StringSpecifier, StringSRun09)
-ITEST(StringSpecifier, StringSRun10)
-ITEST(StringSpecifier, StringSRun11)
-ITEST(StringSpecifier, StringSRun12)
-ITEST(StringSpecifier, StringSRun13)
-ITEST(StringSpecifier, StringSRun14)
-ITEST(StringSpecifier, StringSRun15)
-ITEST(StringSpecifier, StringSRun16)
-ITEST(StringSpecifier, StringSRun17)
-ITEST(StringSpecifier, StringSRun18)
-ITEST(StringSpecifier, StringSRun19)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

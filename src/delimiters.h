@@ -2,7 +2,7 @@
 
 class Delimiters
 {
-public:
+PUBLIC:
 	// cons
 		Delimiters()
 	:
@@ -104,7 +104,7 @@ public:
 		return *input != '\0';
 	};
 	
-private:
+PRIVATE:
 	bool
 		Match(char const * one, char const * two)
 	{

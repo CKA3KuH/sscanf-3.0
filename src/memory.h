@@ -6,7 +6,7 @@
 
 class Memory
 {
-public:
+PUBLIC:
 	// cons
 		Memory(AMX * amx) : m_amx(amx) {};
 	
@@ -38,14 +38,14 @@ public:
 		return false;
 	};
 	
-protected:
+PROTECTED:
 	AMX *
 		m_amx;
 };
 
 class CellMemory : public Memory
 {
-public:
+PUBLIC:
 	// cons
 		CellMemory(AMX * amx, cell * params)
 	:
@@ -77,7 +77,7 @@ public:
 	int
 		Poll();
 	
-private:
+PRIVATE:
 	size_t
 		m_cur,
 		m_count;
@@ -89,7 +89,7 @@ private:
 /*
 class EnumMemory : public Memory
 {
-public:
+PUBLIC:
 	// cons
 		EnumMemory(Memory * parent)
 	:
@@ -152,7 +152,7 @@ public:
 		return OK;
 	};
 	
-private:
+PRIVATE:
 	size_t
 		offset;
 	
@@ -170,7 +170,7 @@ private:
 	// values.
 	class TestMemory : public Memory
 	{
-	public:
+	PUBLIC:
 		// cons
 			TestMemory(cell * data, size_t len)
 		:
@@ -226,7 +226,7 @@ private:
 	// This version does store data in a pre-provided memory location.
 	class TempMemory : public Memory
 	{
-	public:
+	PUBLIC:
 		// cons
 			TempMemory(cell * data, size_t len)
 		:

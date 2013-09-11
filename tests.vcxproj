@@ -86,6 +86,14 @@
     <ClCompile Include="src\specifiers\other_specifiers.cpp" />
     <ClCompile Include="src\specifiers\simple_specifiers.cpp" />
     <ClCompile Include="src\specifiers\string_specifier.cpp" />
+    <ClCompile Include="src\tests\test_group_specifiers.cpp" />
+    <ClCompile Include="src\tests\test_other_specifiers.cpp" />
+    <ClCompile Include="src\tests\test_parser.cpp" />
+    <ClCompile Include="src\tests\test_simple_specifiers.cpp" />
+    <ClCompile Include="src\tests\test_specifiers.cpp" />
+    <ClCompile Include="src\tests\test_string_specifier.cpp" />
+    <ClCompile Include="src\tests\test_trivial_specifiers.cpp" />
+    <ClCompile Include="src\tests\test_utils.cpp" />
     <ClCompile Include="src\utils.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>

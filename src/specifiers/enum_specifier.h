@@ -2,7 +2,7 @@
 
 class EnumSpecifier : public SpecifierGroup
 {
-public:
+PUBLIC:
 	// cons
 		EnumSpecifier()
 	:
@@ -105,7 +105,7 @@ ReadToken_new_quiet:
 		return out << ">";
 	};
 	
-private:
+PRIVATE:
 	cell *
 		m_default;
 	

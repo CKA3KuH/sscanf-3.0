@@ -8,7 +8,7 @@
 
 class Environment
 {
-public:
+PUBLIC:
 	// cons
 		Environment(Memory * m) //, Delimiter * d, Options * o)
 	:
@@ -105,7 +105,7 @@ public:
 		m_memory = mem;
 	};
 	
-private:
+PRIVATE:
 	Memory *
 		m_memory;
 	
@@ -117,10 +117,10 @@ private:
 // format specifier itself and store the values in the classes themselves.
 class DefaultEnvironment : public Environment
 {
-private:
+PRIVATE:
 	class DefaultMemory : public Memory
 	{
-	public:
+	PUBLIC:
 		virtual error_t
 			GetNextPointer(cell ** const ret)
 		{
@@ -191,7 +191,7 @@ private:
 			return OK;
 		};
 		
-	private:
+	PRIVATE:
 		static inline cell
 			FlipCell(cell c)
 		{
@@ -214,7 +214,7 @@ private:
 		friend class DefaultEnvironment;
 	};
 	
-public:
+PUBLIC:
 	static DefaultEnvironment &
 		Get(cell * dest)
 	{
@@ -222,7 +222,7 @@ public:
 		return m_defaultEnvironment;
 	};
 	
-private:
+PRIVATE:
 	static DefaultEnvironment
 		m_defaultEnvironment;
 	
