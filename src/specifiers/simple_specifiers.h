@@ -2,13 +2,6 @@
 
 #include "../specifiers.h"
 
-#ifdef SSCANF_DEBUG
-	#include "../utils.h"
-#endif
-
-typedef
-	error_t (* ReadFunction_t)(char const * &, cell &);
-
 class SimpleSpecifier : public Specifier
 {
 PUBLIC:

@@ -1,9 +1,86 @@
 #include "string_specifier.h"
+#include "../errors.h"
+
+Environment *
+	gEnv;
+
+// Option: READ_SIMPLE
+error_t
+	ReadSimpleChar(char const * & input, cell & dest)
+{
+	// Don't allow ANY escapes.
+	dest = *input++;
+	return OK;
+}
+
+// Option: READ_EXTENDED
+error_t
+	ReadExtendedChar(char const * & input, cell & dest)
+{
+	// Allow SOME escapes.
+	dest = *input++;
+	if (dest == '\\')
+	{
+		if (*input == '\\') ++input;
+		else if (gEnv && gEnv->AtDelimiter(input, true)) dest = *input++;
+		else return ERROR_INVALID_ESCAPE;
+	}
+	return OK;
+}
+
+// Option: READ_NL
+error_t
+	ReadNLChar(char const * & input, cell & dest)
+{
+	// Allow MORE escapes.
+	dest = *input++;
+	if (dest == '\\')
+	{
+		switch (*input)
+		{
+			case '\\': ++input; break;
+			case 'r': dest = '\r'; ++input; break;
+			case 'n': dest = '\n'; ++input; break;
+			default:
+				if (gEnv && gEnv->AtDelimiter(input, true)) dest = *input++;
+				else return ERROR_INVALID_ESCAPE;
+				break;
+		}
+	}
+	return OK;
+}
+
+// Option: NORMALISE_NL
+void
+	NormaliseNL(char const * & input, cell & cur, ReadFunction_t reader)
+{
+	// Convert "\n", "\r", and "\r\n" to just "\n".  "\n\r" is malformed, assume
+	// it to mean "\n\n" (or look for "\n\r\n", i.e. mixed style).
+	char const *
+		tmp = input;
+	if (cur == '\r')
+	{
+		if ((*reader)(tmp, cur) == OK && cur == '\n') input = tmp;
+		else cur = '\n';
+	}
+}
 
 error_t
 	StringSpecifier::
 	Run(char const * & input, Environment & env)
 {
+	// =========================================================================
+	//                         Get the reader configuration.                        
+	// =========================================================================
+	ReadFunction_t
+		reader =
+			env.GetOption(OPTION_READ_SIMPLE) ? &ReadSimpleChar :
+			env.GetOption(OPTION_READ_EXTENDED) ? &ReadExtendedChar :
+			env.GetOption(OPTION_READ_NL) ? &ReadNLChar :
+			&Utils::ReadChar;
+	gEnv = &env;
+	int
+		normalise = env.GetOption(OPTION_NORMALISE_NL);
 	// =========================================================================
 	//                         Get the destination size.                        
 	// =========================================================================
@@ -33,7 +110,7 @@ error_t
 		else do
 		{
 			// Skip the current string, don't save it anywhere.
-			TRY(Utils::ReadChar(input, dump));
+			TRY((*reader)(input, dump));
 		}
 		while (!env.AtDelimiter(input, incws));
 		return OK;
@@ -70,7 +147,8 @@ error_t
 			// leading spaces are always trimmed in advance.
 			if (*input > ' ') truLen = ++posLen;
 			else ++posLen;
-			TRY(Utils::ReadChar(input, dump));
+			TRY((*reader)(input, dump));
+			if (normalise) NormaliseNL(input, dump, reader);
 		}
 		while (!env.AtDelimiter(input, incws));
 		// We can now get some characters from "start" on.
@@ -78,7 +156,8 @@ error_t
 		// Copy "mn" many cells.
 		for (size_t i = 0; i != mn; ++i)
 		{
-			Utils::ReadChar(start, dump); // No need to "try" again.
+			(*reader)(start, dump); // No need to "try" again.
+			if (normalise) NormaliseNL(input, dump, reader);
 			TRY(env.SetNextValue(dump, i));
 		}
 	}

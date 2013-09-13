@@ -42,6 +42,7 @@ enum E_SSCANF_ERROR
 	ERROR_INVALID_DEFAULT,
 	ERROR_INVALID_RANGE,
 	ERROR_OUT_OF_RANGE,
+	ERROR_UNKNOWN_OPTION
 };
 
 #define SHOW_OK ""
@@ -77,9 +78,10 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_NO_CHILDREN "Empty alt branch."
 #define SHOW_ERROR_OUT_OF_VARIABLES "Insufficient destination variables given."
 #define SHOW_ERROR_INVALID_DELIMITER "Could not find a valid delimiter."
-#define SHOW_ERROR_INVALID_DEFAULT "Default value invalid."
-#define SHOW_ERROR_INVALID_RANGE "Invalid range."
-#define SHOW_ERROR_OUT_OF_RANGE "Value out of range."
+#define SHOW_ERROR_INVALID_DEFAULT "The default value is not valid."
+#define SHOW_ERROR_INVALID_RANGE "The range given is not valid (lower - higher)."
+#define SHOW_ERROR_OUT_OF_RANGE "The input is outside the given range."
+#define SHOW_ERROR_UNKNOWN_OPTION "Unknown option \"%s\" encountered."
 
 typedef
 	enum E_SSCANF_ERROR
@@ -115,6 +117,9 @@ typedef
 				return (error); \
 			} \
 		} while (false)
+	
+	extern logprintf_t
+		logprintf;
 #else
 	#ifdef SSCANF_DEBUG
 		void logprintf(char * msg, ...);

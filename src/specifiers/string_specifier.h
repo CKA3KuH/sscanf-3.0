@@ -2,10 +2,6 @@
 
 #include "../specifiers.h"
 
-#ifdef SSCANF_DEBUG
-	bool TestCompare(char const * one, cell const * two);
-#endif
-
 class StringSpecifier : public Specifier
 {
 PUBLIC:

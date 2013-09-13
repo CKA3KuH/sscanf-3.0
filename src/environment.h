@@ -12,6 +12,7 @@ PUBLIC:
 	// cons
 		Environment(Memory * m) //, Delimiter * d, Options * o)
 	:
+		m_skipDelim(true),
 		m_memory(m)
 	{
 		for (int i = (int)OPTION_NONE; i != (int)_OPTIONS_COUNT; ++i)
@@ -23,6 +24,7 @@ PUBLIC:
 	// cons
 		Environment(Environment & env)
 	:
+		m_skipDelim(env.m_skipDelim),
 		m_memory(env.m_memory)
 	{
 		for (int i = (int)OPTION_NONE; i != (int)_OPTIONS_COUNT; ++i)
@@ -32,8 +34,13 @@ PUBLIC:
 	};
 	
 	virtual error_t
-		SkipDelimiters(char const * & input) const
+		SkipDelimiters(char const * & input)
 	{
+		if (!m_skipDelim)
+		{
+			m_skipDelim = true;
+			return OK;
+		}
 		if ('\0' <= *input && *input <= ' ')
 		{
 			Utils::SkipWhitespace(input);
@@ -72,6 +79,12 @@ PUBLIC:
 	virtual int
 		Poll() { return m_memory->Poll(); };
 	
+	virtual void
+		ZeroRead()
+	{
+		m_skipDelim = false;
+	};
+	
 	void
 		SetOption(option_t option, int const value)
 	{
@@ -106,6 +119,9 @@ PUBLIC:
 	};
 	
 PRIVATE:
+	bool
+		m_skipDelim;
+
 	Memory *
 		m_memory;
 	

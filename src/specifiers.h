@@ -4,6 +4,9 @@
 #include "errors.h"
 #include "environment.h"
 
+typedef
+	error_t (* ReadFunction_t)(char const * &, cell &);
+
 #define CLONE()                         \
 	virtual error_t                     \
 		Clone(Specifier ** dest)        \

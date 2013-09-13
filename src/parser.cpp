@@ -172,8 +172,9 @@ error_t
 	TRY(Add(new DelimSpecifier()));  // 'p'.
 	TRY(Add(new ArraySpecifier()));  // 'a'.
 	TRY(Add(new KustomSpecifier())); // 'k'.
-	TRY(AddAs(new StringSpecifier(false), 's')); // Unpacked.
-	TRY(AddAs(new StringSpecifier(true ), 'z')); // Packed.
+	TRY(AddAs(new StringSpecifier(false), 's')); // Unpacked.*/
+	TRY(Add(new StringSpecifier())); // Unpacked.*/
+	/*TRY(AddAs(new StringSpecifier(true ), 'z')); // Packed.
 	TRY(AddAs(new PlayerSpecifier(false, true ), 'q')); // Bots only.
 	TRY(AddAs(new PlayerSpecifier(true,  false), 'r')); // Players only.
 	TRY(AddAs(new PlayerSpecifier(true,  true ), 'u')); // Players and Bots.
@@ -188,8 +189,8 @@ error_t
 	/*
 	// Others.
 	TRY(Add(new SkipSpecifier()));   // '-'.
-	//TRY(Add(new PlusSpecifier()));   // '+'.
-	TRY(Add(new OptionSpecifier())); // '?'.*/
+	//TRY(Add(new PlusSpecifier()));   // '+'.*/
+	TRY(Add(new OptionSpecifier())); // '?'.
 	return OK;
 }
 

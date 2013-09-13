@@ -53,7 +53,8 @@ error_t
 	char const *
 		opts;
 	TRY(Utils::GetParams(input, opts));
-	m_value = 0;
+	// Off by default, turned on here.
+	m_value = 1;
 	for (char const * val = opts; *val; ++val)
 	{
 		if (*val == '=')
@@ -72,6 +73,7 @@ error_t
 		}
 	}
 	m_option = LookupOption(opts);
+	FAIL(m_option != OPTION_NONE, ERROR_UNKNOWN_OPTION, opts);
 	return OK;
 }
 
@@ -80,7 +82,7 @@ error_t
 	Run(char const * & input, Environment & env)
 {
 	// So that the environment doesn't try to skip two sets of delimiters.
-	//env.ZeroRead();
+	env.ZeroRead();
 	env.SetOption(m_option, m_value);
 	return OK;
 }
