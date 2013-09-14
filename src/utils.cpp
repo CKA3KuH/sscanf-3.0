@@ -272,7 +272,7 @@ void
 	Utils::
 	SkipWhitespace(char const * & input)
 {
-	while ('\0' < (unsigned char)*input && (unsigned char)*input <= ' ') ++input;
+	while ((unsigned char)(*input - 1) < ' ') ++input;
 }
 
 error_t

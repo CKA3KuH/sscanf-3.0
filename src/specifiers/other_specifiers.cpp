@@ -63,7 +63,8 @@ error_t
 			*const_cast<char *>(val) = '\0';
 			++val;
 			Utils::SkipWhitespace(val);
-			Utils::ReadDecimal(val, m_value);
+			if (*val == '?') m_value = 0x80000000;
+			else TRY(Utils::ReadDecimal(val, m_value));
 			break;
 		}
 		// Strip spaces.
@@ -72,7 +73,7 @@ error_t
 			*const_cast<char *>(val) = '\0';
 		}
 	}
-	m_option = LookupOption(opts);
+	m_option = Options::Lookup(opts);
 	FAIL(m_option != OPTION_NONE, ERROR_UNKNOWN_OPTION, opts);
 	return OK;
 }

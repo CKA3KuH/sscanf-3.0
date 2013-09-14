@@ -19,5 +19,5 @@ TEST(LitSpec8,  { LiteralSpecifier ls; return ls.ReadToken(S"'  hello  '") == OK
 TEST(Minus0, { MinusSpecifier ms; return ms.ReadToken(S"-i") == OK && ms.GetSpecifier() == 'i' && ms.GetSkip() == true; })
 TEST(Minus1, { MinusSpecifier ms; return ms.ReadToken(S"-H(42)") == OK && ms.GetSpecifier() == 'h' && ms.GetSkip() == true; })
 
-TEST(Opt0,  { OptionSpecifier opt; return opt.ReadToken("?<READ_NL>") == OK; })
+TEST(Opt0,  { OptionSpecifier opt; return opt.ReadToken(S"?<READ_NL>") == OK; })
 

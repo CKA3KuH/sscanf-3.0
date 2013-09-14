@@ -111,6 +111,8 @@ error_t
 		{
 			// Skip the current string, don't save it anywhere.
 			TRY((*reader)(input, dump));
+			// If we aren't saving the data, it doesn't matter if we don't
+			// normalise it first.
 		}
 		while (!env.AtDelimiter(input, incws));
 		return OK;

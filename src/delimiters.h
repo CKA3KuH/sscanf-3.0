@@ -1,5 +1,10 @@
 #pragma once
 
+#include "errors.h"
+
+#include <vector>
+#include <list>
+
 class Delimiters
 {
 PUBLIC:
@@ -7,7 +12,10 @@ PUBLIC:
 		Delimiters()
 	:
 		m_delimiters(),
-		m_optionals()
+		m_optionals(),
+		m_delimStore(16, '\0'),
+		m_write(0),
+		m_hasAny(false)
 	{
 	};
 	
@@ -78,54 +86,37 @@ PUBLIC:
 	void
 		Reset()
 	{
-		for (auto i = m_delimiters.begin(), e = m_delimiters.end(); i != e; ++i)
-		{
-			delete [] *i;
-		}
 		m_delimiters.clear();
-		for (auto i = m_optionals.begin(), e = m_optionals.end(); i != e; ++i)
-		{
-			delete [] *i;
-		}
 		m_optionals.clear();
+		m_write = 0;
+		m_hasAny = false;
 	};
 	
 	bool
-		Delimit(char const * & input)
-	{
-		Utils::SkipWhitespace(input);
-		if (m_delimiters.empty())
-		{
-		}
-		else
-		{
-		}
-		Utils::SkipWhitespace(input);
-		return *input != '\0';
-	};
+		AtDelimiter(char const * input, bool incWhite);
+	
+	bool
+		SkipDelimiters(char const * & input);
 	
 PRIVATE:
 	bool
-		Match(char const * one, char const * two)
-	{
-		while (
-	}
-	
+		Match(char const * & input, char const * delim);
 	
 	void
-		DoAdd(std::list<char *> & dest, char * delim)
-	{
-		size_t
-			len = strlen(delim);
-		char *
-			c = new char [len + 1];
-		strcpy(c, delim);
-		c[len] = '\0';
-		dest.push_back(c);
-	};
+		DoAdd(std::list<size_t> & dest, char * delim);
 	
-	std::list<char *>
+	std::list<size_t>
 		m_delimiters,
 		m_optionals;
+	
+	// Store the data in a single large block for better memory management.
+	std::vector<char>
+		m_delimStore;
+	
+	size_t
+		m_write;
+	
+	bool
+		m_hasAny;
 };
 

@@ -13,24 +13,18 @@ PUBLIC:
 		Environment(Memory * m) //, Delimiter * d, Options * o)
 	:
 		m_skipDelim(true),
+		m_options(),
 		m_memory(m)
 	{
-		for (int i = (int)OPTION_NONE; i != (int)_OPTIONS_COUNT; ++i)
-		{
-			m_options[(option_t)i] = 0;
-		}
 	};
 	
 	// cons
 		Environment(Environment & env)
 	:
 		m_skipDelim(env.m_skipDelim),
+		m_options(&env.m_options),
 		m_memory(env.m_memory)
 	{
-		for (int i = (int)OPTION_NONE; i != (int)_OPTIONS_COUNT; ++i)
-		{
-			m_options[(option_t)i] = env.m_options[(option_t)i];
-		}
 	};
 	
 	virtual error_t
@@ -88,20 +82,13 @@ PUBLIC:
 	void
 		SetOption(option_t option, int const value)
 	{
-		if (OPTION_NONE < option && option < _OPTIONS_COUNT)
-		{
-			m_options[option] = value;
-		}
+		m_options.Set(option, value);
 	};
 	
 	int
 		GetOption(option_t option)
 	{
-		if (OPTION_NONE < option && option < _OPTIONS_COUNT)
-		{
-			return m_options[option];
-		}
-		return -1;
+		return m_options.Get(option);
 	};
 	
 	// Not used by this environment.  They should throw an error, but we control
@@ -119,14 +106,14 @@ PUBLIC:
 	};
 	
 PRIVATE:
+	Options
+		m_options;
+
 	bool
 		m_skipDelim;
 
 	Memory *
 		m_memory;
-	
-	int
-		m_options[_OPTIONS_COUNT];
 };
 
 // The "default" environment is the code used to read in default values from the
