@@ -19,6 +19,17 @@ PUBLIC:
 	{
 	};
 	
+	// cons
+		Delimiters(Delimiters const & that)
+	:
+		m_delimiters(that.m_delimiters),
+		m_optionals(that.m_optionals),
+		m_delimStore(that.m_delimStore),
+		m_write(that.m_write),
+		m_hasAny(that.m_hasAny)
+	{
+	};
+	
 	// dest
 		~Delimiters()
 	{
@@ -84,6 +95,36 @@ PUBLIC:
 	};
 	
 	void
+		RemoveOptional(char delim)
+	{
+		static char
+			c[2] = { '\0', '\0' };
+		c[0] = delim;
+		DoRemove(m_optionals, c);
+	};
+	
+	void
+		RemoveOptional(char * delim)
+	{
+		DoRemove(m_optionals, delim);
+	};
+	
+	void
+		Remove(char delim)
+	{
+		static char
+			c[2] = { '\0', '\0' };
+		c[0] = delim;
+		DoRemove(m_delimiters, c);
+	};
+	
+	void
+		Remove(char * delim)
+	{
+		DoRemove(m_delimiters, delim);
+	};
+	
+	void
 		Reset()
 	{
 		m_delimiters.clear();
@@ -93,17 +134,20 @@ PUBLIC:
 	};
 	
 	bool
-		AtDelimiter(char const * input, bool incWhite);
+		AtDelimiter(char const * input, bool incWhite) const;
 	
 	bool
-		SkipDelimiters(char const * & input);
+		SkipDelimiters(char const * & input) const;
 	
 PRIVATE:
-	bool
+	static bool
 		Match(char const * & input, char const * delim);
 	
 	void
-		DoAdd(std::list<size_t> & dest, char * delim);
+		DoAdd(std::list<size_t> & dest, char const * delim);
+	
+	void
+		DoRemove(std::list<size_t> & dest, char const * delim);
 	
 	std::list<size_t>
 		m_delimiters,

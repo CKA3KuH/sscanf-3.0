@@ -159,15 +159,244 @@ main()
 	ASSERT(unformat("0b111", "n<0b0110-0b1111> ", var0) == OK && var0 == 0b0111);
 	//RUN("0b111", "n<0b0110-0b1111> ", var0);
 
+	print(" ");
+	print(" - Group 4:");
+	print(" ");
+	
+	ASSERT(unformat("hello", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "hello"));
+	ASSERT(unformat("there", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "there"));
+	ASSERT(unformat("world", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "world"));
+	ASSERT(unformat("hello there world", "s[10]s[10]s[10]", str0, str1, str2) == OK && str0[0] && str1[0] && str2[0]);
+	ASSERT(!strcmp(str0, "hello") && !strcmp(str1, "there") && !strcmp(str2, "world"));
+	ASSERT(unformat("hello there world", "s[10]s[10]", str0, str1) == OK && str0[0] && str1[0]);
+	ASSERT(!strcmp(str0, "hello") && !strcmp(str1, "there wor"));
+	ASSERT(unformat("hello there world", "s[10]s[16]", str0, str1) == OK && str0[0] && str1[0]);
+	ASSERT(!strcmp(str0, "hello") && !strcmp(str1, "there world"));
+	ASSERT(unformat("", "S(woop d)[10]", str0) == OK && str0[0] && !strcmp(str0, "woop d"));
+	ASSERT(unformat("", "S(woop d)[4]", str0) == OK && str0[0] && !strcmp(str0, "woo"));
+	ASSERT(unformat("long", "s[4]", str0) == OK && str0[0] && !strcmp(str0, "lon"));
+	ASSERT(unformat("short one", "s[20]", str0) == OK && str0[0] && !strcmp(str0, "short one"));
+	ASSERT(unformat("short one", "s[20] ", str0) == OK && str0[0] && !strcmp(str0, "short"));
+	var0 = 2;
+	ASSERT(unformat("short one", "s[*]", var0, str0) == OK && var0 == 2 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 2;
+	ASSERT(unformat("short one", "s[*] ", var0, str0) == OK && var0 == 2 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 4;
+	ASSERT(unformat("s o ", "s[*] ", var0, str0) == OK && var0 == 4 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 4;
+	ASSERT(unformat("s o ", "s[*]", var0, str0) == OK && var0 == 4 && str0[0] && !strcmp(str0, "s o"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s o ", "s[*]", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s o"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s o\\ ", "s[*]", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s o "));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s o\\ ", "s[*] ", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s\\ o\\ ", "s[*] ", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s o "));
+	//printf("%d \"%s\"", var0, str0);
+
+	print(" ");
+	print(" - Group 5:");
+	print(" ");
+
+	var0 = 2;
+	ASSERT(unformat("short one", "S(xxy yzz)[*]", var0, str0) == OK && var0 == 2 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 2;
+	ASSERT(unformat("short one", "S(xxy yzz)[*] ", var0, str0) == OK && var0 == 2 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 4;
+	ASSERT(unformat("s o ", "S(xx yy zz )[*] ", var0, str0) == OK && var0 == 4 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 4;
+	ASSERT(unformat("s o ", "S(xx yy zz )[*]", var0, str0) == OK && var0 == 4 && str0[0] && !strcmp(str0, "s o"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s o ", "S(xx yy zz )[*]", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s o"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s o\\ ", "S(xxy yzz\\ )[*]", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s o "));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s o\\ ", "S(xxy yzz\\ )[*] ", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 5;
+	ASSERT(unformat("s\\ o\\ ", "S(xxy\\ yzz\\ )[*] ", var0, str0) == OK && var0 == 5 && str0[0] && !strcmp(str0, "s o "));
+	//printf("%d \"%s\"", var0, str0);
+
+	print(" ");
+	print(" - Group 6:");
+	print(" ");
+
+
+	var0 = 2;
+	ASSERT(unformat("", "S(xxy yzz)[*]", var0, str0) == OK && var0 == 2 && str0[0] && !strcmp(str0, "x"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 2;
+	ASSERT(unformat("", "S(xxy yzz)[*] ", var0, str0) == OK && var0 == 2 && str0[0] && !strcmp(str0, "x"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 4;
+	ASSERT(unformat("", "S(xx yy zz )[*] ", var0, str0) == OK && var0 == 4 && str0[0] && !strcmp(str0, "xx "));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 4;
+	ASSERT(unformat("", "S(xx yy zz )[*]", var0, str0) == OK && var0 == 4 && str0[0] && !strcmp(str0, "xx "));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 10;
+	ASSERT(unformat("", "S(xx yy zz )[*]", var0, str0) == OK && var0 == 10 && str0[0] && !strcmp(str0, "xx yy zz"));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 10;
+	ASSERT(unformat("", "S(xxy yzz\\ )[*]", var0, str0) == OK && var0 == 10 && str0[0] && !strcmp(str0, "xxy yzz "));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 10;
+	ASSERT(unformat("", "S(xxy yzz\\ )[*] ", var0, str0) == OK && var0 == 10 && str0[0] && !strcmp(str0, "xxy yzz "));
+	//printf("%d \"%s\"", var0, str0);
+	var0 = 10;
+	ASSERT(unformat("", "S(xxy\\ yzz\\ )[*] ", var0, str0) == OK && var0 == 10 && str0[0] && !strcmp(str0, "xxy yzz "));
+	//printf("%d \"%s\"", var0, str0);
+
+
+	print(" ");
+	print(" - Group 7:");
+	print(" ");
+
+	str0[0] = 888;
+	ASSERT(unformat("", "S()[10]", str0) == OK && !str0[0]);
+	str0[0] = 999;
+	ASSERT(unformat("", "S(  )[10]", str0) == OK && !str0[0]);
+	str0[0] = 777;
+	ASSERT(unformat("", "S(\\ \\ )[10]", str0) == OK && str0[0] && !strcmp(str0, "  "));
+	ASSERT(unformat("", "s[10]", str0) == ERROR_NO_STRING_LITERAL);
+	ASSERT(unformat("\\q", "s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\x", "s[10]", str0) == ERROR_NAN);
+	ASSERT(unformat("\\x;", "s[10]", str0) == ERROR_NAN);
+	ASSERT(unformat("\\x", "s[10]", str0) == ERROR_NAN);
+	ASSERT(unformat("\\0;", "s[10]", str0) == OK && !str0[0]);
+	str0[0] = -1, str0[1] = -1, str0[2] = -1, str0[3] = -1;
+	// This test passes, but the "str0[0] == '\0'" means it doesn't print right.
+	ASSERT(unformat("\\09;", "s[10]", str0) == OK && str0[0] == '\0' && str0[1] == '9' && str0[2] == ';' && str0[3] == '\0');
+	ASSERT(unformat("\\-", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "-"));
+	// The "ASSERT" macro string expansion doesn't like the excessive "\"s.
+	printf("%s %s", (unformat("\\\\", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\")) ? ("PASS!") : ("FAIL"),
+		"\"unformat(\"\\\\\", \"s[10]\", str0) == OK && str0[0] && !strcmp(str0, \"\\\")\"");
+	printf("%s %s", (unformat("\\\"", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\"")) ? ("PASS!") : ("FAIL"),
+		"\"unformat(\"\\\"\", \"s[10]\", str0) == OK && str0[0] && !strcmp(str0, \"\"\")\"");
+	printf("%s %s", (unformat("\\\'", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "'")) ? ("PASS!") : ("FAIL"),
+		"\"unformat(\"\\\'\", \"s[10]\", str0) == OK && str0[0] && !strcmp(str0, \"\'\")\"");
+	//ASSERT(unformat("\\\\", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\"));
+	//ASSERT(unformat("\\\"", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\""));
+	//ASSERT(unformat("\\\'", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "'"));
+	ASSERT(unformat("\\x42;", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\x42;"));
+	ASSERT(unformat("\\u42;", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\x42;"));
+	ASSERT(unformat("\\42;", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\42;"));
+	ASSERT(unformat("\\053;", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\43;"));
+	// String options: No escapes.
+	
+
+	print(" ");
+	print(" - Group 8:");
+	print(" ");
+
+	ASSERT(unformat("", "?<BLA>") == ERROR_UNKNOWN_OPTION);
+	ASSERT(unformat("", "?<NONE>") == ERROR_UNKNOWN_OPTION);
+	ASSERT(unformat("", "?<_OPTIONS_COUNT>") == ERROR_UNKNOWN_OPTION);
+	ASSERT(unformat("", "?<READ_SIMPLE_>") == ERROR_UNKNOWN_OPTION);
+	ASSERT(unformat("", "?<READ_SIMPL>") == ERROR_UNKNOWN_OPTION);
+	ASSERT(unformat("", "?<READ_SIMPLE>") == OK);
+	ASSERT(unformat("", "?<READ_EXTENDED>") == OK);
+	ASSERT(unformat("", "?<READ_NL>") == OK);
+	ASSERT(unformat("", "?<NORMALISE_NL>") == OK);
+	ASSERT(unformat("7813", "?<NORMALISE_NL>i", var0) == OK && var0 == 7813);
+	ASSERT(unformat("34 6456", "i?<READ_SIMPLE>i", var0, var1) == OK && var0 == 34 && var1 == 6456);
+	ASSERT(unformat("735 537", "ii?<READ_EXTENDED>", var0, var1) == OK && var0 == 735 && var1 == 537);
+	ASSERT(unformat("69 465", "?<READ_NL>ii", var0, var1) == OK && var0 == 69 && var1 == 465);
 
 	
+	print(" ");
+	print(" - Group 9:");
+	print(" ");
+
+	ASSERT(unformat("\\ ", "s[10]", str0) == OK && str0[0] && !strcmp(str0, " "));
+	ASSERT(unformat("\\ ", "?<READ_SIMPLE>s[10]", str0) == OK && str0[0] == '\\' && str0[1] == '\0');
+	ASSERT(unformat("\\ ", "?<READ_EXTENDED>s[10]", str0) == OK && str0[0] && !strcmp(str0, " "));
+	ASSERT(unformat("\\ ", "?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, " "));
+	ASSERT(unformat("\\r", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\r"));
+	ASSERT(unformat("\\r", "?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\r"));
+	ASSERT(unformat("\\r", "?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\r", "?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\r"));
+	ASSERT(unformat("\\n", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\n", "?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\n"));
+	ASSERT(unformat("\\n", "?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\n", "?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\r\\n", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\r\n"));
+	ASSERT(unformat("\\r\\n", "?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\r\\n"));
+	ASSERT(unformat("\\r\\n", "?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\r\\n", "?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\r\n"));
+	ASSERT(unformat("\\x42;", "s[10]", str0) == OK && str0[0] && !strcmp(str0, "\x42;"));
+	ASSERT(unformat("\\x42;", "?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\x42;"));
+	ASSERT(unformat("\\x42;", "?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\x42;", "?<READ_NL>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\r", "?<NORMALISE_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\r", "?<NORMALISE_NL>?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\r"));
+	ASSERT(unformat("\\r", "?<NORMALISE_NL>?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\r", "?<NORMALISE_NL>?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\n", "?<NORMALISE_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\n", "?<NORMALISE_NL>?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\n"));
+	ASSERT(unformat("\\n", "?<NORMALISE_NL>?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\n", "?<NORMALISE_NL>?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\r\\n", "?<NORMALISE_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+	ASSERT(unformat("\\r\\n", "?<NORMALISE_NL>?<READ_SIMPLE>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\\r\\n"));
+	ASSERT(unformat("\\r\\n", "?<NORMALISE_NL>?<READ_EXTENDED>s[10]", str0) == ERROR_INVALID_ESCAPE);
+	ASSERT(unformat("\\r\\n", "?<NORMALISE_NL>?<READ_NL>s[10]", str0) == OK && str0[0] && !strcmp(str0, "\n"));
+
+
+	print(" ");
+	print(" - Group 10:");
+	print(" ");
 	
+	ASSERT(unformat("HELLO,WORLD", "s[32]", str0) == OK && str0[0] && !strcmp(str0, "HELLO,WORLD"));
+	ASSERT(unformat("HELLO, WORLD", "s[32] ", str0) == OK && str0[0] && !strcmp(str0, "HELLO,"));
+	ASSERT(unformat("HELLO, WORLD ", "s[32]", str0) == OK && str0[0] && !strcmp(str0, "HELLO, WORLD"));
+	ASSERT(unformat("HELLO,WORLD", "p<,>s[32]", str0) == OK && str0[0] && !strcmp(str0, "HELLO"));
+	ASSERT(unformat("HELLO ,WORLD", "p+<,>s[32]s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO"));
+	ASSERT(unformat("HELLO, WORLD", "p+<,>s[32]s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO"));
+	RUN("HELLO, WORLD", "p+<,>s[32]s[32]", str0, str1);
+	printf("%s", str0);
+	ASSERT(unformat("HELLO,, WORLD", "P+<,>s[32]s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO") && str1[0] && !strcmp(str1, "WORLD"));
+	RUN("HELLO,, WORLD", "P+<,>s[32]s[32]", str0, str1);
+	printf("%s", str0);
+	printf("%s", str1);
+	ASSERT(unformat("HELLO,, WORLD,", "P+<,>s[32]s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO") && str1[0] && !strcmp(str1, "WORLD"));
+	ASSERT(unformat("HELLO,, WORLD,", "P+<,>s[32]P-<,>s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO") && str1[0] && !strcmp(str1, "WORLD,"));
+	ASSERT(unformat("HELLO,, WORLD,", "P+<,>s[32]P<>s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO") && str1[0] && !strcmp(str1, "WORLD,"));
+	ASSERT(unformat("HELLO,, WORLD,", "P+<,>s[32]p<>s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO") && str1[0] && !strcmp(str1, "WORLD,"));
+	ASSERT(unformat("HELLO,, WORLD,", "P<,>s[32]P<>s[32]", str0, str1) == OK && str0[0] && !strcmp(str0, "HELLO") && str1[0] && !strcmp(str1, "WORLD,"));
+	ASSERT(unformat("HELLO,, WORLD,", "p<,>s[32]s[32]", str0, str1) == ERROR_NO_STRING_LITERAL && !strcmp(str0, "HELLO"));
+	ASSERT(unformat("HELLO,, WORLD,", "p<,>s[32]S(HA)[32]s[32]", str0, str1, str2) == OK && !strcmp(str0, "HELLO") && !strcmp(str1, "HA") && !strcmp(str2, "WORLD"));
+	RUN("HELLO,, WORLD,", "p<,>s[32]S(HA)[32]s[32]", str0, str1, str2);
+
 	
-	
-	
-	
-	
+
+	print(" ");
+	print(" - Group 10:");
+	print(" ");
+
+	ASSERT(unformat("HELLO,; WORLD,", "P<,;>s[32]S(HA)[32]s[32]", str0, str1, str2) == ERROR_NO_STRING_LITERAL);
+	ASSERT(unformat("HELLO,; WORLD,", "P<,;>s[32]s[32]S(HA)[32]", str0, str1, str2) == OK && !strcmp(str0, "HELLO") && !strcmp(str1, "WORLD,") && !strcmp(str2, "HA"));
+	ASSERT(unformat("HELLO,; WORLD,", "?<OLD_DELIMITERS>P<,;>s[32]S(HA)[32]s[32]", str0, str1, str2) == OK && !strcmp(str0, "HELLO") && !strcmp(str1, "HA") && !strcmp(str2, "WORLD"));
+	ASSERT(unformat("HELLO,; WORLD,", "?<OLD_DELIMITERS>P+<,;>s[32]S(HA)[32]s[32]", str0, str1, str2) == ERROR_INVALID_DELIMITER_TYPE);
+	ASSERT(unformat("HELLO,; WORLD,", "?<OLD_DELIMITERS>p<>s[32]S(HA)[32]s[32]", str0, str1, str2) == ERROR_INVALID_DELIMITER_TYPE);
+
 	
 }
+
+
+
 
 

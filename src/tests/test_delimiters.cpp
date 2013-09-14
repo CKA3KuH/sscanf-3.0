@@ -12,6 +12,11 @@ TEST(Delims07a, { Delimiters d; d.Set(','); return d.AtDelimiter(S",", false) ==
 TEST(Delims08a, { Delimiters d; d.Set(','); return d.AtDelimiter(S" ,",  true) == true; })
 TEST(Delims09a, { Delimiters d; d.Set(','); return d.AtDelimiter(S" ,", false) == false; })
 
+TEST(Delims06j, { Delimiters d; d.Set(','); return d.AtDelimiter(S"",  true) == true; })
+TEST(Delims07j, { Delimiters d; d.Add(','); return d.AtDelimiter(S"", false) == true; })
+TEST(Delims08j, { Delimiters d; d.SetOptional(','); return d.AtDelimiter(S"",  true) == true; })
+TEST(Delims09j, { Delimiters d; d.AddOptional(','); return d.AtDelimiter(S"", false) == true; })
+
 TEST(Delims06b, { Delimiters d; d.Set(","); return d.AtDelimiter(S",",  true) == true; })
 TEST(Delims07b, { Delimiters d; d.Set(","); return d.AtDelimiter(S",", false) == true; })
 TEST(Delims08b, { Delimiters d; d.Set(","); return d.AtDelimiter(S" ,",  true) == true; })
@@ -80,8 +85,14 @@ TEST(Delims24, { Delimiters d; d.AddOptional("hy"); return d.SkipDelimiters(S" h
 TEST(Delims25, { Delimiters d; d.AddOptional("hy"); d.Add("F"); return d.SkipDelimiters(S" hy F hy hy z") && *CUR == 'F'; })
 TEST(Delims30, { Delimiters d; d.AddOptional("hy"); d.Add("F"); return d.SkipDelimiters(S" F hyt hy hy z") && *CUR == 'h' && *(CUR + 2) == 't'; })
 TEST(Delims26, { Delimiters d; d.AddOptional("hy"); d.Set("F"); return !d.SkipDelimiters(S" hy F hy F hy y"); })
-TEST(Delims27, { Delimiters d; d.AddOptional("hy"); d.AddOptional("F"); return d.SkipDelimiters(S" hy F hy F hy x") && *CUR == 'x'; })
+TEST(Delims27, { Delimiters d; d.AddOptional("hy"); d.AddOptional("F"); return d.SkipDelimiters(S" hy F hy F hy x") && *CUR == 'F'; })
 TEST(Delims28, { Delimiters d; d.Add("hy"); d.AddOptional("F"); return d.SkipDelimiters(S"F hyt F hy w") && *CUR == 'h' && *(CUR + 2) == 't'; })
 
+
+TEST(Delims31, { Delimiters d; d.Add(","); d.Add(";"); return d.AtDelimiter(S";", true) == true; })
+TEST(Delims32, { Delimiters d; d.Add(","); d.Add(";"); d.Remove(","); return d.AtDelimiter(S";", true) == true; })
+TEST(Delims33, { Delimiters d; d.Add(","); d.Add(";"); d.Remove(";"); return d.AtDelimiter(S";", true) == false; })
+TEST(Delims34, { Delimiters d; d.Add(","); d.Add(";"); d.Remove(","); return d.AtDelimiter(S",", true) == false; })
+TEST(Delims35, { Delimiters d; d.Add(","); d.Add(";"); d.Remove(";"); return d.AtDelimiter(S",", true) == true; })
 
 

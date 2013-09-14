@@ -85,6 +85,12 @@
     <ClCompile Include="src\tests\test_utils.cpp">
       <Filter>src\tests</Filter>
     </ClCompile>
+    <ClCompile Include="src\tests\test_delimiters.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\delimiters.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
@@ -152,6 +158,9 @@
       <Filter>src\memories</Filter>
     </ClInclude>
     <ClInclude Include="src\options.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\delimiters.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

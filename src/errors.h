@@ -42,7 +42,8 @@ enum E_SSCANF_ERROR
 	ERROR_INVALID_DEFAULT,
 	ERROR_INVALID_RANGE,
 	ERROR_OUT_OF_RANGE,
-	ERROR_UNKNOWN_OPTION
+	ERROR_UNKNOWN_OPTION,
+	ERROR_INVALID_DELIMITER_TYPE,
 };
 
 #define SHOW_OK ""
@@ -82,6 +83,7 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_INVALID_RANGE "The range given is not valid (lower - higher)."
 #define SHOW_ERROR_OUT_OF_RANGE "The input is outside the given range."
 #define SHOW_ERROR_UNKNOWN_OPTION "Unknown option \"%s\" encountered."
+#define SHOW_ERROR_INVALID_DELIMITER_TYPE "Invalid combination of delimiter options."
 
 typedef
 	enum E_SSCANF_ERROR

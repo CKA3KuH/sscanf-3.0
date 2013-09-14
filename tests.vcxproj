@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClCompile Include="sdk\amxplugin.cpp" />
     <ClCompile Include="sdk\amx\getch.c" />
+    <ClCompile Include="src\delimiters.cpp" />
     <ClCompile Include="src\environment.cpp" />
     <ClCompile Include="src\errors.cpp" />
     <ClCompile Include="src\memory.cpp" />
@@ -86,6 +87,7 @@
     <ClCompile Include="src\specifiers\other_specifiers.cpp" />
     <ClCompile Include="src\specifiers\simple_specifiers.cpp" />
     <ClCompile Include="src\specifiers\string_specifier.cpp" />
+    <ClCompile Include="src\tests\test_delimiters.cpp" />
     <ClCompile Include="src\tests\test_group_specifiers.cpp" />
     <ClCompile Include="src\tests\test_other_specifiers.cpp" />
     <ClCompile Include="src\tests\test_parser.cpp" />
@@ -103,6 +105,7 @@
     <ClInclude Include="sdk\amx\sclinux.h" />
     <ClInclude Include="sdk\plugin.h" />
     <ClInclude Include="sdk\plugincommon.h" />
+    <ClInclude Include="src\delimiters.h" />
     <ClInclude Include="src\environment.h" />
     <ClInclude Include="src\errors.h" />
     <ClInclude Include="src\memory.h" />

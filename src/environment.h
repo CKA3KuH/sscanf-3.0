@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "utils.h"
 #include "options.h"
+#include "delimiters.h"
 #include <map>
 #include <string>
 
@@ -14,7 +15,8 @@ PUBLIC:
 	:
 		m_skipDelim(true),
 		m_options(),
-		m_memory(m)
+		m_memory(m),
+		m_delims()
 	{
 	};
 	
@@ -23,7 +25,8 @@ PUBLIC:
 	:
 		m_skipDelim(env.m_skipDelim),
 		m_options(&env.m_options),
-		m_memory(env.m_memory)
+		m_memory(env.m_memory),
+		m_delims(env.m_delims)
 	{
 	};
 	
@@ -35,20 +38,14 @@ PUBLIC:
 			m_skipDelim = true;
 			return OK;
 		}
-		if ('\0' <= *input && *input <= ' ')
-		{
-			Utils::SkipWhitespace(input);
-			return OK;
-		}
-		return ERROR_INVALID_DELIMITER;
+		FAIL(m_delims.SkipDelimiters(input), ERROR_INVALID_DELIMITER);
+		return OK;
 	};
 	
 	virtual bool
 		AtDelimiter(char const * & input, bool incWhite) const
 	{
-		if (incWhite) return *input <= ' ';
-		// ONLY NULL for now.
-		return *input == '\0';
+		return m_delims.AtDelimiter(input, incWhite);
 	};
 	
 	// Mostly just simple pass-throughs to the memory subsystem.
@@ -91,6 +88,12 @@ PUBLIC:
 		return m_options.Get(option);
 	};
 	
+	Delimiters &
+		GetDelimiters()
+	{
+		return m_delims;
+	};
+	
 	// Not used by this environment.  They should throw an error, but we control
 	// when and where this one is used, so I can just never use it like that.
 	virtual Memory *
@@ -114,6 +117,9 @@ PRIVATE:
 
 	Memory *
 		m_memory;
+	
+	Delimiters
+		m_delims;
 };
 
 // The "default" environment is the code used to read in default values from the

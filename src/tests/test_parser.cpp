@@ -47,3 +47,20 @@ TEST(GN12, { Specifier * s = nullptr; char const * p = S"   B  (  0b001101  )   
 
 TEST(Parser1, { Parser p; return '~' - '!' < sizeof (p.m_specifiers) / sizeof (Specifier *); })
 
+
+TEST(Wierd01, { Specifier * s = nullptr; char const * p = S"p+<,>s[32]s[32]"; return
+	gParser.Compile(p, &s) == OK; })
+
+TEST(Wierd02, {
+	Specifier * s = nullptr; char const * p = S"p+<,>s[8]s[8]";
+	gParser.Compile(p, &s);
+	cell data[16]; TempMemory tm(data, 16); Environment env(&tm);
+	return s->Run(S"HELLO, WORLD", env) == OK;
+})
+
+TEST(Wierd03, {
+	Specifier * s = nullptr; char const * p = S"P+<,>s[8]s[8]";
+	gParser.Compile(p, &s);
+	cell data[16]; TempMemory tm(data, 16); Environment env(&tm);
+	return s->Run(S"HELLO,, WORLD", env) == OK;
+})

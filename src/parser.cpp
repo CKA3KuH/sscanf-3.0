@@ -12,6 +12,7 @@
 #include "specifiers/simple_specifiers.h"
 #include "specifiers/other_specifiers.h"
 #include "specifiers/group_specifiers.h"
+#include "specifiers/delim_specifier.h"
 
 Parser
 	gParser;
@@ -186,11 +187,12 @@ error_t
 	
 	// Others.
 	TRY(Add(new MinusSpecifier())); // '-'.
+	TRY(Add(new DelimSpecifier())); // 'p'.
+	TRY(Add(new OptionSpecifier())); // '?'
 	/*
 	// Others.
 	TRY(Add(new SkipSpecifier()));   // '-'.
 	//TRY(Add(new PlusSpecifier()));   // '+'.*/
-	TRY(Add(new OptionSpecifier())); // '?'.
 	return OK;
 }
 

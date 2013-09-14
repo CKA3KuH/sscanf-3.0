@@ -3,15 +3,16 @@
 enum E_SSCANF_OPTIONS
 {
 	OPTION_NONE,
-	OPTION_READ_SIMPLE,
-	OPTION_READ_EXTENDED,
-	OPTION_READ_NL,
-	OPTION_NORMALISE_NL,
-	OPTION_OLD_DEFAULT_KUSTOM,
-	OPTION_SSCANF_QUIET,
-	OPTION_MATCH_NAME_PARTIAL,
-	OPTION_CELLMIN_ON_MATCHES,
-	OPTION_OLD_DEFAULT_NAME,
+	OPTION_READ_SIMPLE, // Don't allow any escape characters in strings.
+	OPTION_READ_EXTENDED, // Allow a few escape characters only.
+	OPTION_READ_NL, // Allow the previous lot, plus "\r" and "\n".
+	OPTION_NORMALISE_NL, // Convert "\r" and "\r\n" to just "\n".
+	OPTION_OLD_DEFAULT_KUSTOM, // Kustom parse "K"'s default value.
+	OPTION_SSCANF_QUIET, // Don't output any messages.
+	OPTION_MATCH_NAME_PARTIAL, // Better name matching (find) at any point.
+	OPTION_CELLMIN_ON_MATCHES, // Return "cellmin" for multiple name matches.
+	OPTION_OLD_DEFAULT_NAME, // Require "U"'s default value to be connected.
+	OPTION_OLD_DELIMITERS, // Use the old "p" and "P" behaviours.
 	_OPTIONS_COUNT,
 };
 
