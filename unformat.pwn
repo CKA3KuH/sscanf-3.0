@@ -384,7 +384,7 @@ main()
 	
 
 	print(" ");
-	print(" - Group 10:");
+	print(" - Group 11:");
 	print(" ");
 
 	ASSERT(unformat("HELLO,; WORLD,", "P<,;>s[32]S(HA)[32]s[32]", str0, str1, str2) == ERROR_NO_STRING_LITERAL);
@@ -393,7 +393,36 @@ main()
 	ASSERT(unformat("HELLO,; WORLD,", "?<OLD_DELIMITERS>P+<,;>s[32]S(HA)[32]s[32]", str0, str1, str2) == ERROR_INVALID_DELIMITER_TYPE);
 	ASSERT(unformat("HELLO,; WORLD,", "?<OLD_DELIMITERS>p<>s[32]S(HA)[32]s[32]", str0, str1, str2) == ERROR_INVALID_DELIMITER_TYPE);
 
+
+	print(" ");
+	print(" - Group 12:");
+	print(" ");
 	
+	
+	ASSERT(unformat("1 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("111 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("0101 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("1111 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("0 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat(" 42", "L(1)d", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat(" 42", "L(0)d", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("T 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("y 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("t 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("Y 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("TRUE 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("yEs 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("tRUe 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("YEs 42", "ld", var0, var1) == OK && var0 == 1 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("F 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("f 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("N 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("n 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("FalSE 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("false 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("nIL 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+	ASSERT(unformat("NUlL 42", "ld", var0, var1) == OK && var0 == 0 && var1 == 42); var1 = 8, var0 = 4;
+
 }
 
 

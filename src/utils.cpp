@@ -187,6 +187,57 @@ error_t
 
 error_t
 	Utils::
+	ReadLogical(char const * & input, cell & n)
+{
+	// This version is far more strict than the old version.  The input MUST be
+	// either a boolean number (101, 0b001, 0, etc), "true", "false", "nil",
+	// "no", or "yes".  Currently only does English - sorry :(.  Also just "n",
+	// "f", "t", and "y".
+	switch (*input)
+	{
+		case '\0':
+			break;
+		case '0':
+		case '1':
+			Utils::ReadBinary(input, n); // No need for "TRY".
+			if (n) n = 1;
+			return OK;
+		case 'f':
+		case 'F':
+			// "f", "F", "false".
+			if ((*(input + 1) | 0x20) == 'a' && (*(input + 2) | 0x20) == 'l' && (*(input + 3) | 0x20) == 's' && (*(input + 4) | 0x20) == 'e') input += 4;
+			goto ReadLogical_f;
+		case 't':
+		case 'T':
+			// "t", "T", "true".
+			if ((*(input + 1) | 0x20) == 'r' && (*(input + 2) | 0x20) == 'u' && (*(input + 3) | 0x20) == 'e') input += 3;
+			goto ReadLogical_t;
+		case 'y':
+		case 'Y':
+			// "y", "Y", "yes".
+			if ((*(input + 1) | 0x20) == 'e' && (*(input + 2) | 0x20) == 's') input += 2;
+			goto ReadLogical_t;
+		case 'n':
+		case 'N':
+			// "n", "N", "no", "nil", "null".
+			if ((*(input + 1) | 0x20) == 'u' && (*(input + 2) | 0x20) == 'l' && (*(input + 3) | 0x20) == 'l') input += 3;
+			else if ((*(input + 1) | 0x20) == 'i' && (*(input + 2) | 0x20) == 'l') input += 2;
+			else if ((*(input + 1) | 0x20) == 'o') input += 1;
+			goto ReadLogical_f;
+	}
+	return ERROR_NAN;
+ReadLogical_t:
+	n = 1;
+	++input;
+	return OK;
+ReadLogical_f:
+	n = 0;
+	++input;
+	return OK;
+}
+
+error_t
+	Utils::
 	ReadChar(char const * & input, cell & n)
 {
 	switch ((n = *input))

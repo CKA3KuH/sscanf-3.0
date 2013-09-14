@@ -137,7 +137,7 @@ error_t
 //	TRY(Add(new SimpleSpecifier('g', &Utils::ReadIEEE754)));
 	TRY(Add(new SimpleSpecifier('h', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('i', &Utils::ReadDecimal)));
-//	TRY(Add(new SimpleSpecifier('l', &Utils::ReadLogical)));
+	TRY(Add(new SimpleSpecifier('l', &Utils::ReadLogical)));
 	TRY(Add(new SimpleSpecifier('o', &Utils::ReadOctal  )));
 	TRY(Add(new SimpleSpecifier('x', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('c', &Utils::ReadCharEx )));

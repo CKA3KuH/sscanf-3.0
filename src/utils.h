@@ -29,6 +29,9 @@ PUBLIC:
 	static error_t
 		ReadCharEx(char const * & input, cell & n);
 	
+	static error_t
+		ReadLogical(char const * & input, cell & n);
+	
 	static void
 		SkipWhitespace(char const * & input);
 	

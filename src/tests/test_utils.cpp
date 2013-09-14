@@ -212,3 +212,25 @@ TEST(GetLength11, { int s; return Utils::GetLength(S" [ HI ] ", &s) == ERROR_NAN
 
 
 
+TEST(Logical00, { cell n; return Utils::ReadLogical(S"", n) == ERROR_NAN; })
+TEST(Logical01, { cell n; return Utils::ReadLogical(S"hi", n) == ERROR_NAN; })
+TEST(Logical02, { cell n; return Utils::ReadLogical(S"ni", n) == OK && !n && *CUR == 'i'; })
+TEST(Logical03, { cell n; return Utils::ReadLogical(S"Ni", n) == OK && !n && *CUR == 'i'; })
+TEST(Logical04, { cell n; return Utils::ReadLogical(S"YE", n) == OK && n && *CUR == 'E'; })
+TEST(Logical05, { cell n; return Utils::ReadLogical(S"42", n) == ERROR_NAN; })
+TEST(Logical06, { cell n; return Utils::ReadLogical(S"YESa", n) == OK && n && *CUR == 'a'; })
+TEST(Logical07, { cell n; return Utils::ReadLogical(S"Ta", n) == OK && n && *CUR == 'a'; })
+TEST(Logical08, { cell n; return Utils::ReadLogical(S"tRuEa", n) == OK && n && *CUR == 'a'; })
+TEST(Logical09, { cell n; return Utils::ReadLogical(S"TrUea", n) == OK && n && *CUR == 'a'; })
+TEST(Logical10, { cell n; return Utils::ReadLogical(S"False", n) == OK && !n && *CUR == '\0'; })
+TEST(Logical11, { cell n; return Utils::ReadLogical(S"No", n) == OK && !n && *CUR == '\0'; })
+TEST(Logical12, { cell n; return Utils::ReadLogical(S"nil", n) == OK && !n && *CUR == '\0'; })
+TEST(Logical13, { cell n; return Utils::ReadLogical(S"NULL", n) == OK && !n && *CUR == '\0'; })
+TEST(Logical14, { cell n; return Utils::ReadLogical(S"0", n) == OK && !n && *CUR == '\0'; })
+TEST(Logical15, { cell n; return Utils::ReadLogical(S"011", n) == OK && n == 1 && *CUR == '\0'; })
+TEST(Logical16, { cell n; return Utils::ReadLogical(S"000", n) == OK && !n && *CUR == '\0'; })
+TEST(Logical17, { cell n; return Utils::ReadLogical(S"f00", n) == OK && !n && *CUR == '0'; })
+TEST(Logical18, { cell n; return Utils::ReadLogical(S"F00", n) == OK && !n && *CUR == '0'; })
+TEST(Logical19, { cell n; return Utils::ReadLogical(S"FaLs", n) == OK && !n && *CUR == 'a'; })
+
+
