@@ -8,6 +8,9 @@
 class Utils
 {
 PUBLIC:
+	static int
+		Strincmp(char const * a, char const * b, size_t n);
+	
 	static error_t
 		ReadOctal(char const * & input, cell & n);
 	

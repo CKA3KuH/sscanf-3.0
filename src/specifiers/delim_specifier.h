@@ -121,13 +121,14 @@ DelimSpecifier_get_params:
 				break;
 			case DELIM_TYPE_LEGACY_REQ:
 				// Can only add one character this way.
-				d.Add(*m_delim);
+				d.Set(*m_delim);
 				break;
 			case DELIM_TYPE_LEGACY_OPT:
 			{
 				// Add multiple characters, but each as separate delimiters.
 				char *
 					delim = m_delim;
+				d.Reset();
 				while (*delim) d.Add(*delim++);
 				break;
 			}

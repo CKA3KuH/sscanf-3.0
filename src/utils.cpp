@@ -1,6 +1,53 @@
 #include "utils.h"
 #include "errors.h"
 
+int
+	Utils::
+	Strincmp(char const * a, char const * b, size_t n)
+{
+	// Cunning trick!  Store all the lower-case options here.
+	static char const
+		scLower[257] =
+			"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" \
+			"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F" \
+			" !\"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmnopq" \
+			"rstuvwxyz[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F" \
+			"\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8A\x8B\x8C\x8D\x8E\x8F" \
+			"\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9A\x9B\x9C\x9D\x9E\x9F" \
+			"\xA0\xA1\xA2\xA3\xA4\xA5\xA6\xA7\xA8\xA9\xAA\xAB\xAC\xAD\xAE\xAF" \
+			"\xB0\xB1\xB2\xB3\xB4\xB5\xB6\xB7\xB8\xB9\xBA\xBB\xBC\xBD\xBE\xBF" \
+			"\xC0\xC1\xC2\xC3\xC4\xC5\xC6\xC7\xC8\xC9\xCA\xCB\xCC\xCD\xCE\xCF" \
+			"\xD0\xD1\xD2\xD3\xD4\xD5\xD6\xD7\xD8\xD9\xDA\xDB\xDC\xDD\xDE\xDF" \
+			"\xE0\xE1\xE2\xE3\xE4\xE5\xE6\xE7\xE8\xE9\xEA\xEB\xEC\xED\xEE\xEF" \
+			"\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9\xFA\xFB\xFC\xFD\xFE\xFF";
+			/*'\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08', '\x09', '\x0A', '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
+			'\x10', '\x11', '\x12', '\x13', '\x14', '\x15', '\x16', '\x17', '\x18', '\x19', '\x1A', '\x1B', '\x1C', '\x1D', '\x1E', '\x1F',
+			' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7',
+			'8', '9', ':', ';', '<', '=', '>', '?', '@', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+			'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+			'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', '\x7F', 
+			'\x80', '\x81', '\x82', '\x83', '\x84', '\x85', '\x86', '\x87', '\x88', '\x89', '\x8A', '\x8B', '\x8C', '\x8D', '\x8E', '\x8F',
+			'\x90', '\x91', '\x92', '\x93', '\x94', '\x95', '\x96', '\x97', '\x98', '\x99', '\x9A', '\x9B', '\x9C', '\x9D', '\x9E', '\x9F',
+			'\xA0', '\xA1', '\xA2', '\xA3', '\xA4', '\xA5', '\xA6', '\xA7', '\xA8', '\xA9', '\xAA', '\xAB', '\xAC', '\xAD', '\xAE', '\xAF',
+			'\xB0', '\xB1', '\xB2', '\xB3', '\xB4', '\xB5', '\xB6', '\xB7', '\xB8', '\xB9', '\xBA', '\xBB', '\xBC', '\xBD', '\xBE', '\xBF',
+			'\xC0', '\xC1', '\xC2', '\xC3', '\xC4', '\xC5', '\xC6', '\xC7', '\xC8', '\xC9', '\xCA', '\xCB', '\xCC', '\xCD', '\xCE', '\xCF',
+			'\xD0', '\xD1', '\xD2', '\xD3', '\xD4', '\xD5', '\xD6', '\xD7', '\xD8', '\xD9', '\xDA', '\xDB', '\xDC', '\xDD', '\xDE', '\xDF',
+			'\xE0', '\xE1', '\xE2', '\xE3', '\xE4', '\xE5', '\xE6', '\xE7', '\xE8', '\xE9', '\xEA', '\xEB', '\xEC', '\xED', '\xEE', '\xEF',
+			'\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF';*/
+	while (n--)
+	{
+		char
+			d = scLower[*a] - scLower[*b];
+		// Don't need to check "*b".  Either it is 0 and *a isn't, in which case
+		// d will be non zero.  Or both it and *a are 0, in which case we
+		// already check *a, or it isn't 0, in which case the return depends on
+		// the value of d and *a.
+		if (d || !*a) return d;
+		++a, ++b;
+	}
+	return 0;
+}
+
 error_t
 	Utils::
 	ReadOctal(char const * & input, cell & n)
@@ -193,46 +240,45 @@ error_t
 	// either a boolean number (101, 0b001, 0, etc), "true", "false", "nil",
 	// "no", or "yes".  Currently only does English - sorry :(.  Also just "n",
 	// "f", "t", and "y".
-	switch (*input)
+	switch (*input++)
 	{
 		case '\0':
 			break;
 		case '0':
 		case '1':
+			--input;
 			Utils::ReadBinary(input, n); // No need for "TRY".
 			if (n) n = 1;
 			return OK;
 		case 'f':
 		case 'F':
 			// "f", "F", "false".
-			if ((*(input + 1) | 0x20) == 'a' && (*(input + 2) | 0x20) == 'l' && (*(input + 3) | 0x20) == 's' && (*(input + 4) | 0x20) == 'e') input += 4;
+			if (!Utils::Strincmp(input, "alse", 4)) input += 4;
 			goto ReadLogical_f;
 		case 't':
 		case 'T':
 			// "t", "T", "true".
-			if ((*(input + 1) | 0x20) == 'r' && (*(input + 2) | 0x20) == 'u' && (*(input + 3) | 0x20) == 'e') input += 3;
+			if (!Utils::Strincmp(input, "rue", 3)) input += 3;
 			goto ReadLogical_t;
 		case 'y':
 		case 'Y':
 			// "y", "Y", "yes".
-			if ((*(input + 1) | 0x20) == 'e' && (*(input + 2) | 0x20) == 's') input += 2;
+			if (!Utils::Strincmp(input, "es", 2)) input += 2;
 			goto ReadLogical_t;
 		case 'n':
 		case 'N':
 			// "n", "N", "no", "nil", "null".
-			if ((*(input + 1) | 0x20) == 'u' && (*(input + 2) | 0x20) == 'l' && (*(input + 3) | 0x20) == 'l') input += 3;
-			else if ((*(input + 1) | 0x20) == 'i' && (*(input + 2) | 0x20) == 'l') input += 2;
-			else if ((*(input + 1) | 0x20) == 'o') input += 1;
+			if ((*input | 0x20) == 'o') input += 1;
+			else if (!Utils::Strincmp(input, "il", 2)) input += 2;
+			else if (!Utils::Strincmp(input, "ull", 3)) input += 3;
 			goto ReadLogical_f;
 	}
 	return ERROR_NAN;
 ReadLogical_t:
 	n = 1;
-	++input;
 	return OK;
 ReadLogical_f:
 	n = 0;
-	++input;
 	return OK;
 }
 
@@ -427,12 +473,6 @@ error_t
 	char const *
 		len;
 	TRY(Utils::GetSizes(input, len));
-	if (*len == '*')
-	{
-		// Look up the length.
-		*s = -1;
-		return OK;
-	}
 	if (*len == '\0')
 	{
 		// No length given ([]).  For now just accept that, let the code
@@ -440,12 +480,44 @@ error_t
 		*s = 0;
 		return OK;
 	}
-	cell
-		ret;
-	TRY(Utils::ReadDecimal(len, ret));
-	FAIL(*len == '\0', ERROR_NAN);
-	FAIL(ret > 0, ERROR_INVALID_ARRAY_SIZE);
-	*s = ret;
+	else if (*len == '*')
+	{
+		// Look up the length.
+		++len;
+		*s = -1;
+		Utils::SkipWhitespace(len);
+		if (!Utils::Strincmp(len, "char", 4))
+		{
+			len += 4;
+			*s = -2;
+		}
+		else if (!Utils::Strincmp(len, "bit", 3))
+		{
+			len += 3;
+			*s = -3;
+		}
+		FAIL(*len == '\0', ERROR_NAN);
+	}
+	else
+	{
+		cell
+			ret;
+		TRY(Utils::ReadDecimal(len, ret));
+		Utils::SkipWhitespace(len);
+		if (!Utils::Strincmp(len, "char", 4))
+		{
+			len += 4;
+			ret = (ret + 4 - 1) / 4;
+		}
+		else if (!Utils::Strincmp(len, "bit", 3))
+		{
+			len += 3;
+			ret = (ret + 32 - 1) / 32;
+		}
+		*s = ret;
+		FAIL(*len == '\0', ERROR_NAN);
+		FAIL(ret > 0, ERROR_INVALID_ARRAY_SIZE);
+	}
 	return OK;
 };
 
