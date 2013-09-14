@@ -27,6 +27,12 @@ PUBLIC:
 		ReadNum(char const * & input, cell & n);
 	
 	static error_t
+		ReadIEEE(char const * & input, cell & n);
+	
+	static error_t
+		ReadFloat(char const * & input, cell & n);
+	
+	static error_t
 		ReadChar(char const * & input, cell & n);
 	
 	static error_t

@@ -234,3 +234,42 @@ TEST(Logical18, { cell n; return Utils::ReadLogical(S"F00", n) == OK && !n && *C
 TEST(Logical19, { cell n; return Utils::ReadLogical(S"FaLs", n) == OK && !n && *CUR == 'a'; })
 
 
+
+
+
+
+TEST(Float00, { cell n; return Utils::ReadFloat(S"", n) == ERROR_NAN; })
+TEST(Float01, { cell n; return Utils::ReadFloat(S"INF", n) == ERROR_NAN; })
+TEST(Float02, { cell n; return Utils::ReadFloat(S"-INFINITY", n) == ERROR_NAN; })
+TEST(Float03, { cell n; return Utils::ReadFloat(S"- INFINITY", n) == ERROR_NAN; })
+TEST(Float04, { cell n; return Utils::ReadFloat(S"NEG_INFINITY", n) == ERROR_NAN; })
+TEST(Float05, { cell n; return Utils::ReadFloat(S"-NAN", n) == ERROR_NAN; })
+TEST(Float13, { cell n; return Utils::ReadFloat(S"NAN", n) == ERROR_NAN; })
+TEST(Float06, { cell n; return Utils::ReadFloat(S"NAN_E", n) == ERROR_NAN; })
+TEST(Float07, { cell n; return Utils::ReadFloat(S"0x55", n) == OK && n == 0 && *CUR == 'x'; })
+TEST(Float08, { cell n; return Utils::ReadFloat(S"0XFF", n) == OK && n == 0 && *CUR == 'X'; })
+TEST(Float09, { cell n; return Utils::ReadFloat(S"4.5", n) == OK && amx_ctof(n) == 4.5; })
+TEST(Float10, { cell n; return Utils::ReadFloat(S"88", n) == OK && amx_ctof(n) == 88.0; })
+TEST(Float11, { cell n; return Utils::ReadFloat(S"2e6", n) == OK && amx_ctof(n) == 2e6; })
+TEST(Float12, { cell n; return Utils::ReadFloat(S"-9", n) == OK && amx_ctof(n) == -9.0; })
+
+
+
+
+TEST(IEEE00, { cell n; return Utils::ReadIEEE(S"", n) == ERROR_NAN; })
+TEST(IEEE01, { cell n; return Utils::ReadIEEE(S"INF", n) == OK && n == FLOAT_INFINITY; })
+TEST(IEEE02, { cell n; return Utils::ReadIEEE(S"-INFINITY", n) == OK && n == FLOAT_NEG_INFINITY; })
+TEST(IEEE03, { cell n; return Utils::ReadIEEE(S"- INFINITY", n) == ERROR_NAN; })
+TEST(IEEE04, { cell n; return Utils::ReadIEEE(S"NEG_INFINITY", n) == OK && n == FLOAT_NEG_INFINITY; })
+TEST(IEEE05, { cell n; return Utils::ReadIEEE(S"-NAN", n) == ERROR_NAN; })
+TEST(IEEE13, { cell n; return Utils::ReadIEEE(S"NAN", n) == OK && n == FLOAT_NAN; })
+TEST(IEEE06, { cell n; return Utils::ReadIEEE(S"NAN_E", n) == OK && n == FLOAT_NAN_E; })
+TEST(IEEE07, { cell n; return Utils::ReadIEEE(S"0x55", n) == OK && n == 0 && *CUR == 'x'; })
+TEST(IEEE08, { cell n; return Utils::ReadIEEE(S"0XFF", n) == OK && n == 0 && *CUR == 'X'; })
+TEST(IEEE09, { cell n; return Utils::ReadIEEE(S"4.5", n) == OK && amx_ctof(n) == 4.5; })
+TEST(IEEE10, { cell n; return Utils::ReadIEEE(S"88", n) == OK && amx_ctof(n) == 88.0; })
+TEST(IEEE11, { cell n; return Utils::ReadIEEE(S"2e6", n) == OK && amx_ctof(n) == 2e6; })
+TEST(IEEE12, { cell n; return Utils::ReadIEEE(S"-9", n) == OK && amx_ctof(n) == -9.0; })
+
+
+

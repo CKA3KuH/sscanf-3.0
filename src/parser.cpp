@@ -133,8 +133,8 @@ error_t
 	// with different specifier sets.  That's pretty cool IMHO.
 	TRY(Add(new SimpleSpecifier('b', &Utils::ReadBinary )));
 	TRY(Add(new SimpleSpecifier('d', &Utils::ReadDecimal)));
-//	TRY(Add(new SimpleSpecifier('f', &Utils::ReadFloat  )));
-//	TRY(Add(new SimpleSpecifier('g', &Utils::ReadIEEE754)));
+	TRY(Add(new SimpleSpecifier('f', &Utils::ReadFloat  )));
+	TRY(Add(new SimpleSpecifier('g', &Utils::ReadIEEE   )));
 	TRY(Add(new SimpleSpecifier('h', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('i', &Utils::ReadDecimal)));
 	TRY(Add(new SimpleSpecifier('l', &Utils::ReadLogical)));

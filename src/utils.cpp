@@ -1,5 +1,10 @@
 #include "utils.h"
 #include "errors.h"
+#include "../sdk/plugin.h"
+
+#include <stdlib.h>
+
+#define STRTOD strtod
 
 int
 	Utils::
@@ -265,6 +270,107 @@ ReadLogical_t:
 	return OK;
 ReadLogical_f:
 	n = 0;
+	return OK;
+}
+
+error_t
+	Utils::
+	ReadIEEE(char const * & input, cell & n)
+{
+	// STRTOD SHOULD pick these cases up, but doesn't seem to...  Actually, it
+	// seems that the spec says it should, but VS 2010 doesn't.  Not tested on
+	// GCC/Clang/Other yet.
+	if (*input == '\0') return ERROR_NAN;
+	else if ((*input | 0x20) == 'n')
+	{
+		if (!Utils::Strincmp(input, "NEGATIVE_INF", 12))
+		{
+			n = FLOAT_NEG_INFINITY;
+			if (!Utils::Strincmp(input + 12, "INITY", 5)) input += 17;
+			else input += 2;
+			return OK;
+		}
+		else if (!Utils::Strincmp(input, "NEG_INF", 7))
+		{
+			n = FLOAT_NEG_INFINITY;
+			if (!Utils::Strincmp(input + 7, "INITY", 5)) input += 12;
+			else input += 7;
+			return OK;
+		}
+		else if (!Utils::Strincmp(input, "NAN_E", 5))
+		{
+			input += 5;
+			n = FLOAT_NAN_E;
+			return OK;
+		}
+		else if (!Utils::Strincmp(input, "NAN", 3))
+		{
+			input += 3;
+			n = FLOAT_NAN;
+			return OK;
+		}
+	}
+	else if (!Utils::Strincmp(input, "INF", 3))
+	{
+		n = FLOAT_INFINITY;
+		if (!Utils::Strincmp(input + 3, "INITY", 5)) input += 8;
+		else input += 3;
+		return OK;
+	}
+	else if (*input == '-')
+	{
+		if (!Utils::Strincmp(input + 1, "INF", 3))
+		{
+			n = FLOAT_NEG_INFINITY;
+			if (!Utils::Strincmp(input + 4, "INITY", 5)) input += 9;
+			else input += 4;
+			return OK;
+		}
+	}
+	char *
+		end;
+	// Apparently this takes care of more sequences than I thought.
+	float
+		f = (float)STRTOD(input, &end);
+	FAIL(end != input, ERROR_NAN);
+	input = end;
+	n = amx_ftoc(f);
+	return OK;
+}
+
+error_t
+	Utils::
+	ReadFloat(char const * & input, cell & n)
+{
+	// "strtof" allows many formats we don't.  Detect and disallow them.
+	if (*input == '\0') return ERROR_NAN;
+	else if (*input == '0' && (*(input + 1) | 0x20) == 'x')
+	{
+		++input;
+		n = 0;
+		return OK;
+	}
+	else if (*input == '-' && !Utils::Strincmp(input + 1, "INF", 3)) return ERROR_NAN;
+	else if (!Utils::Strincmp(input, "INF", 3) || !Utils::Strincmp(input, "NAN", 3)) return ERROR_NAN;
+	char *
+		end;
+	// This function prototype seems wrong:
+	//  
+	//  double strtod(char const * str, char ** endptr);
+	//  
+	// It takes an input of "char const *" and returns "char **".  Given that
+	// this points to the end of the number in the input string, the "const"
+	// should not be removed!  There does seem to be documentation on this,
+	// including mentioning that C++ overloads correctly, but I don't like it!
+	// Should use "strtof", but that's not in Visual Studio 2010.  I could also
+	// roll my own, which would avoid the complex checks above, and in fact I
+	// have written my own in the past, but I'd rather not if I can avoid it.
+	float
+		f = (float)STRTOD(input, &end);
+	FAIL(end != input, ERROR_NAN);
+	// BAD BAD BAD  (see note above).
+	input = end;
+	n = amx_ftoc(f);
 	return OK;
 }
 
