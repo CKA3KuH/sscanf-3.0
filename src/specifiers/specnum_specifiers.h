@@ -11,12 +11,6 @@ public:
 	:
 		SimpleSpecifier('l', &Utils::ReadLogical)
 	{
-		float
-			n;
-		n = std::numeric_limits<float>::lowest();
-		m_lower = amx_ftoc(n);
-		n = (std::numeric_limits<float>::max)(); // Visual Studio macro hack.
-		m_upper = amx_ftoc(n);
 	};
 	
 	// // cons
@@ -48,6 +42,12 @@ public:
 	:
 		SimpleSpecifier(c, f)
 	{
+		float
+			n;
+		n = std::numeric_limits<float>::lowest();
+		m_lower = amx_ftoc(n);
+		n = (std::numeric_limits<float>::max)(); // Visual Studio macro hack.
+		m_upper = amx_ftoc(n);
 	};
 	
 	CLONE();

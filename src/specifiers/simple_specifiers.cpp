@@ -71,8 +71,8 @@ error_t
 	SimpleSpecifier::
 	ReadToken(char const * & input)
 {
-	// Check this has the correct specifier.
-	FAIL((*input | 0x20) == GetSpecifier(), ERROR_EXPECTED_A_GOT_B_2, GetSpecifier(), *input);
+	// Check this has the correct specifier (shouldn't ha
+	//FAIL((*input | 0x20) == GetSpecifier(), ERROR_EXPECTED_A_GOT_B_2, GetSpecifier(), *input);
 	// Check if this is upper-case (optional).
 	bool
 		opt = false;
@@ -94,9 +94,11 @@ error_t
 	// THEN read the ranges (so that they aren't applied to the defaults).
 	if (pars)
 	{
+		// We use temporary variables so that the ranges aren't applied in "Run"
+		// while getting the new ranges.
 		cell
-			lower = 0x80000000,
-			upper = 0x7FFFFFFF;
+			lower = m_lower,
+			upper = m_upper;
 		TRY(GetRanges(this, pars, hyphens, &lower, &upper));
 		FAIL(CheckRange(lower, upper), ERROR_INVALID_RANGE);
 		m_lower = lower;

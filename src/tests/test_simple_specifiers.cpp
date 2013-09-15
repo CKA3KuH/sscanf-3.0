@@ -44,9 +44,11 @@ TEST(Simple9k, { cell dest; SimpleSpecifier that('b', &Utils::ReadBinary);  retu
 
 // Valid formats.
 TEST(Simple1a, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"i") == OK; })
-TEST(Simple1b, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"d") == ERROR_EXPECTED_A_GOT_B_2; })
-TEST(Simple1v, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"") == ERROR_EXPECTED_A_GOT_B_2; })
-TEST(Simple1w, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"(") == ERROR_EXPECTED_A_GOT_B_2; })
+// These tests have been removed - they are valid, but I no longer check for
+// this case because it can't actually happen.
+//TEST(Simple1b, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"d") == ERROR_EXPECTED_A_GOT_B_2; })
+//TEST(Simple1v, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"") == ERROR_EXPECTED_A_GOT_B_2; })
+//TEST(Simple1w, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"(") == ERROR_EXPECTED_A_GOT_B_2; })
 TEST(Simple1c, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I") == ERROR_NO_DEFAULT_START; })
 
 // These don't fail.
@@ -191,11 +193,11 @@ TEST(Simple1t, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.Rea
 TEST(Simple1u, { SimpleSpecifier that('i', &Utils::ReadDecimal); return that.ReadToken(S"I(0x11)") == ERROR_INVALID_DEFAULT; })
 
 TEST(Simple2a, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"d") == OK; })
-TEST(Simple2b, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"i") == ERROR_EXPECTED_A_GOT_B_2; })
+//TEST(Simple2b, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"i") == ERROR_EXPECTED_A_GOT_B_2; })
 TEST(Simple2c, { SimpleSpecifier that('d', &Utils::ReadDecimal); return that.ReadToken(S"D") == ERROR_NO_DEFAULT_START; })
 
 TEST(Simple3a, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"c") == OK; })
-TEST(Simple3b, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"v") == ERROR_EXPECTED_A_GOT_B_2; })
+//TEST(Simple3b, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"v") == ERROR_EXPECTED_A_GOT_B_2; })
 TEST(Simple3c, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C") == ERROR_NO_DEFAULT_START; })
 TEST(Simple3f, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C ") == ERROR_NO_DEFAULT_START; })
 TEST(Simple3g, { SimpleSpecifier that('c', &Utils::ReadCharEx); return that.ReadToken(S"C  ") == ERROR_NO_DEFAULT_START; })
