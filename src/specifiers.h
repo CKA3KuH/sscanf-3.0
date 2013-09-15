@@ -129,9 +129,3 @@ inline error_t
 	return OK;
 };
 
-int
-	CountHyphens(char const * str);
-
-error_t
-	GetRanges(Specifier * that, char const * pars, int hyphens, cell * lower, cell * higher);
-

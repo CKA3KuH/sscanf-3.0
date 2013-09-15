@@ -273,3 +273,37 @@ TEST(IEEE12, { cell n; return Utils::ReadIEEE(S"-9", n) == OK && amx_ctof(n) == 
 
 
 
+// Some of these tests are actually badly defined.  The ones that fail have a
+// length given that is longer than either input string.  This is never the case
+// in the "sscanf" code as all the instances use a constant string with the
+// exact length of that string.  The fails are an issue, but point to this
+// comment stating that I don't know what to do about that case.
+// 
+// Update: I solved it one way, but I'm still not sure if the last parameter
+// should be defined as "MAX length", or "EXACT length" - this assumes the
+// latter, but the former would also make sense as the string ARE the same up
+// to that point.
+// 
+TEST(strincmp00, { return Utils::Strincmp("", "", 0) == 0; })
+TEST(strincmp01, { return Utils::Strincmp("9", "", 0) == 0; })
+TEST(strincmp02, { return Utils::Strincmp("", "q", 0) == 0; })
+TEST(strincmp03, { return Utils::Strincmp("", "", 1) != 0; })
+TEST(strincmp04, { return Utils::Strincmp("", "", 2) != 0; })
+TEST(strincmp05, { return Utils::Strincmp("a", "", 1) != 0; })
+TEST(strincmp06, { return Utils::Strincmp("", "a", 1) != 0; })
+TEST(strincmp07, { return Utils::Strincmp("a", "b", 1) != 0; })
+TEST(strincmp08, { return Utils::Strincmp("a", "A", 1) == 0; })
+TEST(strincmp09, { return Utils::Strincmp("abb", "Acc", 1) == 0; })
+TEST(strincmp10, { return Utils::Strincmp("abb", "Acc", 3) != 0; })
+TEST(strincmp11, { return Utils::Strincmp("acc", "Ac", 3) != 0; })
+TEST(strincmp12, { return Utils::Strincmp("aC", "AcC", 3) != 0; })
+TEST(strincmp13, { return Utils::Strincmp("a133", "A234", 1) == 0; })
+TEST(strincmp14, { return Utils::Strincmp("a133", "A234", 4) != 0; })
+TEST(strincmp15, { return Utils::Strincmp("z", "Z", 1) == 0; })
+TEST(strincmp16, { return Utils::Strincmp("a", "b", 1) != 0; })
+TEST(strincmp17, { return Utils::Strincmp("0", "1", 1) != 0; })
+TEST(strincmp18, { return Utils::Strincmp("a", "A", 2) != 0; })
+TEST(strincmp19, { return Utils::Strincmp("", "", 1) != 0; })
+TEST(strincmp20, { return Utils::Strincmp("", "", 1) != 0; })
+
+

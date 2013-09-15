@@ -35,6 +35,12 @@ PUBLIC:
 	{
 	};
 	
+	virtual bool
+		CheckRange(cell lower, cell upper) const
+	{
+		return lower <= upper;
+	};
+	
 	virtual cell
 		Skip(Environment & env)
 	{
@@ -42,7 +48,7 @@ PUBLIC:
 		return 1;
 	};
 	
-PRIVATE:
+PROTECTED:
 	cell
 		m_lower,
 		m_upper,

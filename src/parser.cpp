@@ -13,6 +13,7 @@
 #include "specifiers/other_specifiers.h"
 #include "specifiers/group_specifiers.h"
 #include "specifiers/delim_specifier.h"
+#include "specifiers/specnum_specifiers.h"
 
 Parser
 	gParser;
@@ -133,11 +134,11 @@ error_t
 	// with different specifier sets.  That's pretty cool IMHO.
 	TRY(Add(new SimpleSpecifier('b', &Utils::ReadBinary )));
 	TRY(Add(new SimpleSpecifier('d', &Utils::ReadDecimal)));
-	TRY(Add(new SimpleSpecifier('f', &Utils::ReadFloat  )));
-	TRY(Add(new SimpleSpecifier('g', &Utils::ReadIEEE   )));
+	TRY(Add(new FloatSpecifier('f', &Utils::ReadFloat  )));
+	TRY(Add(new FloatSpecifier('g', &Utils::ReadIEEE   )));
 	TRY(Add(new SimpleSpecifier('h', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('i', &Utils::ReadDecimal)));
-	TRY(Add(new SimpleSpecifier('l', &Utils::ReadLogical)));
+	TRY(Add(new LogicalSpecifier()));
 	TRY(Add(new SimpleSpecifier('o', &Utils::ReadOctal  )));
 	TRY(Add(new SimpleSpecifier('x', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('c', &Utils::ReadCharEx )));
@@ -170,7 +171,6 @@ error_t
 	TRY(AddAs(temp, '\"'));
 	/*
 	// More complex specifiers.
-	TRY(Add(new DelimSpecifier()));  // 'p'.
 	TRY(Add(new ArraySpecifier()));  // 'a'.
 	TRY(Add(new KustomSpecifier())); // 'k'.
 	TRY(AddAs(new StringSpecifier(false), 's')); // Unpacked.*/

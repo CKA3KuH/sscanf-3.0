@@ -1,4 +1,8 @@
 #include "../specifiers/simple_specifiers.h"
+#include "../specifiers/specnum_specifiers.h"
+
+error_t
+	GetRanges(Specifier * that, char const * pars, int hyphens, cell * lower, cell * higher);
 
 TEST(Range0,  { SimpleSpecifier s('i', &Utils::ReadDecimal); cell l = 0x80000000, h = 0x7FFFFFFF; return GetRanges(&s, S"5 - 7", 1, &l, &h) == OK && l == 5 && h == 7; })
 TEST(Range1,  { SimpleSpecifier s('i', &Utils::ReadDecimal); cell l = 0x80000000, h = 0x7FFFFFFF; return GetRanges(&s, S"-5 - 7", 2, &l, &h) == OK && l == -5 && h == 7; })

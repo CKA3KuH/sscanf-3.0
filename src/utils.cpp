@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 
+// Replace this if I write my own version.  I still suspect this was the cause
+// of the random "f" fails on Linux in version 2.x.
 #define STRTOD strtod
 
 int
@@ -33,7 +35,12 @@ int
 		// d will be non zero.  Or both it and *a are 0, in which case we
 		// already check *a, or it isn't 0, in which case the return depends on
 		// the value of d and *a.
-		if (d || !*a) return d;
+		if (d) return d;
+		else if (!*a)
+		{
+			if (*b) return d;
+			else return 0x80000000;
+		}
 		++a, ++b;
 	}
 	return 0;
