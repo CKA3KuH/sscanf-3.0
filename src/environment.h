@@ -65,56 +65,38 @@ PUBLIC:
 		SetNextString(char const * val, size_t idx = 0, bool pack = false) { return m_memory->SetNextString(val, idx, pack); };
 	
 	error_t
-		Skip(int n, int part = 0) { return m_memory->Skip(n, part); };
+		Skip(int n, int part = 0, bool read = false) { return m_memory->Skip(n, part); };
 	
 	virtual int
 		Poll() { return m_memory->Poll(); };
 	
 	virtual void
-		ZeroRead()
-	{
-		m_skipDelim = false;
-	};
+		ZeroRead() { m_skipDelim = false; };
 	
 	void
-		SetOption(option_t option, int const value)
-	{
-		m_options.Set(option, value);
-	};
+		SetOption(option_t option, int const value) { m_options.Set(option, value); };
 	
 	int
-		GetOption(option_t option)
-	{
-		return m_options.Get(option);
-	};
+		GetOption(option_t option) { return m_options.Get(option); };
 	
 	Delimiters &
-		GetDelimiters()
-	{
-		return m_delims;
-	};
+		GetDelimiters() { return m_delims; };
 	
 	// Not used by this environment.  They should throw an error, but we control
 	// when and where this one is used, so I can just never use it like that.
 	virtual Memory *
-		GetMemory()
-	{
-		return m_memory;
-	};
+		GetMemory() { return m_memory; };
 	
 	void
-		SetMemory(Memory * mem)
-	{
-		m_memory = mem;
-	};
+		SetMemory(Memory * mem) { m_memory = mem; };
 	
 PRIVATE:
 	Options
 		m_options;
-
+	
 	bool
 		m_skipDelim;
-
+	
 	Memory *
 		m_memory;
 	

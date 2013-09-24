@@ -48,3 +48,7 @@ TEST(CopyStr0,  { cell dest[42]; return Utils::CopyString(dest, S"Hello", 5, fal
 TEST(CopyStr1,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"Hello", 7, false) == OK && TestCompare("Hello", dest) && dest[6] == 42; })
 TEST(CopyStr2,  { cell dest[7]; dest[6] = 42; return Utils::CopyString(dest, S"world", 7, true) == OK && TestCompare("world", dest) && dest[6] == 0; })
 
+
+
+
+

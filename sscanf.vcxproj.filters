@@ -133,6 +133,9 @@
     <ClInclude Include="src\delimiters.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\specifiers\specnum_specifiers.h">
+      <Filter>src\specifiers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="sscanf.def" />

@@ -48,6 +48,7 @@
     <ClInclude Include="src\specifiers\other_specifiers.h" />
     <ClInclude Include="src\specifiers\player_specifier.h" />
     <ClInclude Include="src\specifiers\simple_specifiers.h" />
+    <ClInclude Include="src\specifiers\specnum_specifiers.h" />
     <ClInclude Include="src\specifiers\string_specifier.h" />
     <ClInclude Include="src\specifiers\trivial_specifiers.h" />
     <ClInclude Include="src\utils.h" />

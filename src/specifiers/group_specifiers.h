@@ -76,81 +76,45 @@ PRIVATE:
 	friend class Parser;
 };
 
-/*
 class QuietGroup : public SpecifierGroup
 {
 PUBLIC:
 	// cons
 		QuietGroup()
 	:
-		SpecifierGroup('{')
+		SpecifierGroup('{'),
+		m_unknown(true)
 	{
 	};
 	
 	// cons
 		QuietGroup(QuietGroup const & that)
 	:
-		SpecifierGroup(that)
+		SpecifierGroup(that),
+		m_unknown(that.m_unknown)
 	{
 	};
 	
 	virtual error_t
-		ReadToken(char const * & input)
-	{
-		++input;
-		Specifier *
-			child;
-		// Avoids repetition of code.
-		goto ReadToken_new_quiet;
-		do
-		{
-			Add(child);
-ReadToken_new_quiet:
-			TRY(gParser.GetNext(input, &child));
-		}
-		while (child && child->GetSpecifier() != '}');
-		FAIL(child, ERROR_NO_QUIET_END);
-		return OK;
-	};
+		ReadToken(char const * & input);
 	
 	CLONE();
 	
 	// This needs to count all READS, but not WRITES.
-	virtual int
-		Skip(Environment & env) { return 0; };
+	virtual cell
+		Skip(Environment & env);
 	
 	virtual error_t
-		Run(char const * & input, Environment & env)
-	{
-		// Store a copy of the old memory system.
-		Memory *
-			om = env.GetMemory();
-		// Just takes all writes and null-routes them, but still serves reads.
-		QuietMemory
-			quiet(env.GetMemory());
-		env.SetMemory(&quiet);
-		for (auto i = Begin(), e = End(); i != e; ++i)
-		{
-			TRY((*i)->Run(input, env));
-			TRY(env.SkipDelimiters());
-		}
-		// Restore the old memory system.
-		env.SetMemory(om);
-		return OK;
-	};
+		Run(char const * & input, Environment & env);
 	
 	virtual std::ostream &
-		Render(std::ostream & out) const
-	{
-		out = out << "{";
-		for (auto i = Begin(), e = End(); i != e; ++i)
-		{
-			(*i)->Render(out);
-		}
-		return out << "}";
-	};
+		Render(std::ostream & out) const;
+	
+PRIVATE:
+	// Number of readable children is unknown (or not 0).
+	bool
+		m_unknown;
 };
-*/
 
 // This is just a set of specifiers, to be run one after the other - simple as!
 class SequentialGroup : public SpecifierGroup

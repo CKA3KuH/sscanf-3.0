@@ -89,6 +89,7 @@ static cell AMX_NATIVE_CALL
 	// it HUGE).
 	Environment
 		env(&storage);
+	Utils::SkipWhitespace(cptr);
 	error = parent->Run(cptr, env);
 	delete parent;
 	return (cell)error;

@@ -54,6 +54,7 @@ PUBLIC:
 					s;
 				// Get the count.
 				env.GetNextValue(&c);
+				FAIL(c >= 0, ERROR_COUNT_IS_NEGATIVE);
 				// Get the skip value for one.
 				s = m_child->Skip(env);
 				// Skip the remainder.
@@ -79,6 +80,7 @@ PUBLIC:
 			cell
 				read;
 			TRY(env.GetNextValue(&read));
+			FAIL(read >= 0, ERROR_COUNT_IS_NEGATIVE);
 			end = read;
 		}
 		else
@@ -91,6 +93,7 @@ PUBLIC:
 			TRY(m_child->Run(input, env));
 			TRY(env.SkipDelimiters(input));
 		}
+		env.ZeroRead();
 		return OK;
 	};
 	

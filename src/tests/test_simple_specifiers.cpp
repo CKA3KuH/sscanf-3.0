@@ -265,3 +265,18 @@ TEST(NumXs, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that
 TEST(NumXt, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"G", DefaultEnvironment::Get(&dest)) == ERROR_NAN; })
 TEST(NumXu, { cell dest; SimpleSpecifier that('n', &Utils::ReadNum); return that.Run(S"-a", DefaultEnvironment::Get(&dest)) == ERROR_NAN; })
 
+
+//TEST(Logical0, { cel})
+TEST(LogicSpec00, { LogicalSpecifier that; return that.ReadToken(S"L(NULL)") == OK && *CUR == '\0'; })
+TEST(LogicSpec01, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(NULL)") == OK && that.Run(S"", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
+TEST(LogicSpec02, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(0)") == OK && that.Run(S"", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
+TEST(LogicSpec03, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(10101)") == OK && that.Run(S"", DefaultEnvironment::Get(&dest)) == OK && dest == 21; })
+TEST(LogicSpec04, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(truE)") == OK && that.Run(S"", DefaultEnvironment::Get(&dest)) == OK && dest == 1; })
+
+TEST(LogicSpec05, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(NULL)") == OK && that.Run(S"10101", DefaultEnvironment::Get(&dest)) == OK && dest == 1; })
+TEST(LogicSpec06, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(0)") == OK && that.Run(S"1", DefaultEnvironment::Get(&dest)) == OK && dest == 1; })
+TEST(LogicSpec07, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(10101)") == OK && that.Run(S"faLSE", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
+TEST(LogicSpec08, { cell dest; LogicalSpecifier that; return that.ReadToken(S"L(truE)") == OK && that.Run(S"0", DefaultEnvironment::Get(&dest)) == OK && dest == 0; })
+
+
+

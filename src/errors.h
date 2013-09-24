@@ -44,6 +44,8 @@ enum E_SSCANF_ERROR
 	ERROR_OUT_OF_RANGE,
 	ERROR_UNKNOWN_OPTION,
 	ERROR_INVALID_DELIMITER_TYPE,
+	ERROR_COUNT_IS_NEGATIVE,
+	ERROR_NO_QUIET_END
 };
 
 #define SHOW_OK ""
@@ -84,6 +86,8 @@ enum E_SSCANF_ERROR
 #define SHOW_ERROR_OUT_OF_RANGE "The input is outside the given range."
 #define SHOW_ERROR_UNKNOWN_OPTION "Unknown option \"%s\" encountered."
 #define SHOW_ERROR_INVALID_DELIMITER_TYPE "Invalid combination of delimiter options."
+#define SHOW_ERROR_COUNT_IS_NEGATIVE "Variable numeric count is < 0."
+#define SHOW_ERROR_NO_QUIET_END "Unclosed quiet section."
 
 typedef
 	enum E_SSCANF_ERROR

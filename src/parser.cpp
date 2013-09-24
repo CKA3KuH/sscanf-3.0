@@ -181,8 +181,8 @@ error_t
 	TRY(AddAs(new PlayerSpecifier(true,  true ), 'u')); // Players and Bots.
 	
 	// Complex groups.
-	TRY(Add(new EnumSpecifier())); // 'e'.
-	TRY(Add(new QuietGroup()));    // '{'.*/
+	TRY(Add(new EnumSpecifier())); // 'e'.*/
+	TRY(Add(new QuietGroup()));    // '{'.
 	TRY(Add(new AltGroup()));      // '('.
 	
 	// Others.

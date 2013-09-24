@@ -4,6 +4,133 @@
 #include "../specifiers/other_specifiers.h"
 #include "../parser.h"
 #include "../errors.h"
+#include "../memory.h"
+
+error_t
+	QuietGroup::
+	ReadToken(char const * & input)
+{
+	++input;
+	Specifier *
+		child;
+	// Avoids repetition of code.
+	goto ReadToken_new_quiet;
+	do
+	{
+		Add(child);
+ReadToken_new_quiet:
+		TRY(gParser.GetNext(input, &child));
+	}
+	while (child && child->GetSpecifier() != '}');
+	FAIL(child, ERROR_NO_QUIET_END);
+	delete child;
+	return OK;
+}
+
+class QuietMemory : public Memory
+{
+PUBLIC:
+	// cons
+		QuietMemory(Memory * parent)
+	:
+		Memory(nullptr),
+		m_parent(parent)
+	{
+	};
+	
+	virtual error_t
+		GetNextPointer(cell ** const ret) { return m_parent->GetNextPointer(ret); };
+	
+	virtual error_t
+		GetNextValue(cell * const ret) { return m_parent->GetNextValue(ret); };
+	
+	virtual error_t
+		GetNextString(char * ret, size_t len) { return m_parent->GetNextString(ret, len); };
+	
+	virtual error_t
+		SetNextValue(cell const val, size_t idx = 0) { return OK; };
+	
+	virtual error_t
+		SetNextString(char const * val, size_t idx = 0, bool pack = false) { return OK; };
+	
+	virtual error_t
+		Skip(int n, int part = 0)
+	{
+		if (n < 0) return m_parent->Skip(n, part);
+		return OK;
+	};
+	
+	virtual int
+		Poll() { return m_parent->Poll(); };
+	
+PRIVATE:
+	Memory *
+		m_parent;
+};
+
+error_t
+	QuietGroup::
+	Run(char const * & input, Environment & env)
+{
+	// Store a copy of the old memory system.
+	Memory *
+		om = env.GetMemory();
+	// Just takes all writes and null-routes them, but still serves reads.
+	QuietMemory
+		quiet(om);
+	env.SetMemory(&quiet);
+	// bool
+		// pop = env.GetQuiet();
+	// env.SetQuiet(true);
+	for (auto i = Begin(), e = End(); i != e; ++i)
+	{
+		TRY((*i)->Run(input, env));
+		TRY(env.SkipDelimiters(input));
+	}
+	// Don't re-skip the next delimiter.
+	env.ZeroRead();
+	// Restore the old memory system.
+	// env.SetQuiet(pop);
+	env.SetMemory(om);
+	return OK;
+}
+
+cell
+	QuietGroup::
+	Skip(Environment & env)
+{
+	if (m_unknown)
+	{
+		cell
+			ret = 0,
+			cur = 0;
+		m_unknown = false;
+		Memory *
+			om = env.GetMemory();
+		QuietMemory
+			quiet(om);
+		env.SetMemory(&quiet);
+		for (auto i = Begin(), e = End(); i != e; ++i)
+		{
+			cur = (*i)->Skip(env);
+			if (cur == -1) m_unknown = true;
+		}
+		env.SetMemory(om);
+	}
+	return m_unknown ? -1 : 0;
+}
+
+std::ostream &
+	QuietGroup::
+	Render(std::ostream & out) const
+{
+	//out << "{";
+	for (auto i = Begin(), e = End(); i != e; ++i)
+	{
+		(*i)->Render(out);
+	}
+	return out << "}";
+}
 
 cell
 	SequentialGroup::

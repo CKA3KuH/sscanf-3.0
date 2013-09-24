@@ -271,6 +271,7 @@ error_t
 			else if (!Utils::Strincmp(input, "ull", 3)) input += 3;
 			goto ReadLogical_f;
 	}
+	--input;
 	return ERROR_NAN;
 ReadLogical_t:
 	n = 1;

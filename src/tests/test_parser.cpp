@@ -64,3 +64,59 @@ TEST(Wierd03, {
 	cell data[16]; TempMemory tm(data, 16); Environment env(&tm);
 	return s->Run(S"HELLO,, WORLD", env) == OK;
 })
+
+
+
+
+// Missing logical values did not correctly ignore the first character.  This
+// checks that they now do.
+TEST(MissingL100, {
+	Specifier * s = nullptr; char const * p = S"p<,>L(1)d";
+	gParser.Compile(p, &s);
+	cell data[3]; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S", 42", env) == OK && data[0] == 1 && data[1] == 42;
+})
+TEST(MissingL101, {
+	Specifier * s = nullptr; char const * p = S"p<,>L(0)d";
+	gParser.Compile(p, &s);
+	cell data[3]; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S", 42", env) == OK && data[0] == 0 && data[1] == 42;
+})
+TEST(MissingL102, {
+	Specifier * s = nullptr; char const * p = S"p<,>iL(1)d";
+	gParser.Compile(p, &s);
+	cell data[3]; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S"12,, 42", env) == OK && data[0] == 12 && data[1] == 1 && data[2] == 42;
+})
+TEST(MissingL103, {
+	Specifier * s = nullptr; char const * p = S"p<,>iL(0)d";
+	gParser.Compile(p, &s);
+	cell data[3]; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S"12,, 42", env) == OK && data[0] == 12 && data[1] == 0 && data[2] == 42;
+})
+
+TEST(Quiet100, {
+	Specifier * s = nullptr; char const * p = S"{*i}i";
+	gParser.Compile(p, &s);
+	cell data[2] = {3, 0}; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S"0 11 22 33 44", env) == OK && data[0] == 3 && data[1] == 33;
+})
+TEST(Quiet101, {
+	Specifier * s = nullptr; char const * p = S"{i}|{x}";
+	gParser.Compile(p, &s);
+	cell data[3] = {3, 0, 0}; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S"0", env) == OK && data[0] == 0;
+})
+TEST(Quiet102, {
+	Specifier * s = nullptr; char const * p = S"{i}|{x}";
+	gParser.Compile(p, &s);
+	cell data[3] = {3, 0, 0}; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S"0x55", env) == OK && data[0] == 1;
+})
+TEST(Quiet103, {
+	Specifier * s = nullptr; char const * p = S"{i}-|{x}";
+	gParser.Compile(p, &s);
+	cell data[2] = {3, 0}; TempMemory tm(data, 3); Environment env(&tm);
+	return s->Run(S"0x01", env) == OK && data[0] == 1;
+})
+

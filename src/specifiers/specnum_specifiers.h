@@ -25,10 +25,13 @@ public:
 	virtual error_t
 		GetDefault(char const * & input, cell * target)
 	{
+		char const *
+			start;
+		TRY(Utils::GetDefaults(input, start));
 		// Don't constrain the defaults to just 0 or 1.
-		if (*input == '0' || *input == '1') TRY(Utils::ReadBinary(input, *target));
-		else TRY(Utils::ReadLogical(input, *target));
-		FAIL(*input == '\0', ERROR_INVALID_DEFAULT);
+		if (*start == '0' || *start == '1') TRY(Utils::ReadBinary(start, *target));
+		else TRY(Utils::ReadLogical(start, *target));
+		FAIL(*start == '\0', ERROR_INVALID_DEFAULT);
 		SetOptional();
 		return OK;
 	};

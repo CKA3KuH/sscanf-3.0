@@ -56,25 +56,25 @@ PUBLIC:
 	{
 	};
 	
-	error_t
+	virtual error_t
 		GetNextPointer(cell ** const ret);
 	
-	error_t
+	virtual error_t
 		GetNextValue(cell * const ret);
 	
-	error_t
+	virtual error_t
 		GetNextString(char * ret, size_t len);
 	
-	error_t
+	virtual error_t
 		SetNextValue(cell const val, size_t idx = 0);
 	
-	error_t
+	virtual error_t
 		SetNextString(char const * val, size_t idx = 0, bool pack = false);
 	
-	error_t
+	virtual error_t
 		Skip(int n, int part = 0);
 	
-	int
+	virtual int
 		Poll();
 	
 PRIVATE:
