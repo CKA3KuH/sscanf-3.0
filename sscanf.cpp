@@ -51,12 +51,15 @@ static cell AMX_NATIVE_CALL
 		error = OK;
 	char const *
 		cptr = nullptr;
+	bool
+		del = true;
 	if (*formatAddr == -1)
 	{
 		// Special case, the passed string is actually a 2 element arrays, the
 		// first is -1 as a marker, the second is the address of a pre-compiled
 		// specifier.
 		parent = (Specifier *)*(formatAddr + 1);
+		del = false;
 	}
 	else
 	{
@@ -91,7 +94,7 @@ static cell AMX_NATIVE_CALL
 		env(&storage);
 	Utils::SkipWhitespace(cptr);
 	error = parent->Run(cptr, env);
-	delete parent;
+	if (del) delete parent; // Don't delete pre-compiled specifiers.
 	return (cell)error;
 }
 

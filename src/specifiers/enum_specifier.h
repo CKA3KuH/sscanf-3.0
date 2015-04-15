@@ -19,7 +19,7 @@ PUBLIC:
 		m_memory(-1),
 		SpecifierGroup(that)
 	{
-		Skip(env);
+		//Skip(env);
 		if (that.m_default)
 		{
 			m_default = new cell [m_memory];
@@ -52,9 +52,9 @@ ReadToken_new_quiet:
 		{
 			NEXT(input, '(', ERROR_NO_DEFAULT_START);
 			int
-				mem = Skip(Environment & env);
+				mem = Skip(DefaultEnvironment::Get(nullptr));
 			m_default = new cell[mem];
-			TRY(Run(input, gDefaultEnvironment(m_default)));
+			TRY(Run(input, DefaultEnvironment::Get(m_default)));
 			// Skip the closing bracket.
 			NEXT(input, ')', ERROR_NO_DEFAULT_END);
 			// Whatever.
@@ -65,11 +65,13 @@ ReadToken_new_quiet:
 	virtual int
 		Skip(Environment & env)
 	{
-		if (m_memory != -1) return m_memory;
-		m_memory = 0;
-		for (auto i = Begin(), e = End(); i != e; ++i)
+		if (m_memory == -1)
 		{
-			m_memory += (*i)->Skip(Environment & env);
+			m_memory = 0;
+			for (auto i = Begin(), e = End(); i != e; ++i)
+			{
+				m_memory += (*i)->Skip(env);
+			}
 		}
 		return m_memory;
 	};
@@ -80,7 +82,6 @@ ReadToken_new_quiet:
 		// Store a copy of the old memory system.
 		Memory *
 			om = env.GetMemory();
-		// Just takes all writes and null-routes them, but still serves reads.
 		EnumMemory
 			mem(om);
 		env.SetMemory(&mem);

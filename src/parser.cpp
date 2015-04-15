@@ -100,7 +100,6 @@ error_t
 	return OK;
 }
 
-
 error_t
 	Parser::
 	Add(Specifier * prototype)
@@ -133,15 +132,15 @@ error_t
 	// There is no reason in this design why we can't have different parsers
 	// with different specifier sets.  That's pretty cool IMHO.
 	TRY(Add(new SimpleSpecifier('b', &Utils::ReadBinary )));
+	TRY(Add(new SimpleSpecifier('c', &Utils::ReadCharEx )));
 	TRY(Add(new SimpleSpecifier('d', &Utils::ReadDecimal)));
-	TRY(Add(new FloatSpecifier('f', &Utils::ReadFloat  )));
-	TRY(Add(new FloatSpecifier('g', &Utils::ReadIEEE   )));
+	TRY(Add(new FloatSpecifier ('f', &Utils::ReadFloat  )));
+	TRY(Add(new FloatSpecifier ('g', &Utils::ReadIEEE   )));
 	TRY(Add(new SimpleSpecifier('h', &Utils::ReadHex    )));
 	TRY(Add(new SimpleSpecifier('i', &Utils::ReadDecimal)));
-	TRY(Add(new LogicalSpecifier()));
+	TRY(Add(new LogicalSpecifier())); // 'l'.
 	TRY(Add(new SimpleSpecifier('o', &Utils::ReadOctal  )));
 	TRY(Add(new SimpleSpecifier('x', &Utils::ReadHex    )));
-	TRY(Add(new SimpleSpecifier('c', &Utils::ReadCharEx )));
 	// I don't know why I EVER made this a different class...
 	TRY(Add(new SimpleSpecifier('n', &Utils::ReadNum    )));
 	
@@ -174,7 +173,9 @@ error_t
 	TRY(Add(new ArraySpecifier()));  // 'a'.
 	TRY(Add(new KustomSpecifier())); // 'k'.
 	TRY(AddAs(new StringSpecifier(false), 's')); // Unpacked.*/
-	TRY(Add(new StringSpecifier())); // Unpacked.*/
+	TRY(Add(new StringSpecifier())); // Unpacked.
+	//TRY(Add(new PackedSpecifier())); // Packed.
+	// if (isbot ? allowbot : allowplayer)
 	/*TRY(AddAs(new StringSpecifier(true ), 'z')); // Packed.
 	TRY(AddAs(new PlayerSpecifier(false, true ), 'q')); // Bots only.
 	TRY(AddAs(new PlayerSpecifier(true,  false), 'r')); // Players only.
@@ -189,10 +190,6 @@ error_t
 	TRY(Add(new MinusSpecifier())); // '-'.
 	TRY(Add(new DelimSpecifier())); // 'p'.
 	TRY(Add(new OptionSpecifier())); // '?'
-	/*
-	// Others.
-	TRY(Add(new SkipSpecifier()));   // '-'.
-	//TRY(Add(new PlusSpecifier()));   // '+'.*/
 	return OK;
 }
 

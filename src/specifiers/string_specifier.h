@@ -66,7 +66,7 @@ PUBLIC:
 	virtual cell
 		Skip(Environment & env)
 	{
-		env.Skip(1);
+		env.Skip(1, m_size);
 		return 1;
 	};
 	
